@@ -69,6 +69,21 @@ namespace JE
 	{
 		return selectable == 0;
 	}
+	DWORD VisualEffect::SetStoredValues(const DWORD* input)
+	{
+		value174 = input[0];
+		value178 = input[1];
+		DWORD last = input[2];
+		value17C = last;
+		return last;
+	}
+	DWORD* VisualEffect::GetStoredValues(DWORD* output) const
+	{
+		output[0] = value174;
+		output[1] = value178;
+		output[2] = value17C;
+		return output;
+	}
 	BYTE VisualEffect::IsFinished() const { if (!instance) return 1; return instance->IsFinished(); }
 	void VisualEffect::ResetVisibility() //59F8D0.
 	{
