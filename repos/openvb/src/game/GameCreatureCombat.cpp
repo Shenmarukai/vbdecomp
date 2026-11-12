@@ -86,7 +86,8 @@ namespace F3
 			std::memcpy(&kind,attack->unwritten10,sizeof(kind));
 			if ((kind==1 && optionalWeapon->weaponClass==9)
 				|| (kind==3 && optionalWeapon->weaponClass==10))
-				throw std::logic_error("GameCreature40A045: original absolute ds:0x24 read");
+				//40A045 reads absolute address24h, rather than a weapon member.
+				result+=*reinterpret_cast<const DWORD*>(0x24);
 		}
 		LONG defense;
 		if (usable) defense=LONG(usable->values164[attack->damageType]);
