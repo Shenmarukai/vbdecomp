@@ -26,7 +26,7 @@ namespace F3
 {
 	GameInterfaces::GameInterfaces() : mainMenu(NULL), loadMap(NULL), feedback(NULL),
 		actionbar(NULL), auxiliary14(NULL), inventory(NULL), escapeMenu(NULL), loading(NULL),
-		auxiliary24(NULL), container(NULL), value2C(0), auxiliary30(NULL), value34(0),
+		auxiliary24(NULL), container(NULL), value2C(0), auxiliary30(NULL), worldMap(NULL),
 		characterGeneration(NULL), auxiliary3C(NULL), auxiliary40(NULL), pipBoy(NULL),
 		miniMap(NULL), options(NULL), optionsLoad(NULL), optionsGame(NULL), optionsHotKeys(NULL),
 		optionsMultiplayer(NULL), optionsVideo(NULL)

@@ -28,7 +28,7 @@
       ],
       "sources": [
         {
-          "path": "deps/dx81-font/src/d3dfont.cpp",
+          "path": "repos/openvb/openje/src/graphics/StatisticsFont.cpp",
           "compileGroupIndex": 0
         }
       ]

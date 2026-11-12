@@ -13,9 +13,9 @@ class Gfx_SkinMeshManager;
 
 struct Gfx_ShadowPoint { float x, z, radius; }; //Engine+64, 12-byte records.
 
-// Actual engine identity with normal owned VC7 containers and the unmodified
-// SDK CD3DFont. Offsets describe the observed x86 owner, not an allocation or
-// serialization contract. Unresolved children remain explicit.
+// Actual engine identity with owned VC7 containers and the SDK statistics font.
+// DrawText retains native engine integration. Offsets describe the observed x86
+// owner, not an allocation or serialization contract. Unknowns remain explicit.
 class Gfx_Engine : public Gfx_System_Interface
 {
 public:
@@ -210,7 +210,7 @@ public:
 	IDirect3DTexture8* projectedShadowTarget; //+F0; owned COM reference.
 	DWORD textureF4; //+F4; owning handle, exact producer role unresolved.
 	std::string mapName; //+F8; actual normal string lifetime.
-	CD3DFont statisticsFont; //+114..78B; supplied unmodified ANSI SDK class, Arial12/flags0.
+	CD3DFont statisticsFont; //+114..78B; supplied ANSI SDK class, Arial12/flags0.
 	char statisticsText[256]; //+78C..88B; constructor leaves contents unwritten.
 	BYTE statistics; // +88C; selects the actual unresolved overlay.
 	BYTE transparency, lighting, value88F, value890; //+88D..890; initialized0.

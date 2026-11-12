@@ -291,7 +291,10 @@ namespace F3
 		{
 			char name[260];
 			packet.ReadCString(name);
-			throw std::logic_error("GameClient4621D0: actual store UI461960 remains unresolved");
+			GameClient* client = static_cast<GameClient*>(g_pNetworkInstance->client);
+			client->OpenStore(name);
+			RefreshInterface();
+			return;
 		}
 		case 108:
 		{
