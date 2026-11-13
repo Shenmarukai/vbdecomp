@@ -424,16 +424,36 @@ namespace JE
 				NormalizeCollisionVector(inward);
 				D3DXVECTOR3 particleProjection = inward * D3DXVec3Dot(&inward, &currentVelocity);
 				D3DXVECTOR3 particleTangent = currentVelocity - particleProjection;
+				Gfx_Vector3f colliderProjectionValue, particleProjectionValue;
+				memcpy(colliderProjectionValue.value, &colliderProjection, sizeof(colliderProjectionValue.value));
+				memcpy(particleProjectionValue.value, &particleProjection, sizeof(particleProjectionValue.value));
 				D3DXVECTOR3 differenceA = colliderProjection - particleProjection;
-				D3DXVECTOR3 sum = colliderProjection + particleProjection;
+				const Gfx_Vector3f sumA = colliderProjectionValue.Add(particleProjectionValue);
+				D3DXVECTOR3 sum;
+				memcpy(&sum, sumA.value, sizeof(sumA.value));
 				D3DXVECTOR3 exchangedA = (sum - differenceA) * 0.5f;
 				D3DXVECTOR3 differenceB = particleProjection - colliderProjection;
+				const Gfx_Vector3f sumB = colliderProjectionValue.Add(particleProjectionValue);
+				memcpy(&sum, sumB.value, sizeof(sumB.value));
 				D3DXVECTOR3 exchangedB = (sum - differenceB) * 0.5f;
-				D3DXVECTOR3 colliderResult = exchangedA + colliderTangent;
+				Gfx_Vector3f exchangedAValue, colliderTangentValue;
+				memcpy(exchangedAValue.value, &exchangedA, sizeof(exchangedAValue.value));
+				memcpy(colliderTangentValue.value, &colliderTangent, sizeof(colliderTangentValue.value));
+				const Gfx_Vector3f colliderResult = exchangedAValue.Add(colliderTangentValue);
 				(void)colliderResult; //Original computes but does not publish collider motion.
-				currentVelocity = (exchangedB + particleTangent) * (data.power * 0.0099999998f);
+				Gfx_Vector3f exchangedBValue, particleTangentValue;
+				memcpy(exchangedBValue.value, &exchangedB, sizeof(exchangedBValue.value));
+				memcpy(particleTangentValue.value, &particleTangent, sizeof(particleTangentValue.value));
+				const Gfx_Vector3f particleResult = exchangedBValue.Add(particleTangentValue);
+				memcpy(&currentVelocity, particleResult.value, sizeof(particleResult.value));
 				float responseRadius = float(double(data.radius) * scale + diameter);
-				outputPosition = center + normal * responseRadius;
+				const D3DXVECTOR3 scaledNormal = normal * responseRadius;
+				Gfx_Vector3f centerValue, scaledNormalValue;
+				memcpy(centerValue.value, &center, sizeof(centerValue.value));
+				memcpy(scaledNormalValue.value, &scaledNormal, sizeof(scaledNormalValue.value));
+				const Gfx_Vector3f responsePosition = centerValue.Add(scaledNormalValue);
+				memcpy(&outputPosition, responsePosition.value, sizeof(responsePosition.value));
+				currentVelocity *= data.power * 0.0099999998f;
 				RestoreCollisionMotion(particle.mass, particle.resistance, scale, acceleration,
 					outputPosition, currentVelocity, elapsed, particle.initialPosition, particle.initialVelocity);
 			}
@@ -442,7 +462,12 @@ namespace JE
 				normal = particle.position - center;
 				NormalizeCollisionVector(normal);
 				float responseRadius = float(double(data.radius) * scale + diameter);
-				outputPosition = center + normal * responseRadius;
+				const D3DXVECTOR3 scaledNormal = normal * responseRadius;
+				Gfx_Vector3f centerValue, scaledNormalValue;
+				memcpy(centerValue.value, &center, sizeof(centerValue.value));
+				memcpy(scaledNormalValue.value, &scaledNormal, sizeof(scaledNormalValue.value));
+				const Gfx_Vector3f responsePosition = centerValue.Add(scaledNormalValue);
+				memcpy(&outputPosition, responsePosition.value, sizeof(responsePosition.value));
 				D3DXVECTOR3 acceleration = particles.Acceleration();
 				RestoreCollisionMotion(particle.mass, particle.resistance, scale, acceleration,
 					outputPosition, D3DXVECTOR3(0,0,0), elapsed, particle.initialPosition, particle.initialVelocity);

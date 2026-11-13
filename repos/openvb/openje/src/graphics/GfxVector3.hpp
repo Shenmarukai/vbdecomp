@@ -33,6 +33,7 @@ struct Gfx_Vector3f
 	Gfx_Vector3f Transform(const D3DXMATRIX& matrix) const; //522140; owned affine result.
 	Gfx_Vector3f Scale(float scalar) const; //5221C0; owned rounded component result.
 	Gfx_Vector3f Subtract(const Gfx_Vector3f& other) const; //5222A0; hidden12B result, RET8.
+	Gfx_Vector3f Add(const Gfx_Vector3f& other) const; //522310; hidden12B result, RET8.
 	Gfx_Vector3f Cross(const Gfx_Vector3f& other) const; //522210; hidden12B result, RET8.
 };
 
