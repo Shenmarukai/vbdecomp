@@ -25,6 +25,45 @@ Gfx_Matrix4x4::Gfx_Matrix4x4() //412AD0; observed identity stores, no ownership 
 	matrix._44 = 1.0f;
 }
 
+void Gfx_Matrix3x3::SetZero() //48F6E0.
+{
+	{
+		const float row[3] = {0.0f, 0.0f, 0.0f};
+		memcpy(value, row, sizeof(row));
+	}
+	{
+		const float row[3] = {0.0f, 0.0f, 0.0f};
+		memcpy(value + 3, row, sizeof(row));
+	}
+	{
+		const float row[3] = {0.0f, 0.0f, 0.0f};
+		memcpy(value + 6, row, sizeof(row));
+	}
+}
+
+void Gfx_Matrix3x3::SetDiagonal(float diagonal) //48F780.
+{
+	float* destination = value;
+	for (DWORD count = 3; count; --count)
+	{
+		memcpy(destination, &diagonal, sizeof(diagonal));
+		destination += 4;
+	}
+}
+
+void Gfx_Matrix3x3::SetIdentity(float diagonal) //48FD30.
+{
+	SetZero();
+	SetDiagonal(diagonal);
+}
+
+void Gfx_AffineMatrix3x4::SetIdentity(float diagonal) //48FD50.
+{
+	linear.SetIdentity(diagonal);
+	const float zero[3] = {0.0f, 0.0f, 0.0f};
+	memcpy(translation, zero, sizeof(zero));
+}
+
 // The original read-only float at0x649C50 has bits3C8EFA35.
 const float g_GfxDegreesToRadians = D3DX_PI / 180.0f;
 
