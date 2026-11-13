@@ -63,11 +63,11 @@ namespace F3
 		const double dx = double(giver->position.x) - target->position.x;
 		if (sqrt(dx * dx + double(dy) * dy + double(dz) * dz) >= 5.0)
 		{
-			GameActionMoveTo* move = new(std::nothrow) GameActionMoveTo;
+			GameActionMoveTo* move = new GameActionMoveTo;
 			move->SetTarget(target);
 			move->stopDistance = 5;
 			giver->QueueAction(move);
-			GameActionGive* retry = new(std::nothrow) GameActionGive;
+			GameActionGive* retry = new GameActionGive;
 			retry->SetTarget(target);
 			retry->SetItem(itemID);
 			giver->QueueAction(retry);
@@ -112,7 +112,7 @@ namespace F3
 		JE::Entity* target = JE::GetEntityPtr(targetID);
 		if (actor && target)
 		{
-			GameActionGive* action = new(std::nothrow) GameActionGive;
+			GameActionGive* action = new GameActionGive;
 			action->SetTarget(target);
 			action->SetItem(itemID);
 			actor->QueueAction(action); //46E3E8; original does not clear actions.
