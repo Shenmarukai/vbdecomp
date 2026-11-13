@@ -2,6 +2,7 @@
 #include "G3DMeshExport.hpp"
 #include "G3DWaterTile.hpp"
 #include "G3DSceneAttributes.hpp"
+#include "G3DLightAttributes.hpp"
 #include "LineSystem.hpp"
 #include "ParticleSystem.hpp"
 #include "WaterTile.hpp"
@@ -95,7 +96,8 @@ void Gfx_G3D_Model::BuildNode(G3D_Node& source, Gfx_ModelNode& target, DWORD fvf
 	const LONG attributeCount = LONG(source.attributes.size());
 	for (LONG i = 0; i < attributeCount; ++i)
 	{
-		G3D_WaterTile* waterTile = dynamic_cast<G3D_WaterTile*>(source.attributes[i]);
+		G3D_BaseAttribute* input = source.attributes[i];
+		G3D_WaterTile* waterTile = dynamic_cast<G3D_WaterTile*>(input);
 		if (waterTile)
 		{
 			Gfx_WaterTile* attribute = new Gfx_WaterTile;
@@ -104,7 +106,7 @@ void Gfx_G3D_Model::BuildNode(G3D_Node& source, Gfx_ModelNode& target, DWORD fvf
 			attribute->owner = &target;
 			continue; //Actual528184 tests this subtype before generic G3D_Mesh.
 		}
-		G3D_Mesh* mesh = dynamic_cast<G3D_Mesh*>(source.attributes[i]);
+		G3D_Mesh* mesh = dynamic_cast<G3D_Mesh*>(input);
 		if (mesh)
 		{
 			Gfx_G3D_Mesh* converter = new Gfx_G3D_Mesh;
@@ -128,120 +130,121 @@ void Gfx_G3D_Model::BuildNode(G3D_Node& source, Gfx_ModelNode& target, DWORD fvf
 		}
 		else
 		{
-			G3D_OcclusionZones* zones = dynamic_cast<G3D_OcclusionZones*>(source.attributes[i]);
-			if (!zones)
+			G3D_OcclusionZones* zones = dynamic_cast<G3D_OcclusionZones*>(input);
+			if (zones)
 			{
-				if (G3D_ParticleEmitter* emitter = dynamic_cast<G3D_ParticleEmitter*>(source.attributes[i]))
+				if (extraNames)
 				{
-					Gfx_ParticleSystem* attribute = new Gfx_ParticleSystem;
-					attribute->scale = float(emitter->scale * double(scale));
-					target.attributes.push_back(attribute);
-					attribute->owner = &target; //528BD0, before resource loading.
-					const std::string name(emitter->effectName);
-					DWORD texture = 0;
-					if (resources)
-					{
-						JE::Resources::ResourceMemoryStream* stream =
-							JE::Resources::OpenResourceMemoryStream(name.c_str(), 0);
-						//528C4B requires this stream; the original has no NULL check.
-						attribute->LoadConfiguration(stream->begin, DWORD(stream->end - stream->begin));
-						JE::Resources::CloseResourceMemoryStream(stream);
-						stream = JE::Resources::OpenResourceMemoryStream(attribute->configuration.textureName, 0);
-						if (stream)
-						{
-							g_GfxSystem->LoadTextureFromBuffer(&texture, attribute->configuration.textureName,
-								stream->begin, UINT(stream->end - stream->begin), D3DFMT_UNKNOWN,
-								D3DPOOL_MANAGED, UINT(-1), 3, 5, 0);
-							JE::Resources::CloseResourceMemoryStream(stream);
-						}
-						else JE::LogDebugString("RecurseChildNode - Missing particle from resource: %s\n",
-							attribute->configuration.textureName);
-					}
-					else
-					{
-						FILE* stream = fopen(name.c_str(), "rb");
-						if (stream)
-						{
-							fseek(stream, 0, SEEK_END);
-							const LONG size = ftell(stream);
-							if (size > 0)
-							{
-								BYTE* bytes = new BYTE[size];
-								if (bytes)
-								{
-									fseek(stream, 0, SEEK_SET);
-									fread(bytes, size, 1, stream);
-									attribute->LoadConfiguration(static_cast<const BYTE*>(bytes), size);
-									::operator delete(bytes); //528D68, before the filename texture API.
-									g_GfxSystem->LoadTextureFromFile(&texture, attribute->configuration.textureName,
-										D3DFMT_UNKNOWN, D3DPOOL_MANAGED, UINT(-1), 3, 5, 0);
-								}
-							}
-							fclose(stream);
-						}
-					}
-					attribute->SetTexture(texture, 1, 1); //528DBA, even for a zero handle.
-					continue;
+					delete[] extraNames;
+					extraNames = NULL;
+					JE::LogDebugString("ERROR: Mesh \"%s\" contains multiple occlusion zone definitions!\n", data.name.c_str());
 				}
-				if (G3D_WaterAttribute* water = dynamic_cast<G3D_WaterAttribute*>(source.attributes[i]))
+				extraNameCount = DWORD(zones->names.size());
+				extraNames = new std::string[extraNameCount];
+				for (DWORD n = 0; n < extraNameCount; ++n)
 				{
-					Gfx_Water* attribute = new Gfx_Water;
-					attribute->SetRegistryName(water->GetName());
-					const G3D_WaterDimensions dimensions(water->dimensions);
-					const __int64 rows = static_cast<__int64>(dimensions.rows);
-					const __int64 columns = static_cast<__int64>(dimensions.columns);
-					attribute->sampleHeight = LONG(rows);
-					attribute->sampleWidth = LONG(columns);
-					attribute->SetTextureName(water->textureName);
-					attribute->cellSize = water->cellSize * scale;
-					attribute->SetSecondaryTextureName(water->secondaryTextureName);
-					attribute->tilesX = water->tilesX;
-					attribute->tilesZ = water->tilesZ;
-					for (std::list<Gfx_WaterTexturePatch>::const_iterator patch = water->texturePatches.begin();
-						patch != water->texturePatches.end(); ++patch)
-						attribute->AddTexturePatch(patch->x, patch->z, patch->textureName, patch->tileName);
-					target.attributes.push_back(attribute);
-					attribute->owner = &target; //No PrepareSamples/Update/registry call in this branch.
-					continue;
+					const std::string name = zones->GetName(n);
+					extraNames[n] = name;
 				}
-				G3D_LineSystem* lines = dynamic_cast<G3D_LineSystem*>(source.attributes[i]);
-				if (!lines) continue; //Original unknown/non-render attribute policy.
-				Gfx_LineSystem* attribute = new Gfx_LineSystem;
-				const LONG count = LONG(lines->segments.size());
-				for (LONG index = 0; index < count; ++index)
-				{
-					const G3D_LineSegment segment(lines->segments[index]);
-					D3DXVECTOR3 from, to;
-					for (DWORD axis = 0; axis < 3; ++axis)
-					{
-						from[axis] = float(double(scale) * segment.vertices[0].position[axis]);
-						to[axis] = float(double(scale) * segment.vertices[1].position[axis]);
-					}
-					LONG channels[8];
-					for (LONG endpoint = 1; endpoint >= 0; --endpoint)
-						for (LONG channel = 3; channel >= 0; --channel)
-							channels[endpoint * 4 + channel] = LONG(static_cast<__int64>(
-								double(segment.vertices[endpoint].color[channel]) * 255.0));
-					attribute->AddSegment(from.x, from.y, from.z, to.x, to.y, to.z, channels[0], channels[1], channels[2],
-						channels[3], channels[4], channels[5], channels[6], channels[7]);
-				}
+			}
+			if (dynamic_cast<G3D_BaseLight*>(input)) continue;
+			if (G3D_ParticleEmitter* emitter = dynamic_cast<G3D_ParticleEmitter*>(input))
+			{
+				Gfx_ParticleSystem* attribute = new Gfx_ParticleSystem;
+				attribute->scale = float(emitter->scale * double(scale));
 				target.attributes.push_back(attribute);
-				attribute->owner = &target; //5291D9, after the completed segment loop.
+				attribute->owner = &target; //528BD0, before resource loading.
+				const std::string name(emitter->effectName);
+				DWORD texture = 0;
+				if (resources)
+				{
+					JE::Resources::ResourceMemoryStream* stream =
+						JE::Resources::OpenResourceMemoryStream(name.c_str(), 0);
+					//528C4B requires this stream; the original has no NULL check.
+					attribute->LoadConfiguration(stream->begin, DWORD(stream->end - stream->begin));
+					JE::Resources::CloseResourceMemoryStream(stream);
+					stream = JE::Resources::OpenResourceMemoryStream(attribute->configuration.textureName, 0);
+					if (stream)
+					{
+						g_GfxSystem->LoadTextureFromBuffer(&texture, attribute->configuration.textureName,
+							stream->begin, UINT(stream->end - stream->begin), D3DFMT_UNKNOWN,
+							D3DPOOL_MANAGED, UINT(-1), 3, 5, 0);
+						JE::Resources::CloseResourceMemoryStream(stream);
+					}
+					else JE::LogDebugString("RecurseChildNode - Missing particle from resource: %s\n",
+						attribute->configuration.textureName);
+				}
+				else
+				{
+					FILE* stream = fopen(name.c_str(), "rb");
+					if (stream)
+					{
+						fseek(stream, 0, SEEK_END);
+						const LONG size = ftell(stream);
+						if (size > 0)
+						{
+							BYTE* bytes = new BYTE[size];
+							if (bytes)
+							{
+								fseek(stream, 0, SEEK_SET);
+								fread(bytes, size, 1, stream);
+								attribute->LoadConfiguration(static_cast<const BYTE*>(bytes), size);
+								::operator delete(bytes); //528D68, before the filename texture API.
+								g_GfxSystem->LoadTextureFromFile(&texture, attribute->configuration.textureName,
+									D3DFMT_UNKNOWN, D3DPOOL_MANAGED, UINT(-1), 3, 5, 0);
+							}
+						}
+						fclose(stream);
+					}
+				}
+				attribute->SetTexture(texture, 1, 1); //528DBA, even for a zero handle.
 				continue;
 			}
-			if (extraNames)
+			if (G3D_WaterAttribute* water = dynamic_cast<G3D_WaterAttribute*>(input))
 			{
-				delete[] extraNames;
-				extraNames = NULL;
-				JE::LogDebugString("ERROR: Mesh \"%s\" contains multiple occlusion zone definitions!\n", data.name.c_str());
+				Gfx_Water* attribute = new Gfx_Water;
+				attribute->SetRegistryName(water->GetName());
+				const G3D_WaterDimensions dimensions(water->dimensions);
+				const __int64 rows = static_cast<__int64>(dimensions.rows);
+				const __int64 columns = static_cast<__int64>(dimensions.columns);
+				attribute->sampleHeight = LONG(rows);
+				attribute->sampleWidth = LONG(columns);
+				attribute->SetTextureName(water->textureName);
+				attribute->cellSize = water->cellSize * scale;
+				attribute->SetSecondaryTextureName(water->secondaryTextureName);
+				attribute->tilesX = water->tilesX;
+				attribute->tilesZ = water->tilesZ;
+				for (std::list<Gfx_WaterTexturePatch>::const_iterator patch = water->texturePatches.begin();
+					patch != water->texturePatches.end(); ++patch)
+					attribute->AddTexturePatch(patch->x, patch->z, patch->textureName, patch->tileName);
+				target.attributes.push_back(attribute);
+				attribute->owner = &target; //No PrepareSamples/Update/registry call in this branch.
+				continue;
 			}
-			extraNameCount = DWORD(zones->names.size());
-			extraNames = new std::string[extraNameCount];
-			for (DWORD n = 0; n < extraNameCount; ++n)
+			G3D_LineSystem* lines = dynamic_cast<G3D_LineSystem*>(input);
+			if (!lines) continue; //Original unknown/non-render attribute policy.
+			Gfx_LineSystem* attribute = new Gfx_LineSystem;
+			const LONG count = LONG(lines->segments.size());
+			for (LONG index = 0; index < count; ++index)
 			{
-				const std::string name = zones->GetName(n);
-				extraNames[n] = name;
+				const G3D_LineSegment segment(lines->segments[index]);
+				D3DXVECTOR3 from, to;
+				for (DWORD axis = 0; axis < 3; ++axis)
+				{
+					from[axis] = float(double(scale) * segment.vertices[0].position[axis]);
+					to[axis] = float(double(scale) * segment.vertices[1].position[axis]);
+				}
+				LONG channels[8];
+				for (LONG endpoint = 1; endpoint >= 0; --endpoint)
+					for (LONG channel = 3; channel >= 0; --channel)
+						channels[endpoint * 4 + channel] = LONG(static_cast<__int64>(
+							double(segment.vertices[endpoint].color[channel]) * 255.0));
+				attribute->AddSegment(from.x, from.y, from.z, to.x, to.y, to.z, channels[0], channels[1], channels[2],
+					channels[3], channels[4], channels[5], channels[6], channels[7]);
 			}
+			target.attributes.push_back(attribute);
+			attribute->owner = &target; //5291D9, after the completed segment loop.
+			continue;
 		}
 	}
 	const LONG childCount = LONG(source.children.size());
