@@ -7,6 +7,11 @@ struct D3DXVECTOR3;
 double __cdecl GfxSin(float value);
 double __cdecl GfxCos(float value);
 
+//Readonly scalar operands at6CB56C/647D38/647880; original symbols are unknown.
+extern const float g_GfxScalarZero;
+extern const float g_GfxScalarHalf;
+extern const float g_GfxScalarOne;
+
 //512D90; shared matrix-row output boundary, with implementation credit unresolved.
 void GfxGetMatrixAxes(const D3DXMATRIX& matrix, D3DXVECTOR3& right,
 	D3DXVECTOR3& up, D3DXVECTOR3& forward);
