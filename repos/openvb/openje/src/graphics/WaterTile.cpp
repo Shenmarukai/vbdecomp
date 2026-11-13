@@ -40,7 +40,7 @@ namespace
 				const LONG count = std::ftell(input);
 				if (count > 0)
 				{
-					void* bytes = ::operator new(count);
+					BYTE* bytes = new BYTE[count];
 					if (bytes)
 					{
 						std::fseek(input, 0, SEEK_SET);
@@ -48,7 +48,7 @@ namespace
 						g_GfxSystem->LoadTextureFromBuffer(&handle, name,
 							static_cast<const BYTE*>(bytes), UINT(count),
 							D3DFMT_UNKNOWN, D3DPOOL_MANAGED, UINT(-1), 3, 5, 0);
-						::operator delete(bytes);
+						::operator delete(bytes); //Original array allocation/scalar release pairing.
 					}
 				}
 				std::fclose(input);

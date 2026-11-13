@@ -166,13 +166,13 @@ void Gfx_G3D_Model::BuildNode(G3D_Node& source, Gfx_ModelNode& target, DWORD fvf
 							const LONG size = ftell(stream);
 							if (size > 0)
 							{
-								void* bytes = ::operator new(size);
+								BYTE* bytes = new BYTE[size];
 								if (bytes)
 								{
 									fseek(stream, 0, SEEK_SET);
 									fread(bytes, size, 1, stream);
 									attribute->LoadConfiguration(static_cast<const BYTE*>(bytes), size);
-									free(bytes); //528D68: before the texture API, using the original free API.
+									::operator delete(bytes); //528D68, before the filename texture API.
 									g_GfxSystem->LoadTextureFromFile(&texture, attribute->configuration.textureName,
 										D3DFMT_UNKNOWN, D3DPOOL_MANAGED, UINT(-1), 3, 5, 0);
 								}
