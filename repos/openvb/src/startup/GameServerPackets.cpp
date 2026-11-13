@@ -69,10 +69,21 @@ namespace F3
 			packet.ReadDword(ownerID); packet.ReadDword(itemID);
 			packet.ReadDword(sourceID); packet.ReadDword(slot);
 			JE::Entity* owner=JE::GetEntityPtr(ownerID);
+			BYTE failed = owner == NULL;
 			JE::Entity* source=JE::GetEntityPtr(sourceID);
-			JE::Entity* item=source ? source->inventory->FindByID(itemID) : NULL;
-			//The original failure reply dereferences these failed pointers for
-			//IDs. Retain that unsupported boundary rather than inventing a reply.
+			if (!source) failed = 1;
+			JE::Entity* item = NULL;
+			if (source)
+			{
+				item = source->inventory->FindByID(itemID);
+				if (!item) failed = 1;
+			}
+			if (failed)
+			{
+				//46E725 reads the failed pointers before sending; preserve that failure.
+				SendEquippedItem(owner->entityID, item->entityID, sourceID, slot, 1);
+				return;
+			}
 			GameActionEquip* action=static_cast<GameActionEquip*>(JE::g_World->NewAction(9));
 			action->itemID=item->entityID; action->slot=slot; action->value28=30; action->flag2C=1;
 			owner->QueueAction(action);
@@ -83,7 +94,19 @@ namespace F3
 			JE::Net::UInt32 ownerID,itemID;
 			packet.ReadDword(ownerID); packet.ReadDword(itemID);
 			JE::Entity* owner=JE::GetEntityPtr(ownerID);
-			JE::Entity* item=owner ? owner->inventory->FindByID(itemID) : NULL;
+			BYTE failed = owner == NULL;
+			JE::Entity* item = NULL;
+			if (owner)
+			{
+				item = owner->inventory->FindByID(itemID);
+				if (!item) failed = 1;
+			}
+			if (failed)
+			{
+				//46E7E0 retains the same failed-pointer ID reads as the equip branch.
+				SendUnequippedItem(owner->entityID, item->entityID, 1);
+				return;
+			}
 			GameActionUnequip* action=static_cast<GameActionUnequip*>(JE::g_World->NewAction(10));
 			action->itemID=item->entityID;
 			owner->QueueAction(action);
@@ -148,13 +171,13 @@ namespace F3
 				if (target->entityClass == 3)
 				{
 					GameDoor* door = dynamic_cast<GameDoor*>(target);
-					GameActionOperateDoor* action = new(std::nothrow) GameActionOperateDoor;
+					GameActionOperateDoor* action = new GameActionOperateDoor;
 					action->SetDoor(door);
 					actor->QueueAction(action);
 				}
 				else if (target->entityClass == 4)
 				{
-					GameActionOperateContainer* action = new(std::nothrow) GameActionOperateContainer;
+					GameActionOperateContainer* action = new GameActionOperateContainer;
 					action->SetTarget(target);
 					actor->QueueAction(action);
 				}
