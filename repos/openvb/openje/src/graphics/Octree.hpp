@@ -148,6 +148,8 @@ struct OctreeRay
 	typedef int (OctreeRay::*BoundsTest)(const float*, const float*, float*, float*) const;
 	int TestBounds(const float* minimum, const float* maximum,
 		float* distance, float* point) const; //4ADC20, factored entry-face policy.
+	int IntersectTriangle(const float* a, const float* b, const float* c,
+		float* distance, float* point) const; //4AC2B0, RET14.
 	int IntersectDownwardTriangle(const float* a, const float* b, const float* c,
 		float* distance, float* height) const; //4AC5E0, RET14.
 	void SetDirection(const float* inputDirection); //4ADC90; NULL reselects current signs.

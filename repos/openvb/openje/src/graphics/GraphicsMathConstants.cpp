@@ -80,6 +80,7 @@ const float g_GfxDegreesToRadians = D3DX_PI / 180.0f;
 // Original OctreeCamera inputs at6ADB70/6ADB6C are loaded as separate floats.
 extern const float g_GfxCameraDegreeFraction = 0.0055555557f;
 extern const float g_GfxCameraPi = 3.1415901f;
+extern const float g_GfxCameraHalfPi = 1.570796f; //6ADB68.
 
 //48F660; actual scalar call boundary, real sqrt primitive; support0.
 double G3D_Sqrt(double value)
@@ -303,10 +304,10 @@ double __cdecl GfxDistanceSquared3D(const float* first, const float* second)
 	return (z * z + y * y) + x * x;
 }
 
-float GfxDistanceSquaredXZ(const float* first, const float* second)
+float __cdecl GfxDistanceSquaredXZ(const float* first, const float* second) //521FD0.
 {
-	const double x = double(first[0]) - second[0];
-	const double z = double(first[2]) - second[2];
+	const float x = first[0] - second[0];
+	const float z = first[2] - second[2];
 	return z * z + x * x;
 }
 
@@ -347,7 +348,11 @@ float Gfx_Vector3f::Dot(const float* other) const
 	const float x = value[0] * other[0];
 	const float y = value[1] * other[1];
 	const float z = value[2] * other[2];
-	const float result = (x + y) + z;
+	union RoundedFloat { float scalar; volatile DWORD bits; } rounded;
+	rounded.scalar = (x + y) + z;
+	const DWORD bits = rounded.bits;
+	float result;
+	memcpy(&result, &bits, sizeof(result)); //52212B/52212D: retain float rounding.
 	return result;
 }
 
@@ -356,6 +361,29 @@ void Gfx_Vector3f::RotateXZ(float cosine, float sine, Gfx_Vector3f& output) cons
 	output.value[1] = value[1];
 	output.value[0] = sine * value[2] + cosine * value[0];
 	output.value[2] = cosine * value[2] - sine * value[0];
+}
+
+void Gfx_Vector3f::RotateYZ(float cosine, float sine) //522070.
+{
+	const double y = cosine * value[1] - sine * value[2];
+	value[2] = cosine * value[2] + sine * value[1];
+	value[1] = float(y);
+}
+
+void Gfx_Vector3f::RotateXZ(float cosine, float sine) //5220D0.
+{
+	const double x = cosine * value[0] + sine * value[2];
+	value[2] = cosine * value[2] - sine * value[0];
+	value[0] = float(x);
+}
+
+Gfx_Vector3f Gfx_Vector3f::Cross(const Gfx_Vector3f& other) const //522210.
+{
+	Gfx_Vector3f result;
+	result.value[0] = other.value[2] * value[1] - other.value[1] * value[2];
+	result.value[1] = other.value[0] * value[2] - other.value[2] * value[0];
+	result.value[2] = other.value[1] * value[0] - other.value[0] * value[1];
+	return result;
 }
 
 // Ordinary observed vector boundaries; ownership remains unresolved/support0.

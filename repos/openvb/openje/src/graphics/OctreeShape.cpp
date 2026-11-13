@@ -4,7 +4,6 @@
 #include <new>
 #include <stdexcept>
 
-float GfxDistanceSquaredXZ(const float* first, const float* second);
 D3DXVECTOR3 GfxAddVectors(const float* first, const float* second);
 D3DXVECTOR3 GfxSubtractVectors(const float* first, const float* second);
 

@@ -1,7 +1,7 @@
 #include "OctreeShape.hpp"
+#include "GfxVector3.hpp"
 #include <d3dx8math.h>
 
-float GfxDistanceSquaredXZ(const float* first, const float* second);
 D3DXVECTOR3 GfxAddVectors(const float* first, const float* second);
 D3DXVECTOR3 GfxSubtractVectors(const float* first, const float* second);
 

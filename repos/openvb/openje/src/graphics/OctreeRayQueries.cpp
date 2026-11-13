@@ -22,36 +22,6 @@ namespace
 		}
 	}
 
-	//Proprietary4AC2B0 two-sided barycentric policy, using the real SDK vector
-	//operations. Original x87 versus SDK rounding is not claimed equivalent.
-	bool IntersectTriangle(const OctreeRay& ray, const float* first, const float* second,
-		const float* third, float& distance, float* point)
-	{
-		D3DXVECTOR3 a(first), b(second), c(third), direction(ray.direction.value), origin(ray.origin);
-		D3DXVECTOR3 edge1 = b - a, edge2 = c - a, p, q;
-		D3DXVec3Cross(&p, &direction, &edge2);
-		float determinant = D3DXVec3Dot(&edge1, &p);
-		if (!(determinant > 0.000099999997f) && !(-0.000099999997f > determinant)) return false;
-		D3DXVECTOR3 offset = origin - a;
-		float u = D3DXVec3Dot(&offset, &p);
-		D3DXVec3Cross(&q, &offset, &edge1);
-		float v = D3DXVec3Dot(&direction, &q);
-		if (determinant > 0.000099999997f)
-		{
-			if (u < 0.0f || u > determinant || v < 0.0f || u + v > determinant) return false;
-		}
-		else if (u > 0.0f || u < determinant || v > 0.0f || u + v < determinant) return false;
-		double value = static_cast<double>(D3DXVec3Dot(&edge2, &q)) * (1.0 / determinant);
-		distance = static_cast<float>(value);
-		if (!(value >= 0.0)) return false;
-		for (int axis = 0; axis < 3; ++axis)
-		{
-			float scaled = ray.direction.value[axis] * distance;
-			point[axis] = ray.origin[axis] + scaled;
-		}
-		return true;
-	}
-
 	bool IntersectNode(const OctreeNode& node, const OctreeRay& ray, const float* positions,
 		float& distance, float* point, DWORD mask, DWORD mode, DWORD* flags) //5BD260.
 	{
@@ -78,7 +48,7 @@ namespace
 				cursor += 3;
 				if (!MatchesTriangle(triangleFlags, mask, mode)) continue;
 				float candidateDistance, candidatePoint[3];
-				if (IntersectTriangle(ray, a, b, c, candidateDistance, candidatePoint)
+				if (ray.IntersectTriangle(a, b, c, &candidateDistance, candidatePoint)
 					&& candidateDistance < distance)
 				{
 					distance = candidateDistance;
@@ -90,6 +60,46 @@ namespace
 		}
 		return distance != ray.maximumDistance;
 	}
+}
+
+int OctreeRay::IntersectTriangle(const float* first, const float* second,
+	const float* third, float* distance, float* point) const //4AC2B0.
+{
+	D3DXVECTOR3 edgeValue = GfxSubtractVectors(second, first);
+	Gfx_Vector3f edge1 = {{edgeValue.x, edgeValue.y, edgeValue.z}};
+	edgeValue = GfxSubtractVectors(third, first);
+	Gfx_Vector3f edge2 = {{edgeValue.x, edgeValue.y, edgeValue.z}};
+	Gfx_Vector3f p = direction.Cross(edge2);
+	float determinant = edge1.Dot(p.value);
+	Gfx_Vector3f q;
+	if (determinant > 0.000099999997f)
+	{
+		D3DXVECTOR3 offsetValue = GfxSubtractVectors(origin, first);
+		Gfx_Vector3f offset = {{offsetValue.x, offsetValue.y, offsetValue.z}};
+		float u = offset.Dot(p.value);
+		if (u < 0.0 || u > determinant) return 0;
+		q = offset.Cross(edge1);
+		float v = direction.Dot(q.value);
+		if (v < 0.0 || u + v > determinant) return 0;
+	}
+	else
+	{
+		if (!(-0.000099999997f > determinant)) return 0;
+		D3DXVECTOR3 offsetValue = GfxSubtractVectors(origin, first);
+		Gfx_Vector3f offset = {{offsetValue.x, offsetValue.y, offsetValue.z}};
+		float u = offset.Dot(p.value);
+		if (u > 0.0 || u < determinant) return 0;
+		q = offset.Cross(edge1);
+		float v = direction.Dot(q.value);
+		if (v > 0.0 || u + v < determinant) return 0;
+	}
+	float value = edge2.Dot(q.value) * (g_GfxScalarOne / determinant);
+	*distance = value;
+	if (value < g_GfxScalarZero) return 0;
+	Gfx_Vector3f scaled = direction.Scale(value);
+	D3DXVECTOR3 hit = GfxAddVectors(origin, scaled.value);
+	memcpy(point, &hit, sizeof(hit));
+	return 1;
 }
 
 int OCTREE_Camera::MakeScreenRay(LONG x, LONG y, OctreeRay* output)
