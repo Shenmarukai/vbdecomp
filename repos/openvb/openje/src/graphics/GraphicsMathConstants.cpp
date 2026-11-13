@@ -1,8 +1,29 @@
 #include "Camera.hpp"
 #include "GfxVector3.hpp"
+#include "GfxMatrix.hpp"
 #include "G3DModel.hpp"
 #include <string.h>
 #include <math.h>
+
+Gfx_Matrix4x4::Gfx_Matrix4x4() //412AD0; observed identity stores, no ownership credit.
+{
+	matrix._11 = 1.0f;
+	matrix._12 = 0.0f;
+	matrix._13 = 0.0f;
+	matrix._14 = 0.0f;
+	matrix._21 = 0.0f;
+	matrix._22 = 1.0f;
+	matrix._23 = 0.0f;
+	matrix._24 = 0.0f;
+	matrix._31 = 0.0f;
+	matrix._32 = 0.0f;
+	matrix._33 = 1.0f;
+	matrix._34 = 0.0f;
+	matrix._41 = 0.0f;
+	matrix._42 = 0.0f;
+	matrix._43 = 0.0f;
+	matrix._44 = 1.0f;
+}
 
 // The original read-only float at0x649C50 has bits3C8EFA35.
 const float g_GfxDegreesToRadians = D3DX_PI / 180.0f;
