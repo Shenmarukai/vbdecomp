@@ -76,7 +76,7 @@ namespace F3
 		if (targetID && targetID!=id)
 		{
 			completed=1;
-			GameActionAttack* next=new(std::nothrow) GameActionAttack;
+			GameActionAttack* next=new GameActionAttack;
 			next->SetTarget(value);
 			next->calledShotPart=calledShotPart;
 			next->pointTarget=pointTarget;
@@ -87,7 +87,7 @@ namespace F3
 	}
 	GameActionAttack* GameActionAttack::CloneRequest()
 	{
-		GameActionAttack* next=new(std::nothrow) GameActionAttack;
+		GameActionAttack* next=new GameActionAttack;
 		next->SetTarget(JE::GetEntityPtr(targetID));
 		next->reloadRequested=reloadRequested; //Original copied raw request byte+5B.
 		next->calledShotPart=calledShotPart;
@@ -289,7 +289,7 @@ namespace F3
 		if (autoMove && ((range>0 && distance>range)
 			|| !(pointTarget ? owner->GetLOSPoint(targetPosition.x, targetPosition.y, targetPosition.z) : owner->GetLOS(targetEntity))))
 		{
-			GameActionMoveTo* move=new(std::nothrow) GameActionMoveTo;
+			GameActionMoveTo* move=new GameActionMoveTo;
 			if (pointTarget) move->destination=targetPosition;
 			else move->SetTarget(targetEntity);
 			move->stopDistance=static_cast<DWORD>(range);
@@ -305,7 +305,7 @@ namespace F3
 			preparePending=0;
 			if (!PrepareAttack())
 			{
-				owner->QueueAction(new(std::nothrow) GameActionReload);
+				owner->QueueAction(new GameActionReload);
 				return 0;
 			}
 			prepareDeadline=time+attacker->QueueAnimationEvent(7,0);
@@ -363,7 +363,7 @@ namespace F3
 				completed=1;
 				if (!pointTarget)
 				{
-					GameActionAttack* next=new(std::nothrow) GameActionAttack;
+					GameActionAttack* next=new GameActionAttack;
 					next->SetTarget(targetEntity);
 					if (calledShot) next->calledShotPart=calledShotPart;
 					owner->QueueAction(next);
