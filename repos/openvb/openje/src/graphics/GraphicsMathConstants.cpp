@@ -5,6 +5,16 @@
 #include <string.h>
 #include <math.h>
 
+double __cdecl GfxSin(float value) //48F6C0.
+{
+	return sin(value);
+}
+
+double __cdecl GfxCos(float value) //48F6D0.
+{
+	return cos(value);
+}
+
 Gfx_Matrix4x4::Gfx_Matrix4x4() //412AD0; observed identity stores, no ownership credit.
 {
 	matrix._11 = 1.0f;

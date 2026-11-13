@@ -3,6 +3,10 @@
 struct D3DXMATRIX;
 struct D3DXVECTOR3;
 
+//48F6C0/48F6D0; float input and wide x87 return, original provider unresolved.
+double __cdecl GfxSin(float value);
+double __cdecl GfxCos(float value);
+
 //512D90; shared matrix-row output boundary, with implementation credit unresolved.
 void GfxGetMatrixAxes(const D3DXMATRIX& matrix, D3DXVECTOR3& right,
 	D3DXVECTOR3& up, D3DXVECTOR3& forward);
