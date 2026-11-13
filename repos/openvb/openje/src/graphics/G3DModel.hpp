@@ -40,11 +40,26 @@ void G3D_WriteFileVector(FILE* stream, const double* value); //4C94F0.
 void G3D_WriteFileTextureCoordinate(FILE* stream, const double* value); //4C94B0; two float-wire coordinates.
 void G3D_WriteTextVector(FILE* stream, const double* value); //4C9330.
 
+struct G3D_UnitVector3d;
+
 struct G3D_Vector3d
 {
 	double value[3];
 	void CheckUnitMagnitude(); //48FC80; no default construction writes.
+	G3D_UnitVector3d Normalized() const; //48FDA0; checked, separate 24-byte result.
 };
+
+// Descriptive value types; original nominal declarations remain unresolved.
+struct G3D_UnitVector3d
+{
+	explicit G3D_UnitVector3d(const G3D_Vector3d& input) : vector(input)
+	{
+		vector.CheckUnitMagnitude();
+	}
+	G3D_Vector3d vector;
+};
+
+typedef char G3DUnitVector3dSize[(sizeof(G3D_UnitVector3d) == 24) ? 1 : -1];
 
 // Typed source for the game's B3D memory reader. No STL object is placed
 // over original storage. Scalar readers have the original unchecked input domain.

@@ -138,19 +138,6 @@ namespace
 		return output;
 	}
 
-	//48FDA0/48FC80: the original unit-vector conversion keeps the magnitude
-	//postcondition, including its error for a zero or otherwise invalid normal.
-	void Normalize(double* output)
-	{
-		double squared = output[0] * output[0] + output[1] * output[1] + output[2] * output[2];
-		double inverse = squared == 0.0 ? 0.0 : 1.0 / sqrt(squared);
-		output[0] *= inverse;
-		output[1] *= inverse;
-		output[2] *= inverse;
-		double magnitude = sqrt(output[0] * output[0] + output[1] * output[1] + output[2] * output[2]);
-		if (fabs(magnitude - 1.0) >= 0.00001)
-			JE::FatalError("UnitVector has invalid magnitude");
-	}
 }
 
 //4D0450. WORD length and ignored CRT read results are original policies.
@@ -265,10 +252,10 @@ void G3D_Vertex::ReadText()
 		}
 		else if (key == "Normal")
 		{
-			double value[3] = {0.0, 0.0, 0.0};
-			ReadTextVector(value, 3);
-			Normalize(value);
-			memcpy(normal, value, sizeof(normal));
+			G3D_Vector3d value = {{0.0, 0.0, 0.0}};
+			ReadTextVector(value.value, 3);
+			G3D_UnitVector3d unit = value.Normalized();
+			memcpy(normal, unit.vector.value, sizeof(normal));
 		}
 		else if (key == "Color")
 		{

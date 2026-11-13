@@ -92,6 +92,17 @@ double G3D_InverseSqrt(double value) //48F670; actual shared math boundary.
 	return value == 0.0 ? 0.0 : 1.0 / sqrt(value);
 }
 
+G3D_UnitVector3d G3D_Vector3d::Normalized() const //48FDA0.
+{
+	const double inverse = G3D_InverseSqrt(value[0] * value[0]
+		+ value[1] * value[1] + value[2] * value[2]);
+	G3D_Vector3d scaled = *this;
+	scaled.value[0] *= inverse;
+	scaled.value[1] *= inverse;
+	scaled.value[2] *= inverse;
+	return G3D_UnitVector3d(scaled);
+}
+
 // Ordinary observed boundaries; ownership is unresolved and receives no code credit.
 double G3D_Sin(double value) //48F6A0.
 {
