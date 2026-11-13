@@ -10,8 +10,8 @@
 #include "resources/ResourceMemoryStream.hpp"
 #include "diagnostics/DebugOutput.hpp"
 #include <algorithm>
-#include <fstream>
-#include <stdexcept>
+#include <cstdio>
+#include <new>
 #include <string.h>
 
 namespace
@@ -33,18 +33,25 @@ namespace
 		}
 		else
 		{
-			std::ifstream input(name.c_str(), std::ios::in | std::ios::binary | std::ios::ate);
+			FILE* input = std::fopen(name.c_str(), "rb");
 			if (input)
 			{
-				std::streamoff count = input.tellg();
+				std::fseek(input, 0, SEEK_END);
+				const LONG count = std::ftell(input);
 				if (count > 0)
 				{
-					std::vector<BYTE> bytes(static_cast<size_t>(count));
-					input.seekg(0); input.read(reinterpret_cast<char*>(&bytes[0]), count);
-					if (!input) throw std::runtime_error("Water52859A: unable to read water texture file");
-					g_GfxSystem->LoadTextureFromBuffer(&handle, name, &bytes[0], UINT(count),
-						D3DFMT_UNKNOWN, D3DPOOL_MANAGED, UINT(-1), 3, 5, 0);
+					void* bytes = ::operator new(count);
+					if (bytes)
+					{
+						std::fseek(input, 0, SEEK_SET);
+						std::fread(bytes, count, 1, input);
+						g_GfxSystem->LoadTextureFromBuffer(&handle, name,
+							static_cast<const BYTE*>(bytes), UINT(count),
+							D3DFMT_UNKNOWN, D3DPOOL_MANAGED, UINT(-1), 3, 5, 0);
+						::operator delete(bytes);
+					}
 				}
+				std::fclose(input);
 			}
 		}
 		return handle;
