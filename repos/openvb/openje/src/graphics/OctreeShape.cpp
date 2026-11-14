@@ -79,6 +79,10 @@ int OCTREE_Shape::SetTransform(const float* matrix)
 	return 0;
 }
 OctreeShapeNodes* OCTREE_Shape::GetNodes() { return &nodes; }
+__declspec(noinline) void OCTREE_Shape::ClearNodes() //53B4D0; original caller keeps this boundary.
+{
+	nodes.clear();
+}
 int OCTREE_Shape::EnableNodeCache(DWORD capacity)
 {
 	if (cachedNodes) return 0;
@@ -86,7 +90,7 @@ int OCTREE_Shape::EnableNodeCache(DWORD capacity)
 	cachedNodes=new OctreeShapeNodeCache(blockCount,128);
 	return cachedNodes==NULL;
 }
-void OCTREE_Shape::AddNode(const OctreeNode* node)
+__declspec(noinline) void OCTREE_Shape::AddNode(const OctreeNode* node)
 {
 	if (node && (node->flags & 1)) nodes[node->vertexBuffer].push_back(node->ordinal);
 }
@@ -353,7 +357,7 @@ int OCTREE::UpdateShape(OCTREE_Shape* shape)
 	//5B08EF keeps the existing selection/leaf map when a cached prefix exists;
 	//QueryObjects lazily rebuilds object references. Do not add eager cleanup.
 	if (shape->cachedNodes && shape->cachedNodes->Node(0)) return 0;
-	shape->nodes.clear();
+	shape->ClearNodes();
 	for (DWORD index = 0; selected[index]; ++index)
 	{
 		OctreeSpatialObject* object = selected[index];
@@ -371,15 +375,15 @@ int OCTREE::UpdateShape(OCTREE_Shape* shape)
 		{
 			if (classification != 2)
 			{
-				classification = shape->ClassifyBox(node->bounds);
+				classification = currentShape->ClassifyBox(node->bounds);
 				if (!classification) child = 8;
 			}
 			frame.classification = classification;
 			if (classification)
 			{
-				if (node->flags & 1) shape->AddNode(node);
+				if (node->flags & 1) currentShape->AddNode(node);
 				for (OctreeSpatialObject* object = node->objects; object; object = object->next)
-					if (classification == 2 || shape->ClassifyObject(object->center,object->extent))
+					if (classification == 2 || currentShape->ClassifyObject(object->center,object->extent))
 					{
 						selected[written++] = object;
 						++object->references;

@@ -56,6 +56,7 @@ protected:
 	OCTREE_Shape();
 private:
 	friend class OCTREE;
+	void ClearNodes(); //53B4D0; clear the owned map/list values.
 	void AddNode(const OctreeNode* node); //53B9A0.
 	OCTREE_Shape(const OCTREE_Shape&);
 	OCTREE_Shape& operator=(const OCTREE_Shape&);
