@@ -36,6 +36,7 @@
 !/docs/dependency-fidelity.md
 !/docs/matching-policy.md
 !/docs/reporting.md
+!/docs/implementation-status.md
 /scripts/*
 !/scripts/Build.ps1
 !/scripts/Build-Legacy.ps1

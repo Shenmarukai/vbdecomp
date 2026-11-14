@@ -21,15 +21,18 @@ Current recorded game/engine source associations:
 
 | Source association | Entries |
 | --- | ---: |
-| Body mapping resolved without a gap flag | 4,656 |
-| Body mapping flagged as partial | 34 |
+| Body mapping resolved without a gap flag | 4,813 |
+| Body mapping flagged as partial | 27 |
 | Parser uncertainty | 11 |
-| Implicit or compiler-generated implementation | 93 |
-| Partial scope, mapping needing review, or unmapped | 448 |
+| Implicit or compiler-generated implementation | 138 |
+| Partial scope, mapping needing review, or unmapped | 253 |
 
-These are mapping statuses, not completion counts. Some selectors still refer to
-previous file paths or signatures. **The total number of missing or stubbed bodies
-has not been established.** Unresolved mappings do not prove missing implementations.
+These are mapping statuses, not completion counts. Reconciliation of the 586
+previously flagged entries found one confirmed missing body, six incomplete paths
+and many existing, shared or implicit operations. A second declaration-only routine
+has unresolved origin. **These are lower bounds, not the total remaining work.**
+See [implementation status](docs/implementation-status.md) for scope, blockers and
+the distinction between source presence and accuracy.
 
 The canonical VC7 Release target compiled and linked at `39abe6524`. That static
 check did not validate runtime behavior.
