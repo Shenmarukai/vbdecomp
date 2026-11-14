@@ -383,7 +383,12 @@ namespace JE
 						if (previousPosition && particle.birthTime < time)
 						{
 							float projection = -D3DXVec3Dot(&colliderVelocity, &localNormal);
-							currentVelocity += localNormal * projection;
+							const D3DXVECTOR3 correction = localNormal * projection;
+							Gfx_Vector3f currentVelocityValue, correctionValue;
+							memcpy(currentVelocityValue.value, &currentVelocity, sizeof(currentVelocityValue.value));
+							memcpy(correctionValue.value, &correction, sizeof(correctionValue.value));
+							currentVelocityValue.AddAssign(correctionValue);
+							memcpy(&currentVelocity, currentVelocityValue.value, sizeof(currentVelocityValue.value));
 						}
 						currentVelocity *= data.power * 0.0099999998f;
 						const double vx=currentVelocity.x, vy=currentVelocity.y, vz=currentVelocity.z;
@@ -417,7 +422,11 @@ namespace JE
 						currentVelocity = velocityAtEpoch + acceleration * elapsed;
 						D3DXVECTOR3 impulse = data.collisionType == 3 ? -position : position;
 						impulse *= data.power * 0.0099999998f;
-						currentVelocity += impulse;
+						Gfx_Vector3f currentVelocityValue, impulseValue;
+						memcpy(currentVelocityValue.value, &currentVelocity, sizeof(currentVelocityValue.value));
+						memcpy(impulseValue.value, &impulse, sizeof(impulseValue.value));
+						currentVelocityValue.AddAssign(impulseValue);
+						memcpy(&currentVelocity, currentVelocityValue.value, sizeof(currentVelocityValue.value));
 						D3DXVECTOR3 initialPosition, initialVelocity;
 						RestoreParticleMotion(particle.mass, particle.resistance,
 							acceleration.x, acceleration.y, acceleration.z,
@@ -539,7 +548,12 @@ namespace JE
 				D3DXVECTOR3 acceleration = particles.Acceleration();
 				D3DXVECTOR3 currentVelocity = particle.initialVelocity + acceleration * elapsed;
 				if (data.collisionType == 4) difference = -difference;
-				currentVelocity += difference * (data.power * 0.0099999998f);
+				const D3DXVECTOR3 impulse = difference * (data.power * 0.0099999998f);
+				Gfx_Vector3f currentVelocityValue, impulseValue;
+				memcpy(currentVelocityValue.value, &currentVelocity, sizeof(currentVelocityValue.value));
+				memcpy(impulseValue.value, &impulse, sizeof(impulseValue.value));
+				currentVelocityValue.AddAssign(impulseValue);
+				memcpy(&currentVelocity, currentVelocityValue.value, sizeof(currentVelocityValue.value));
 				D3DXVECTOR3 initialPosition, initialVelocity;
 				RestoreParticleMotion(particle.mass, particle.resistance,
 					acceleration.x, acceleration.y, acceleration.z,

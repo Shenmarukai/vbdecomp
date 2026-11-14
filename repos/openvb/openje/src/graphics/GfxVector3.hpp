@@ -34,6 +34,7 @@ struct Gfx_Vector3f
 	Gfx_Vector3f Scale(float scalar) const; //5221C0; owned rounded component result.
 	Gfx_Vector3f Subtract(const Gfx_Vector3f& other) const; //5222A0; hidden12B result, RET8.
 	Gfx_Vector3f Add(const Gfx_Vector3f& other) const; //522310; hidden12B result, RET8.
+	Gfx_Vector3f& AddAssign(const Gfx_Vector3f& other); //522380; in-place XYZ, return receiver, RET4.
 	Gfx_Vector3f Cross(const Gfx_Vector3f& other) const; //522210; hidden12B result, RET8.
 };
 

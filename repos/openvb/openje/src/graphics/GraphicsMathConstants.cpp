@@ -481,6 +481,14 @@ Gfx_Vector3f Gfx_Vector3f::Add(const Gfx_Vector3f& other) const //522310, suppor
 	return result;
 }
 
+Gfx_Vector3f& Gfx_Vector3f::AddAssign(const Gfx_Vector3f& other) //522380, support0.
+{
+	value[0] += other.value[0];
+	value[1] += other.value[1];
+	value[2] += other.value[2];
+	return *this;
+}
+
 //521F50 ordinary SDK vector-scaling boundary; ownership remains unresolved/support0.
 D3DXVECTOR3 GfxScaleVector(float scalar, const D3DXVECTOR3& input)
 {
