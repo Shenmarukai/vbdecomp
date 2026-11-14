@@ -42,6 +42,12 @@ namespace JE
 			float diameter, float time, VFX_VEGInstance& group, D3DXVECTOR3& outputPosition,
 			BYTE faceNormal, BYTE trigger); //4EEFB0; ordinary8stackargument response.
 		void ApplyParticles(VFX_ParticleSystem& particles, float time, VFX_VEGInstance& group); // 0x4F0DB0; per-particle response is separate.
+		float* RestoreParticleMotion(float mass, float resistance,
+			float accelerationX, float accelerationY, float accelerationZ,
+			float positionX, float positionY, float positionZ,
+			float velocityX, float velocityY, float velocityZ, float elapsed,
+			float* initialX, float* initialY, float* initialZ,
+			float* initialVelocityX, float* initialVelocityY, float* initialVelocityZ); //4EECF0, RET48; observed pointer return.
 		void Draw();
 		VFX_CollisionData data;
 		Gfx_Vector3f* previousPosition; //+154; actual5222A0 three-float argument.
