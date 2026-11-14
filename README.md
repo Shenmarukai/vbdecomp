@@ -3,21 +3,40 @@
 A work-in-progress decompilation of the original Fallout: Van Buren demo.
 The goal is to produce an accurate representation of the original tech demo, using
 the original compiler, runtime libraries and period SDKs. This is not yet an exact
-or complete reproduction, though the main content is fully functional.
+or complete reproduction.
 
-All original bugs and quirks are currently maintained, once a greater level of
-accuracy is achieved, a secondary project will be created to house improvements.
-This repo will remain a reference project for the original engine functionality.
+Reconstruction work aims to preserve the original bugs and quirks. Improvements
+belong in a separate project; this repository targets the original engine
+functionality.
 
-### State as of Publication
+### Current status
 
-Out of 10,110 original functions, 9,949 (98.4%) have been attributed to their original source.
-5,242 of these are specific game/engine functions, 4,662 have bodies, but are not guaranteed accurate.
+Source accounting checked 2026-11-14 UTC.
 
-At least 3,447 game/engine functions (65.8%) have historical exact-match receipts, covering about 34.5% of classified game/engine code bytes. These matches have not been revalidated after the latest cleanup.
+The original catalog contains 10,110 function entries. Recorded origin classifications
+cover 9,949 (98.4%): 5,242 game/engine functions, 4,115 library functions and 592
+compiler-generated glue functions. Another 161 remain unclassified.
 
-The remaining classifications are: 4,115 library functions, 592 compiler-generated "glue" functions, and 161 functions of unresolved origin.
+Current recorded game/engine source associations:
 
+| Source association | Entries |
+| --- | ---: |
+| Body mapping resolved without a gap flag | 4,656 |
+| Body mapping flagged as partial | 34 |
+| Parser uncertainty | 11 |
+| Implicit or compiler-generated implementation | 93 |
+| Partial scope, mapping needing review, or unmapped | 448 |
+
+These are mapping statuses, not completion counts. Some selectors still refer to
+previous file paths or signatures. **The total number of missing or stubbed bodies
+has not been established.** Unresolved mappings do not prove missing implementations.
+
+The canonical VC7 Release target compiled and linked at `39abe6524`. That static
+check did not validate runtime behavior.
+
+Historical accounting on 2026-11-12 recorded at least 3,447 game/engine functions
+with exact-match receipts. Those claims have not been revalidated against the
+current tree; no current exact-completion percentage is claimed.
 
 ## Build
 
