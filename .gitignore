@@ -51,6 +51,7 @@
 !/scripts/setup_inputs.py
 !/scripts/workspace_config.py
 !/scripts/inspect_environment.py
+!/scripts/setup_lsp.py
 !/scripts/fix_d3d8_import.py
 !/scripts/fix_bink_import.py
 /tools/*
@@ -99,3 +100,6 @@
 *.til
 *.dmp
 __pycache__/
+/.devenv/
+/.cache/
+/compile_commands.json
