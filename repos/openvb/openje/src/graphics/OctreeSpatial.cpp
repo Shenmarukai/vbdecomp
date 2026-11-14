@@ -87,6 +87,52 @@ int OctreeRay::IntersectDownwardTriangle(const float* a, const float* b, const f
 	return 1;
 }
 
+int OctreeNode::IntersectRay(const OctreeRay& ray, const float* positions,
+	float* distance, float* point, DWORD mask, DWORD mode, DWORD* flags) const //5BD260.
+{
+	DWORD cursor = 0, triangle = 0;
+	if (!indices) return 0;
+	*distance = ray.maximumDistance;
+	while (cursor < wordCount)
+	{
+		WORD marker = indices[cursor];
+		if (marker & 0xC000)
+		{
+			cursor += (marker & 0x8000) ? 4 : 2;
+			continue;
+		}
+		DWORD count = indices[cursor+1];
+		cursor += 2;
+		DWORD end = cursor + count;
+		while (cursor < end)
+		{
+			const WORD* words = indices;
+			const float* a = positions + 3*words[cursor++];
+			const float* b = positions + 3*words[cursor++];
+			const float* c = positions + 3*words[cursor++];
+			DWORD currentFlags = triangleFlags[triangle++];
+			switch (mode)
+			{
+			case 0: if (mask && !(currentFlags & mask)) continue; break;
+			case 1: if (!(currentFlags & mask)) continue; break;
+			case 2: if ((currentFlags & mask) != mask) continue; break;
+			case 3: if (currentFlags & mask) continue; break;
+			case 4: if ((currentFlags & mask) == mask) continue; break;
+			}
+			float candidateDistance, candidatePoint[3];
+			if (ray.IntersectTriangle(a, b, c, &candidateDistance, candidatePoint)
+				&& candidateDistance < *distance)
+			{
+				*distance = candidateDistance;
+				memcpy(point, candidatePoint, sizeof(candidatePoint));
+				if (flags) *flags = triangleFlags[triangle-1];
+			}
+		}
+		cursor += cursor & 1;
+	}
+	return *distance != ray.maximumDistance;
+}
+
 int OctreeNode::QueryFloorHeight(const OctreeRay& ray, const float* positions,
 	float* distance, float* height, DWORD mask, DWORD mode, DWORD* outputFlags) const //5BD410.
 {

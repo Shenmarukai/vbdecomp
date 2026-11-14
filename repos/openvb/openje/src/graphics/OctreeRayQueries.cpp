@@ -5,63 +5,6 @@
 D3DXVECTOR3 GfxAddVectors(const float* first, const float* second);
 D3DXVECTOR3 GfxSubtractVectors(const float* first, const float* second);
 
-namespace
-{
-
-
-	bool MatchesTriangle(DWORD flags, DWORD mask, DWORD mode)
-	{
-		switch (mode)
-		{
-		case 0: return !mask || (flags & mask) != 0;
-		case 1: return (flags & mask) != 0;
-		case 2: return (flags & mask) == mask;
-		case 3: return (flags & mask) == 0;
-		case 4: return (flags & mask) != mask;
-		default: return true;
-		}
-	}
-
-	bool IntersectNode(const OctreeNode& node, const OctreeRay& ray, const float* positions,
-		float& distance, float* point, DWORD mask, DWORD mode, DWORD* flags) //5BD260.
-	{
-		if (!node.indices) return false;
-		distance = ray.maximumDistance;
-		DWORD cursor = 0, triangle = 0;
-		while (cursor < node.wordCount)
-		{
-			WORD marker = node.indices[cursor];
-			if (marker & 0xC000)
-			{
-				cursor += (marker & 0x8000) ? 4 : 2;
-				continue;
-			}
-			DWORD count = node.indices[cursor+1];
-			cursor += 2;
-			DWORD end = cursor + count;
-			while (cursor < end)
-			{
-				const float* a = positions + 3*node.indices[cursor];
-				const float* b = positions + 3*node.indices[cursor+1];
-				const float* c = positions + 3*node.indices[cursor+2];
-				DWORD triangleFlags = node.triangleFlags[triangle++];
-				cursor += 3;
-				if (!MatchesTriangle(triangleFlags, mask, mode)) continue;
-				float candidateDistance, candidatePoint[3];
-				if (ray.IntersectTriangle(a, b, c, &candidateDistance, candidatePoint)
-					&& candidateDistance < distance)
-				{
-					distance = candidateDistance;
-					for (int axis = 0; axis < 3; ++axis) point[axis] = candidatePoint[axis];
-					if (flags) *flags = node.triangleFlags[triangle-1];
-				}
-			}
-			cursor += cursor & 1;
-		}
-		return distance != ray.maximumDistance;
-	}
-}
-
 int OctreeRay::IntersectTriangle(const float* first, const float* second,
 	const float* third, float* distance, float* point) const //4AC2B0.
 {
@@ -183,8 +126,8 @@ int OCTREE::QueryGroundRay(const OctreeRay& ray, OctreeGroundHit* output, DWORD 
 					if (node == &root)
 						throw std::logic_error("OCTREE5AEB93: root-leaf ray+24h buffer selector unresolved");
 					float distance, point[3];
-					if (IntersectNode(*node, ray, vertexBuffers[node->vertexBuffer].positions,
-						distance, point, mask, mode, &triangleFlags) && distance < best)
+					if (node->IntersectRay(ray, vertexBuffers[node->vertexBuffer].positions,
+						&distance, point, mask, mode, &triangleFlags) && distance < best)
 					{
 						best = distance;
 						output->distance = distance;

@@ -67,6 +67,8 @@ struct OctreeNode
 	~OctreeNode(); // 0x5AD8A0; does not own child nodes.
 	int ClassifyObject(const float* center, const float* extent) const; // 0x5BD1A0, ECX node / RET8.
 	const DWORD* GetChildOrder(const float* position, DWORD* count) const; //5BCF30, ECX node / RET8.
+	int IntersectRay(const OctreeRay& ray, const float* positions,
+		float* distance, float* point, DWORD mask, DWORD mode, DWORD* flags) const; //5BD260, RET1C.
 	int QueryFloorHeight(const OctreeRay& ray, const float* positions,
 		float* distance, float* height, DWORD mask, DWORD mode, DWORD* flags) const; //5BD410, RET1C.
 	DWORD ordinal;
