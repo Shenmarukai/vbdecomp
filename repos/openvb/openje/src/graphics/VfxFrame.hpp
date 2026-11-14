@@ -7,6 +7,7 @@ namespace JE
 {
 	namespace VfxFrame
 	{
+		LONG RandomInteger(LONG first, LONG last); //4B82E0, inclusive signed CRT range.
 		double RandomRange(float first,float last); //4B8310, descriptive name/return spelling.
 		void SetCamera(OCTREE_Camera* camera); //4B81C0,707F0C.
 		OCTREE_Camera* GetCamera(); //4B81D0.

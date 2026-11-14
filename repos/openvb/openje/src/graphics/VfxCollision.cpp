@@ -1,4 +1,5 @@
 #include "VfxCollision.hpp"
+#include "VfxFrame.hpp"
 #include <string.h>
 #include "VfxParticles.hpp"
 #include "ParticleSystem.hpp"
@@ -82,7 +83,7 @@ namespace
 		if (x >= y && x >= z) return 0;
 		if (!preferY && y >= x && y >= z) return 1;
 		if (z >= x && z >= y) return 2;
-		return 2 * rand() / 32767; //4B82E0(1,3), minus one; consumes real CRT RNG.
+		return JE::VfxFrame::RandomInteger(1, 3) - 1; //Native CRT RNG boundary4B82E0.
 	}
 
 	void SetCollisionNormal(JE::VFX_Collision& collision, Gfx_ParticleInfo& particle,

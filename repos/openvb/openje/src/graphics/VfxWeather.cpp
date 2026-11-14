@@ -17,10 +17,6 @@
 
 namespace
 {
-	double RandomRange(float first,float last) //4B8310.
-	{ float difference=last-first; return double(rand())*difference*0.000030518509f+first; }
-	LONG RandomInteger(LONG first,LONG last) //4B82E0.
-	{ return first+(last-first)*rand()/32767; }
 	void WrapPosition(D3DXVECTOR3& position,D3DXVECTOR3& origin,float width,float bottom,float top)
 	{
 		while (-0.5*width>position.x) { position.x+=width; origin.x+=width; }
@@ -153,18 +149,18 @@ namespace JE
 				do //Original emits count+1 and also enters for count0; preserve that policy.
 				{
 					VFX_RainDrop drop;
-					drop.origin.x=float((RandomRange(0,data.emitterSize)-data.emitterSize*0.5)*scale);
+					drop.origin.x=float((VfxFrame::RandomRange(0,data.emitterSize)-data.emitterSize*0.5)*scale);
 					drop.origin.y=scale*data.emitterYOffset;
-					drop.origin.z=float((RandomRange(0,data.emitterSize)-data.emitterSize*0.5)*scale);
-					drop.velocity.x=float(RandomRange(data.minVelocity.xy.values[0],data.maxVelocity.xy.values[0])*scale);
-					drop.velocity.y=float(RandomRange(data.minVelocity.xy.values[1],data.maxVelocity.xy.values[1])*scale);
-					drop.velocity.z=float(RandomRange(data.minVelocity.z,data.maxVelocity.z)*scale);
+					drop.origin.z=float((VfxFrame::RandomRange(0,data.emitterSize)-data.emitterSize*0.5)*scale);
+					drop.velocity.x=float(VfxFrame::RandomRange(data.minVelocity.xy.values[0],data.maxVelocity.xy.values[0])*scale);
+					drop.velocity.y=float(VfxFrame::RandomRange(data.minVelocity.xy.values[1],data.maxVelocity.xy.values[1])*scale);
+					drop.velocity.z=float(VfxFrame::RandomRange(data.minVelocity.z,data.maxVelocity.z)*scale);
 					VfxFrame::GetWind(drop.wind);
 					drop.position=drop.origin;
 					drop.born=float(double(time)-double(index)*delta/float(count));
-					drop.length=float(RandomRange(data.minLength,data.maxLength)*scale);
-					drop.beginAlpha=float(RandomInteger(data.minBeginAlpha,data.maxBeginAlpha));
-					drop.endAlpha=float(RandomInteger(data.minEndAlpha,data.maxEndAlpha));
+					drop.length=float(VfxFrame::RandomRange(data.minLength,data.maxLength)*scale);
+					drop.beginAlpha=float(VfxFrame::RandomInteger(data.minBeginAlpha,data.maxBeginAlpha));
+					drop.endAlpha=float(VfxFrame::RandomInteger(data.minEndAlpha,data.maxEndAlpha));
 					drops.push_back(drop);
 					++index;
 				} while (index<=count && LONG(drops.size())<data.maxDrops);
@@ -320,22 +316,22 @@ namespace JE
 				do
 				{
 					VFX_SnowFlake flake;
-					flake.origin.x=float((RandomRange(0,data.emitterSize)-data.emitterSize*0.5)*scale);
+					flake.origin.x=float((VfxFrame::RandomRange(0,data.emitterSize)-data.emitterSize*0.5)*scale);
 					flake.origin.y=scale*data.emitterYOffset;
-					flake.origin.z=float((RandomRange(0,data.emitterSize)-data.emitterSize*0.5)*scale);
-					flake.velocity.x=float(RandomRange(data.minVelocity.xy.values[0],data.maxVelocity.xy.values[0])*scale);
-					flake.velocity.y=float(RandomRange(data.minVelocity.xy.values[1],data.maxVelocity.xy.values[1])*scale);
-					flake.velocity.z=float(RandomRange(data.minVelocity.z,data.maxVelocity.z)*scale);
+					flake.origin.z=float((VfxFrame::RandomRange(0,data.emitterSize)-data.emitterSize*0.5)*scale);
+					flake.velocity.x=float(VfxFrame::RandomRange(data.minVelocity.xy.values[0],data.maxVelocity.xy.values[0])*scale);
+					flake.velocity.y=float(VfxFrame::RandomRange(data.minVelocity.xy.values[1],data.maxVelocity.xy.values[1])*scale);
+					flake.velocity.z=float(VfxFrame::RandomRange(data.minVelocity.z,data.maxVelocity.z)*scale);
 					flake.position=flake.origin;
 					flake.born=float(double(time)-double(index)*delta/float(count));
-					flake.size=float(RandomRange(data.minSize,data.maxSize)*scale);
-					flake.alpha=float(RandomInteger(data.minAlpha,data.maxAlpha));
-					flake.xAmplitude=float(RandomRange(data.minXSinAmplitude,data.maxXSinAmplitude)*scale);
-					flake.xFrequency=float(RandomRange(data.minXSinFrequency,data.maxXSinFrequency)*scale);
-					flake.xPhase=float(RandomRange(data.minXSinPhase,data.maxXSinPhase)*scale);
-					flake.zAmplitude=float(RandomRange(data.minZSinAmplitude,data.maxZSinAmplitude)*scale);
-					flake.zFrequency=float(RandomRange(data.minZSinFrequency,data.maxZSinFrequency)*scale);
-					flake.zPhase=float(RandomRange(data.minZSinPhase,data.maxZSinPhase)*scale);
+					flake.size=float(VfxFrame::RandomRange(data.minSize,data.maxSize)*scale);
+					flake.alpha=float(VfxFrame::RandomInteger(data.minAlpha,data.maxAlpha));
+					flake.xAmplitude=float(VfxFrame::RandomRange(data.minXSinAmplitude,data.maxXSinAmplitude)*scale);
+					flake.xFrequency=float(VfxFrame::RandomRange(data.minXSinFrequency,data.maxXSinFrequency)*scale);
+					flake.xPhase=float(VfxFrame::RandomRange(data.minXSinPhase,data.maxXSinPhase)*scale);
+					flake.zAmplitude=float(VfxFrame::RandomRange(data.minZSinAmplitude,data.maxZSinAmplitude)*scale);
+					flake.zFrequency=float(VfxFrame::RandomRange(data.minZSinFrequency,data.maxZSinFrequency)*scale);
+					flake.zPhase=float(VfxFrame::RandomRange(data.minZSinPhase,data.maxZSinPhase)*scale);
 					flakes.push_back(flake);
 					++index;
 				} while (index<=count && LONG(flakes.size())<data.maxFlakes);

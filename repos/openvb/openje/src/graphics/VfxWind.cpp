@@ -7,6 +7,8 @@ namespace JE
 {
 	namespace VfxFrame
 	{
+		LONG RandomInteger(LONG first, LONG last) //4B82E0; consumes rand even for equal bounds.
+		{ return first + (last - first) * rand() / 32767; }
 		double RandomRange(float first,float last) //4B8310, consumes rand even for equal bounds.
 		{ float difference=last-first; return rand()*difference*0.000030518509f+first; }
 	}
