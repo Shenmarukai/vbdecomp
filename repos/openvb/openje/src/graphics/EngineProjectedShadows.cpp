@@ -92,9 +92,7 @@ void Gfx_Engine::ProjectShadows()
 				g_D3D.SetTexture(0, texture->frameCount > 0 ? texture->frames[0].texture : NULL);
 				const UINT stride = D3DXGetFVFVertexSize(0x104);
 				Gfx_StreamingVertexBuffer* stream = g_BufferManager->vertexStream;
-				const UINT aligned = stream->bytePosition / stride
-					+ (stream->bytePosition % stride != 0);
-				UINT available = (stream->capacity - stride * aligned) / stride;
+				UINT available = stream->GetAvailableBytes(stride) / stride;
 				const UINT vertexLimit = g_D3D.vertexLimit;
 				if (available >= vertexLimit) available = vertexLimit;
 				UINT maximum = stream->capacity / stride;

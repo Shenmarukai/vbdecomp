@@ -53,6 +53,12 @@ bool Gfx_StreamingVertexBuffer::CanFit(UINT count, UINT stride)
 	return fits;
 }
 
+UINT Gfx_StreamingVertexBuffer::GetAvailableBytes(UINT alignment) //490120.
+{
+	const UINT first = bytePosition / alignment + (bytePosition % alignment != 0);
+	return capacity - alignment * first;
+}
+
 HRESULT Gfx_StreamingVertexBuffer::Lock(UINT count, UINT stride, BYTE** output,
 	UINT* base, BYTE discard)
 {

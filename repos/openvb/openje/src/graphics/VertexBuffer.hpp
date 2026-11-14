@@ -27,6 +27,7 @@ public:
 	virtual HRESULT Create(UINT length, DWORD usage, DWORD fvf, D3DPOOL pool); // 0x505600.
 	virtual void Release(); // 0x5053B0; clears the streaming cursor first.
 	bool CanFit(UINT count, UINT stride); // 0x5053C0; signed comparison of wrapped results.
+	UINT GetAvailableBytes(UINT alignment); //490120; unchecked alignment and unsigned remaining bytes.
 	HRESULT Lock(UINT count, UINT stride, BYTE** output, UINT* base, BYTE discard); // 0x505400.
 
 	UINT bytePosition; // +14; ceil-aligned by Lock to its incoming stride.
