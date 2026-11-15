@@ -1,0 +1,6 @@
+add_subdirectory("adecode")
+add_subdirectory("bink")
+add_subdirectory("dx8")
+add_subdirectory("granny2")
+add_subdirectory("small")
+add_subdirectory("zlib")

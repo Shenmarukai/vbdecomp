@@ -1,0 +1,42 @@
+﻿{
+  "version": 9,
+  "configurePresets": [
+    {
+      "name": "windows",
+      "displayName": "Win32",
+      "generator": "Ninja Multi-Config",
+      "architecture": {
+        "value": "x86",
+        "strategy": "external"
+      },
+      "binaryDir": "${sourceDir}/.cache/main/windows",
+      "installDir": "$env{NB_BUILD_DIR}",
+      "cacheVariables": {
+        "CMAKE_CONFIGURATION_TYPES": "Debug;Release",
+        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+        "VCPKG_TARGET_TRIPLET": "x86-windows-static"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "windows-dev",
+      "displayName": "Development",
+      "configurePreset": "windows",
+      "configuration": "Debug",
+      "jobs": 4
+    },
+    {
+      "name": "windows-rel",
+      "displayName": "Release",
+      "configurePreset": "windows",
+      "configuration": "Release",
+      "jobs": 4
+    }
+  ]
+}

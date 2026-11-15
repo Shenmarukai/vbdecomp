@@ -1,0 +1,24 @@
+#include <cstddef>
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <climits>
+#include <vector>
+#include <string>
+#include <map>
+#include <list>
+#include <deque>
+#include <unordered_map>
+#include <set>
+#include <utility>
+#include <algorithm>
+#include <new>
+#include <stdexcept>
+
+// Windows
+#include <winsock2.h>
+#include <windows.h>
+#include <mmsystem.h>
+#include <process.h>
+#include <uuids.h>
