@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Action.hpp"
-#include <d3dx8math.h>
+#include "d3dx9math.h"
 
 namespace JE
 {

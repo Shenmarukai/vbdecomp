@@ -53,7 +53,7 @@ namespace
 		output.a = static_cast<float>(alpha);
 	}
 
-	void SnapshotMaterial(D3DMATERIAL8& output, const Gfx_G3D_Material& source)
+	void SnapshotMaterial(D3DMATERIAL9& output, const Gfx_G3D_Material& source)
 	{
 		SnapshotColor(output.Diffuse, source.colors[1]);
 		SnapshotColor(output.Ambient, source.colors[0]);
@@ -518,7 +518,7 @@ Gfx_SkinMesh* Gfx_G3D_Mesh::ExportGfxSkinMesh(DWORD fvf,
 	for (LONG index = 0; index < static_cast<LONG>(groupCount); ++index)
 	{
 		Gfx_G3D_Group& group = groups[index];
-		D3DMATERIAL8 values;
+		D3DMATERIAL9 values;
 		SnapshotMaterial(values, group.values);
 		const DWORD nameCount = groups[index].nameCount;
 		if (nameCount)
@@ -563,8 +563,15 @@ Gfx_SkinMesh* Gfx_G3D_Mesh::ExportGfxSkinMesh(DWORD fvf,
 				vertexStride);
 		}
 	}
-	output->CreateSkinMeshFVF(fvf, vertexCount, vertices, groupCount, names,
-		indexCounts, primitiveCounts, indices, boneCount, model, boneWeights, unused);
+	const HRESULT result = output->CreateSkinMeshFVF(fvf, vertexCount, vertices,
+		groupCount, names, indexCounts, primitiveCounts, indices,
+		boneCount, model, boneWeights, unused);
+	if (FAILED(result))
+	{
+		JE::LogDebugString("Gfx_G3D_Mesh::ExportGfxSkinMesh - mesh creation failed (%x)\n", result);
+		delete output;
+		return NULL;
+	}
 	output->RebuildGroups(output->materials, output->groups);
 	return output;
 }
@@ -596,7 +603,7 @@ Gfx_ModelMesh* Gfx_G3D_Mesh::ExportGfxModelMesh(DWORD fvf, BYTE loadTextures, BY
 	for (LONG index = 0; index < static_cast<LONG>(groupCount); ++index)
 	{
 		Gfx_G3D_Group& group = groups[index];
-		D3DMATERIAL8 values;
+		D3DMATERIAL9 values;
 		SnapshotMaterial(values, group.values);
 		DWORD handles[2] = {0, 0};
 		textureNames[0] = "";

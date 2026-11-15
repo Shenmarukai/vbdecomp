@@ -92,7 +92,7 @@ HRESULT Gfx_RS_B_EM::Initialize()
 	if (!g_RSBaseEmissiveState.effect)
 	{
 		ID3DXBuffer* errors;
-		result = D3DXCreateEffect(g_D3D.device, source, sizeof(source) - 1,
+		result = Gfx_CreateDX9Effect(g_D3D.device, source, sizeof(source) - 1,
 			&g_RSBaseEmissiveState.effect, &errors);
 		if (SUCCEEDED(result))
 		{
@@ -110,7 +110,7 @@ HRESULT Gfx_RS_B_EM::Initialize()
 			g_RSBaseEmissiveState.effect->SetDword("bLighting", 0);
 			g_RSBaseEmissiveState.effect->SetDword("bFog", 0);
 			g_RSBaseEmissiveState.effect->SetDword("DiffuseSource", 1);
-			D3DXTECHNIQUE_DESC selected;
+			Gfx_DX9TechniqueDesc selected;
 			result = g_RSBaseEmissiveState.effect->FindNextValidTechnique(g_RSBaseEmissiveState.technique, &selected);
 			if (SUCCEEDED(result))
 			{
@@ -250,7 +250,7 @@ HRESULT Gfx_RS_B_EM::SetMaterial(Gfx_Material* material, DWORD)
 		view._41 = view._42 = view._43 = 0;
 		D3DXMatrixInverse(&inverse, NULL, &view);
 		g_RSBaseEmissiveState.effect->SetMatrix("TexMat", &inverse);
-		D3DMATERIAL8 values = material->values;
+		D3DMATERIAL9 values = material->values;
 		g_D3D.device->SetMaterial(&values);
 		if (useRGB || useAlpha)
 			g_D3D.SetRenderState(D3DRS_TEXTUREFACTOR, factor);
@@ -266,7 +266,7 @@ HRESULT Gfx_RS_B_EM::SetMaterial(Gfx_Material* material, DWORD)
 			g_D3D.SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, 0);
 		if (g_RSBaseEmissiveState.techniqueChanged)
 		{
-			D3DXTECHNIQUE_DESC selected;
+			Gfx_DX9TechniqueDesc selected;
 			HRESULT selectedResult;
 			for (;;)
 			{

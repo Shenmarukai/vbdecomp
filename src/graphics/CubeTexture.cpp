@@ -1,7 +1,8 @@
+#include <cstdio>
 #include "CubeTexture.hpp"
 #include "D3DState.hpp"
 #include "../diagnostics/DebugOutput.hpp"
-#include <d3dx8.h>
+#include "d3dx9.h"
 
 Gfx_CubeTex::Gfx_CubeTex() : Gfx_Texture(1)
 {
@@ -37,7 +38,7 @@ HRESULT Gfx_CubeTex::LoadFromFile(std::string path)
 	{
 		JE::LogDebugString("Gfx_CubeTex: Failed to load Cube Texture: %s\n", path.c_str());
 		char message[256];
-		D3DXGetErrorStringA(result, message, sizeof(message));
+		std::snprintf(message, sizeof(message), "HRESULT 0x%08lX", static_cast<unsigned long>(result));
 		JE::LogDebugString("DXErr: %s\n", message);
 	}
 	return result;

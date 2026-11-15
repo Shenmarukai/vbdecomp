@@ -25,7 +25,7 @@ HRESULT Gfx_D3D::CreateDevice(HWND owner, UINT adapter, UINT deviceIndex, UINT m
 		presentation.BackBufferFormat = selected->desktop.Format;
 		presentation.Windowed = TRUE;
 		presentation.FullScreen_RefreshRateInHz = 0;
-		presentation.FullScreen_PresentationInterval = 0;
+		presentation.PresentationInterval = 0;
 		presentation.AutoDepthStencilFormat = selected->windowDepthStencil;
 		currentMode = &windowMode;
 		currentMode->behavior = selected->windowBehavior;
@@ -53,7 +53,7 @@ HRESULT Gfx_D3D::CreateDevice(HWND owner, UINT adapter, UINT deviceIndex, UINT m
 		presentation.BackBufferFormat = mode->backBufferFormat;
 		presentation.Windowed = FALSE;
 		presentation.FullScreen_RefreshRateInHz = mode->display.RefreshRate;
-		presentation.FullScreen_PresentationInterval = verticalSync ?
+		presentation.PresentationInterval = verticalSync ?
 			D3DPRESENT_INTERVAL_ONE : D3DPRESENT_INTERVAL_IMMEDIATE;
 		presentation.AutoDepthStencilFormat = mode->depthStencilFormat;
 		const int height = metrics(SM_CYSCREEN);

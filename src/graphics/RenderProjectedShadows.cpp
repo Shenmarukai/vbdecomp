@@ -30,12 +30,12 @@ void Gfx_RenderManager::RenderShadowVolumes2()
 	if (maximum >= vertexLimit) maximum = vertexLimit;
 	UINT triangles = 0;
 	UINT first = 0;
-	BYTE* data = NULL;
+	void* data = NULL;
 	BYTE locked = 0;
 	UINT written = 0;
 	++g_D3D.statistics[9];
-	g_D3D.device->SetStreamSource(0, stream->buffer, 12);
-	g_D3D.device->SetVertexShader(D3DFVF_XYZ);
+	g_D3D.device->SetStreamSource(0, stream->buffer, 0, 12);
+	g_D3D.device->SetFVF(D3DFVF_XYZ);
 	g_D3D.SetTransform(D3DTS_WORLD, &g_D3D.identity);
 	std::map<DWORD, Gfx_RenderGroup>::iterator group = staticGroups[0].begin();
 	while (group != staticGroups[0].end())
@@ -148,11 +148,11 @@ void Gfx_RenderManager::DrawShadowOverlay()
 {
 	Gfx_VertexBuffer* buffer = quadBuffer;
 	const UINT stride = buffer->vertexStride;
-	IDirect3DVertexBuffer8* deviceBuffer = buffer->buffer;
+	IDirect3DVertexBuffer9* deviceBuffer = buffer->buffer;
 	++g_D3D.statistics[9];
-	g_D3D.device->SetStreamSource(0, deviceBuffer, stride);
+	g_D3D.device->SetStreamSource(0, deviceBuffer, 0, stride);
 	//49017D reloads the wrapper after SetStreamSource.
-	g_D3D.device->SetVertexShader(quadBuffer->fvf);
+	g_D3D.device->SetFVF(quadBuffer->fvf);
 	++g_D3D.statistics[11];
 	g_D3D.statistics[3] += 2;
 	g_D3D.device->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, 2);

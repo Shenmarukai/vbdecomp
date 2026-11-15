@@ -2,7 +2,7 @@
 
 #include "VfxParameters.hpp"
 #include "VfxValueOwners.hpp"
-#include <d3dx8.h>
+#include "d3dx9.h"
 
 // Typed proprietary effect records. Original offsets document ownership and
 // data decisions; normal C++ members supply the runnable host representation.

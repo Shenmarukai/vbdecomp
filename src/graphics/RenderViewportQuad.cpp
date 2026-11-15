@@ -14,11 +14,15 @@ HRESULT Gfx_RenderManager::SetViewportQuad(DWORD x, DWORD y, DWORD width, DWORD 
 		// Creation failure is ignored. A callback may replace the published owner.
 		quadBuffer->vertexStride = 16;
 	}
-	BYTE* data;
-	const HRESULT result = quadBuffer->buffer->Lock(0, 0, &data, 0);
-	if (FAILED(result)) return result;
+	void* data = nullptr;
 
-	D3DXVECTOR4* vertices = reinterpret_cast<D3DXVECTOR4*>(data);
+	const HRESULT result = quadBuffer->buffer->Lock(0, 0, &data, 0);
+	if (FAILED(result))
+	{
+		return result;
+	}
+
+	D3DXVECTOR4* vertices = static_cast<D3DXVECTOR4*>(data);
 	const float left = static_cast<float>(x);
 	vertices[0].x = left;
 	const float top = static_cast<float>(y);

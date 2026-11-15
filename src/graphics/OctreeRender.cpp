@@ -3,7 +3,7 @@
 #include "D3DState.hpp"
 #include "../resources/ResourceMemoryStream.hpp"
 #include "../diagnostics/DebugOutput.hpp"
-#include <dxerr8.h>
+#include "DX9Errors.hpp"
 #include <math.h>
 #include <new>
 #include <string.h>
@@ -423,7 +423,7 @@ void Octree2Gfx::ConstructRenderData()
 			MaterialStyle& style = styles[batch->material];
 			material.style1 = material.style2 = style.style;
 			const BYTE* sourceMaterial = sourceMaterials[batch->material].bytes;
-			D3DMATERIAL8 values;
+			D3DMATERIAL9 values;
 			values.Diffuse.r = sourceMaterial[86] * 0.0039215689f;
 			values.Diffuse.g = sourceMaterial[85] * 0.0039215689f;
 			values.Diffuse.b = sourceMaterial[84] * 0.0039215689f;

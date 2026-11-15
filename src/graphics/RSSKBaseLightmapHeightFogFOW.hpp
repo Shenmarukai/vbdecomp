@@ -1,14 +1,14 @@
 #pragma once
 
 #include "RenderStyle.hpp"
-#include <d3dx8effect.h>
+#include "DX9EffectCompat.hpp"
 
 // Original loader-zero shared storage70BD6C..70BD8F.
 struct Gfx_RS_SK_B_LM_HFog_FOWState
 {
 	DWORD users;
-	ID3DXEffect* normal;
-	ID3DXEffect* factored;
+	Gfx_DX9Effect* normal;
+	Gfx_DX9Effect* factored;
 	D3DXEFFECT_DESC description;
 	LPCSTR technique;
 	BYTE usesShader, techniqueChanged;
@@ -37,7 +37,7 @@ public:
 	virtual HRESULT End(); //Shared537BC0.
 	virtual HRESULT Pass(UINT pass); //537BD0.
 
-	ID3DXEffect* effect; //+04, borrowed selection; constructorNULL.
+	Gfx_DX9Effect* effect; //+04, borrowed selection; constructorNULL.
 	DWORD colorOperation, alphaOperation; //+08/+0C.
 	DWORD lightmapColorOperation, lightmapAlphaOperation, alphaTest; //+10/+14/+18; raw test.
 };

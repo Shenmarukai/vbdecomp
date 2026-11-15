@@ -33,7 +33,7 @@ public:
 	void SetMaterialExtraNameCount(DWORD index, DWORD count); //524270, owned string array.
 	std::string GetMaterialExtraName(DWORD index, DWORD name) const; //508D70, unchecked owned copy.
 	void SetMaterial(DWORD index, DWORD style, const std::string& materialName, DWORD blend,
-		const D3DMATERIAL8& values, DWORD textures, const std::string* names,
+		const D3DMATERIAL9& values, DWORD textures, const std::string* names,
 		const DWORD* handles, BYTE flagB9, BYTE flagBA); // 0x508E90.
 	HRESULT CreateSkinMeshFVF(DWORD fvf, DWORD vertices, const void* vertexData,
 		DWORD groups, const std::string* names, const DWORD* indexCounts,
@@ -60,7 +60,7 @@ public:
 		std::string* names;
 	};
 	DWORD value24, handle; //24/28.
-	ID3DXSkinMesh* skin; //2C.
+	ID3DXSkinInfo* skin; // DX9 separates bone influences from mesh geometry.
 	ID3DXMesh* blended; //30.
 	DWORD* adjacency; //34, owned raw array.
 	BoneInfluences* boneInfluences; //38, owns records and their two raw arrays.
@@ -92,6 +92,7 @@ public:
 	//scratch arrays unwritten; this is not a complete original-layout claim.
 	float shadowLightWeights[8];
 	D3DXVECTOR3 shadowLightDirections[8];
+	ID3DXMesh* sourceMesh; // Unblended geometry; vertex order matches ID3DXSkinInfo.
 
 private:
 	HRESULT BuildShadowGeometry(); //50A600 tail; returns the latest buffer-lock result.

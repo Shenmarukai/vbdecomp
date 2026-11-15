@@ -8,13 +8,13 @@ HRESULT Gfx_BufferRecord::Bind(UINT stream)
 	if (vertices)
 	{
 		const UINT stride = vertices->vertexStride;
-		IDirect3DVertexBuffer8* buffer = vertices->buffer;
+		IDirect3DVertexBuffer9* buffer = vertices->buffer;
 		++g_D3D.statistics[9];
-		result = g_D3D.device->SetStreamSource(stream, buffer, stride);
+		result = g_D3D.device->SetStreamSource(stream, buffer, 0, stride);
 	}
 	if (indices)
 	{
-		return g_D3D.device->SetIndices(indices->buffer, 0);
+		return g_D3D.SetIndices(indices->buffer, 0);
 	}
 	return result;
 }

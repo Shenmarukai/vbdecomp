@@ -1,7 +1,7 @@
 #include "MatrixStackBridge.hpp"
 
 // The real DirectX8.1 SDK library provides the original matrix-stack API.
-#include <d3dx8math.h>
+#include "d3dx9math.h"
 
 namespace JE
 {

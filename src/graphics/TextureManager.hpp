@@ -5,7 +5,7 @@
 #include <map>
 #include <vector>
 #include <string>
-#include <d3d8.h>
+#include "d3d9.h"
 
 class Gfx_Texture;
 class Gfx_TextureManager;

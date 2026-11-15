@@ -1,7 +1,7 @@
 #pragma once
 
 #include <windows.h>
-#include <d3d8.h>
+#include "d3d9.h"
 #include <list>
 #include <set>
 

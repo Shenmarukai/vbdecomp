@@ -1,12 +1,12 @@
 #pragma once
 #include "RenderStyle.hpp"
 #include "Material.hpp"
-#include <d3dx8effect.h>
+#include "DX9EffectCompat.hpp"
 
 struct Gfx_RS_SK_B_LMFOWState
 {
 	DWORD users; //70BD4C.
-	ID3DXEffect* effect;
+	Gfx_DX9Effect* effect;
 	D3DXEFFECT_DESC description;
 	LPCSTR technique;
 	BYTE usesShader, techniqueChanged;

@@ -3,7 +3,7 @@
 #include "gui/EngineInterface.hpp"
 #include "game/GameInterface.hpp"
 #include "gui/Label.hpp"
-#include <d3dx8.h>
+#include "d3dx9.h"
 #include <list>
 
 namespace JE

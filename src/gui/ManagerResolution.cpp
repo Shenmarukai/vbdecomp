@@ -26,7 +26,7 @@ namespace GUI
 		{
 			if (!width) selectedWidth = current->viewport.Width;
 			if (!height) selectedHeight = current->viewport.Height;
-			D3DVIEWPORT8 descriptor;
+			D3DVIEWPORT9 descriptor;
 			descriptor.Width = selectedWidth;
 			descriptor.X = 0; descriptor.Y = 0;
 			descriptor.Height = selectedHeight;

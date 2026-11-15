@@ -2,13 +2,13 @@
 
 #include "RenderStyle.hpp"
 #include "Material.hpp"
-#include <d3dx8effect.h>
+#include "DX9EffectCompat.hpp"
 
 struct Gfx_RS_BaseLightmapHeightFogState
 {
 	DWORD users;
-	ID3DXEffect* normal;
-	ID3DXEffect* factored;
+	Gfx_DX9Effect* normal;
+	Gfx_DX9Effect* factored;
 	D3DXEFFECT_DESC description;
 	LPCSTR technique;
 	BYTE usesShader, techniqueChanged;
@@ -37,7 +37,7 @@ public:
 	virtual HRESULT End(); //537BC0.
 	virtual HRESULT Pass(UINT pass); //5370F0.
 
-	ID3DXEffect* effect; //Borrowed selected effect, original+04; ctorNULL.
+	Gfx_DX9Effect* effect; //Borrowed selected effect, original+04; ctorNULL.
 	DWORD colorOperation, alphaOperation;
 	DWORD lightmapColorOperation, lightmapAlphaOperation, alphaTest;
 };

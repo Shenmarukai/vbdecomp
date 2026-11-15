@@ -1,5 +1,5 @@
 #include "OctreeShape.hpp"
-#include <d3dx8math.h>
+#include "d3dx9math.h"
 
 float GfxDistanceSquaredXZ(const float* first, const float* second);
 D3DXVECTOR3 GfxAddVectors(const float* first, const float* second);

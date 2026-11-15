@@ -2,14 +2,14 @@
 
 #include "RenderStyle.hpp"
 #include "Material.hpp"
-#include <d3dx8effect.h>
+#include "DX9EffectCompat.hpp"
 
 // Shared original state70BBB8..70BBD7. Production static initialization and
 // publication remain unresolved: only the declaration exists in game sources.
 struct Gfx_RS_BaseState
 {
 	DWORD users;
-	ID3DXEffect* effect;
+	Gfx_DX9Effect* effect;
 	D3DXEFFECT_DESC description;
 	LPCSTR technique;
 	BYTE usesShader, techniqueChanged;

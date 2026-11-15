@@ -39,7 +39,7 @@ HRESULT Gfx_RS_B_LM_FOW::Initialize()
 	if (!g_RSBaseLightmapFogOfWarState.effect)
 	{
 		ID3DXBuffer* errors;
-		result = D3DXCreateEffect(g_D3D.device, GFX_RS_B_LM_FOW_SOURCE, sizeof(GFX_RS_B_LM_FOW_SOURCE) - 1,
+		result = Gfx_CreateDX9Effect(g_D3D.device, GFX_RS_B_LM_FOW_SOURCE, sizeof(GFX_RS_B_LM_FOW_SOURCE) - 1,
 			&g_RSBaseLightmapFogOfWarState.effect, &errors);
 		if (SUCCEEDED(result))
 		{
@@ -65,7 +65,7 @@ HRESULT Gfx_RS_B_LM_FOW::Initialize()
 			g_RSBaseLightmapFogOfWarState.effect->SetDword("DiffuseSource", 1);
 			g_RSBaseLightmapFogOfWarState.effect->SetMatrix("FOWmatrix", &identity);
 			g_RSBaseLightmapFogOfWarState.effect->SetTexture("FOW", NULL);
-			D3DXTECHNIQUE_DESC selected;
+			Gfx_DX9TechniqueDesc selected;
 			result = g_RSBaseLightmapFogOfWarState.effect->FindNextValidTechnique(
 				g_RSBaseLightmapFogOfWarState.technique, &selected);
 			if (SUCCEEDED(result))
@@ -197,7 +197,7 @@ HRESULT Gfx_RS_B_LM_FOW::SetMaterial(Gfx_Material* material, DWORD)
 		}
 		else g_D3D.SetTexture(1, NULL);
 
-		IDirect3DTexture8* fogTexture = g_GfxSystem->FogOfWarRenderTexture();
+		IDirect3DTexture9* fogTexture = g_GfxSystem->FogOfWarRenderTexture();
 		if (fogTexture)
 		{
 			g_RSBaseLightmapFogOfWarState.effect->SetTexture("FOW", fogTexture);
@@ -227,7 +227,7 @@ HRESULT Gfx_RS_B_LM_FOW::SetMaterial(Gfx_Material* material, DWORD)
 		g_RSBaseLightmapFogOfWarState.effect->SetDword("Baop", alphaOperation);
 		g_RSBaseLightmapFogOfWarState.effect->SetDword("LMcop", lightmapColorOperation);
 		g_RSBaseLightmapFogOfWarState.effect->SetDword("LMaop", lightmapAlphaOperation);
-		D3DMATERIAL8 values;
+		D3DMATERIAL9 values;
 		std::memcpy(&values, &material->values, sizeof(values));
 		g_D3D.device->SetMaterial(&values);
 		if (!useRGB && !useAlpha)
@@ -273,7 +273,7 @@ HRESULT Gfx_RS_B_LM_FOW::SetMaterial(Gfx_Material* material, DWORD)
 
 		if (g_RSBaseLightmapFogOfWarState.techniqueChanged)
 		{
-			D3DXTECHNIQUE_DESC selected;
+			Gfx_DX9TechniqueDesc selected;
 			result = g_RSBaseLightmapFogOfWarState.effect->FindNextValidTechnique(
 				g_RSBaseLightmapFogOfWarState.technique, &selected);
 			if (SUCCEEDED(result))

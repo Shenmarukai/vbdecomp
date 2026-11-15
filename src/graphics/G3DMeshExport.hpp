@@ -7,7 +7,7 @@
 class Gfx_SkinMesh;
 class Gfx_ModelData526620;
 
-//Stored color order differs from D3DMATERIAL8; exporters build a separate snapshot.
+//Stored color order differs from D3DMATERIAL9; exporters build a separate snapshot.
 struct Gfx_G3D_Material
 {
 	D3DCOLORVALUE colors[4];

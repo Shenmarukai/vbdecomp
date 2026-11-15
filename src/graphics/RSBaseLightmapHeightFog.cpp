@@ -50,7 +50,7 @@ HRESULT Gfx_RS_B_LM_HeightFog::Initialize()
 	ID3DXBuffer* errors;
 	if (!g_RSBaseLightmapHeightFogState.normal)
 	{
-		result = D3DXCreateEffect(g_D3D.device, GFX_RS_B_LM_HEIGHT_FOG_NORMAL_SOURCE, sizeof(GFX_RS_B_LM_HEIGHT_FOG_NORMAL_SOURCE) - 1,
+		result = Gfx_CreateDX9Effect(g_D3D.device, GFX_RS_B_LM_HEIGHT_FOG_NORMAL_SOURCE, sizeof(GFX_RS_B_LM_HEIGHT_FOG_NORMAL_SOURCE) - 1,
 			&g_RSBaseLightmapHeightFogState.normal, &errors);
 		if (SUCCEEDED(result))
 		{
@@ -69,7 +69,7 @@ HRESULT Gfx_RS_B_LM_HeightFog::Initialize()
 			g_RSBaseLightmapHeightFogState.normal->SetDword("DiffuseSource", 1);
 			g_RSBaseLightmapHeightFogState.normal->SetMatrix("fogmatrix", &identity);
 			g_RSBaseLightmapHeightFogState.normal->SetTexture("HFog", NULL);
-			D3DXTECHNIQUE_DESC selected;
+			Gfx_DX9TechniqueDesc selected;
 			result = g_RSBaseLightmapHeightFogState.normal->FindNextValidTechnique(0, &selected);
 			if (SUCCEEDED(result))
 			{
@@ -94,7 +94,7 @@ HRESULT Gfx_RS_B_LM_HeightFog::Initialize()
 	}
 	if (!g_RSBaseLightmapHeightFogState.factored)
 	{
-		result = D3DXCreateEffect(g_D3D.device, GFX_RS_B_LM_HEIGHT_FOG_FACTORED_SOURCE, sizeof(GFX_RS_B_LM_HEIGHT_FOG_FACTORED_SOURCE) - 1,
+		result = Gfx_CreateDX9Effect(g_D3D.device, GFX_RS_B_LM_HEIGHT_FOG_FACTORED_SOURCE, sizeof(GFX_RS_B_LM_HEIGHT_FOG_FACTORED_SOURCE) - 1,
 			&g_RSBaseLightmapHeightFogState.factored, &errors);
 		if (SUCCEEDED(result))
 		{
@@ -113,7 +113,7 @@ HRESULT Gfx_RS_B_LM_HeightFog::Initialize()
 			g_RSBaseLightmapHeightFogState.factored->SetDword("DiffuseSource", 1);
 			g_RSBaseLightmapHeightFogState.factored->SetMatrix("fogmatrix", &identity);
 			g_RSBaseLightmapHeightFogState.factored->SetTexture("HFog", NULL);
-			D3DXTECHNIQUE_DESC selected;
+			Gfx_DX9TechniqueDesc selected;
 			result = g_RSBaseLightmapHeightFogState.factored->FindNextValidTechnique(0, &selected);
 			if (SUCCEEDED(result))
 			{
@@ -285,7 +285,7 @@ HRESULT Gfx_RS_B_LM_HeightFog::SetMaterial(Gfx_Material* material, DWORD fogBits
 	effect->SetDword("Baop", alphaOperation);
 	effect->SetDword("LMcop", lightmapColorOperation);
 	effect->SetDword("LMaop", lightmapAlphaOperation);
-	D3DMATERIAL8 values;
+	D3DMATERIAL9 values;
 	std::memcpy(&values, &material->values, sizeof(values));
 	g_D3D.device->SetMaterial(&values);
 	if (useRGB || useAlpha)
@@ -311,24 +311,24 @@ HRESULT Gfx_RS_B_LM_HeightFog::SetMaterial(Gfx_Material* material, DWORD fogBits
 	if (g_RSBaseLightmapHeightFogState.usesShader)
 	{
 		const float constants[4] = { 0.0f, 0.5f, 1.0f, 2.0f };
-		g_D3D.device->SetVertexShaderConstant(0, constants, 1);
+		g_D3D.device->SetVertexShaderConstantF(0, reinterpret_cast<const float*>(constants), 1);
 		BYTE red, green, blue;
 		g_GfxSystem->GetAmbientRGB(&red, &green, &blue);
 		const float ambient[4] = { red * 0.0039215689f,
 			green * 0.0039215689f, blue * 0.0039215689f, 1.0f };
-		g_D3D.device->SetVertexShaderConstant(1, ambient, 1);
+		g_D3D.device->SetVertexShaderConstantF(1, reinterpret_cast<const float*>(ambient), 1);
 		g_GfxSystem->CurrentViewport();
 		Gfx_Viewport* viewport = g_GfxSystem->CurrentViewport();
 		const float range[4] = { viewport->fogEnd,
 			1.0f / (viewport->fogEnd - viewport->fogStart), 0.0f, 0.0f };
-		g_D3D.device->SetVertexShaderConstant(2, range, 1);
-		g_D3D.device->SetVertexShaderConstant(3, &values.Diffuse, 1);
-		g_D3D.device->SetVertexShaderConstant(4, &values.Emissive, 1);
+		g_D3D.device->SetVertexShaderConstantF(2, reinterpret_cast<const float*>(range), 1);
+		g_D3D.device->SetVertexShaderConstantF(3, reinterpret_cast<const float*>(&values.Diffuse), 1);
+		g_D3D.device->SetVertexShaderConstantF(4, reinterpret_cast<const float*>(&values.Emissive), 1);
 		const float fogPosition[4] = { position.x, position.y, position.z, 0.0f };
-		g_D3D.device->SetVertexShaderConstant(40, fogPosition, 1);
+		g_D3D.device->SetVertexShaderConstantF(40, reinterpret_cast<const float*>(fogPosition), 1);
 		const float scale[4] = { 1.0f, 1.0f / thickness,
 			0.0066666668f, 0.0034482759f };
-		result = g_D3D.device->SetVertexShaderConstant(41, scale, 1);
+		result = g_D3D.device->SetVertexShaderConstantF(41, reinterpret_cast<const float*>(scale), 1);
 	}
 	else
 	{
@@ -351,7 +351,7 @@ HRESULT Gfx_RS_B_LM_HeightFog::SetMaterial(Gfx_Material* material, DWORD fogBits
 	else g_D3D.SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, 0);
 	if (g_RSBaseLightmapHeightFogState.techniqueChanged)
 	{
-		D3DXTECHNIQUE_DESC selected;
+		Gfx_DX9TechniqueDesc selected;
 		result = effect->FindNextValidTechnique(0, &selected);
 		if (SUCCEEDED(result))
 		{

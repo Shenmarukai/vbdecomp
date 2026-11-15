@@ -25,28 +25,28 @@ namespace
 "]\t\t\t\t= Disable;\n}\n}\n"
 typedef char Source3820[(sizeof(GFX_RS_BASE_HFOG_FOW_SOURCE) - 1 == 3820) ? 1 : -1];
 
-	HRESULT UploadFogConstants(const D3DMATERIAL8& material,
+	HRESULT UploadFogConstants(const D3DMATERIAL9& material,
 		const D3DXVECTOR3& position, float thickness)
 	{
 		const float constants[4] = { 0.0f, 0.5f, 1.0f, 2.0f };
-		g_D3D.device->SetVertexShaderConstant(0, constants, 1);
+		g_D3D.device->SetVertexShaderConstantF(0, reinterpret_cast<const float*>(constants), 1);
 		BYTE red, green, blue;
 		g_GfxSystem->GetAmbientRGB(&red, &green, &blue);
 		const float ambient[4] = { red * 0.0039215689f,
 			green * 0.0039215689f, blue * 0.0039215689f, 1.0f };
-		g_D3D.device->SetVertexShaderConstant(1, ambient, 1);
+		g_D3D.device->SetVertexShaderConstantF(1, reinterpret_cast<const float*>(ambient), 1);
 		g_GfxSystem->CurrentViewport();
 		Gfx_Viewport* viewport = g_GfxSystem->CurrentViewport();
 		const float range[4] = { viewport->fogEnd,
 			float(1.0 / (double(viewport->fogEnd) - viewport->fogStart)), 0.0f, 0.0f };
-		g_D3D.device->SetVertexShaderConstant(2, range, 1);
-		g_D3D.device->SetVertexShaderConstant(3, &material.Diffuse, 1);
-		g_D3D.device->SetVertexShaderConstant(4, &material.Emissive, 1);
+		g_D3D.device->SetVertexShaderConstantF(2, reinterpret_cast<const float*>(range), 1);
+		g_D3D.device->SetVertexShaderConstantF(3, reinterpret_cast<const float*>(&material.Diffuse), 1);
+		g_D3D.device->SetVertexShaderConstantF(4, reinterpret_cast<const float*>(&material.Emissive), 1);
 		const float fogPosition[4] = { position.x, position.y, position.z, 0.0f };
-		g_D3D.device->SetVertexShaderConstant(40, fogPosition, 1);
+		g_D3D.device->SetVertexShaderConstantF(40, reinterpret_cast<const float*>(fogPosition), 1);
 		const float scale[4] = { 1.0f, float(1.0 / double(thickness)),
 			0.0066666668f, 0.0034482759f };
-		return g_D3D.device->SetVertexShaderConstant(41, scale, 1);
+		return g_D3D.device->SetVertexShaderConstantF(41, reinterpret_cast<const float*>(scale), 1);
 	}
 }
 
@@ -66,7 +66,7 @@ HRESULT Gfx_RS_Base_HFog_FOW::Initialize()
 	if (g_RSBaseHeightFogFOWState.effect) return S_OK;
 	ID3DXBuffer* errors;
 	HRESULT result;
-	result = D3DXCreateEffect(g_D3D.device, GFX_RS_BASE_HFOG_FOW_SOURCE, sizeof(GFX_RS_BASE_HFOG_FOW_SOURCE) - 1,
+	result = Gfx_CreateDX9Effect(g_D3D.device, GFX_RS_BASE_HFOG_FOW_SOURCE, sizeof(GFX_RS_BASE_HFOG_FOW_SOURCE) - 1,
 		&g_RSBaseHeightFogFOWState.effect, &errors);
 	if (SUCCEEDED(result))
 	{
@@ -88,7 +88,7 @@ HRESULT Gfx_RS_Base_HFog_FOW::Initialize()
 		g_RSBaseHeightFogFOWState.effect->SetMatrix("FOWmatrix", &identity);
 		g_RSBaseHeightFogFOWState.effect->SetTexture("FOW", NULL);
 		g_RSBaseHeightFogFOWState.effect->SetDword("bZEnable", 1);
-		D3DXTECHNIQUE_DESC selected;
+		Gfx_DX9TechniqueDesc selected;
 		result = g_RSBaseHeightFogFOWState.effect->FindNextValidTechnique(g_RSBaseHeightFogFOWState.technique, &selected);
 		if (SUCCEEDED(result))
 		{
@@ -207,7 +207,7 @@ HRESULT Gfx_RS_Base_HFog_FOW::SetMaterial(Gfx_Material* material, DWORD fogBits)
 		Gfx_Texture* texture = g_TextureManager->Lookup(fog->value44);
 		if (texture)
 		{
-			IDirect3DTexture8* frame = texture->frameCount > 0 ? texture->frames[0].texture : NULL;
+			IDirect3DTexture9* frame = texture->frameCount > 0 ? texture->frames[0].texture : NULL;
 			g_RSBaseHeightFogFOWState.effect->SetTexture("HFog", frame);
 		}
 		else
@@ -221,7 +221,7 @@ HRESULT Gfx_RS_Base_HFog_FOW::SetMaterial(Gfx_Material* material, DWORD fogBits)
 		g_RSBaseHeightFogFOWState.effect->SetTexture("HFog", NULL);
 		JE::LogDebugString("Gfx_RS_Base_HFog_FOW: Height Fog map not created!");
 	}
-	IDirect3DTexture8* fowTexture = g_GfxSystem->FogOfWarRenderTexture();
+	IDirect3DTexture9* fowTexture = g_GfxSystem->FogOfWarRenderTexture();
 	g_RSBaseHeightFogFOWState.effect->SetTexture("FOW", fowTexture);
 	g_RSBaseHeightFogFOWState.effect->SetDword("FOWcop", fowTexture ? 4 : 1);
 	g_RSBaseHeightFogFOWState.effect->SetDword("FOWaop", fowTexture ? 2 : 1);
@@ -237,7 +237,7 @@ HRESULT Gfx_RS_Base_HFog_FOW::SetMaterial(Gfx_Material* material, DWORD fogBits)
 	g_RSBaseHeightFogFOWState.effect->SetDword("DiffuseSource", material->flagB8 != 0);
 	g_RSBaseHeightFogFOWState.effect->SetDword("Bcop", colorOperation);
 	g_RSBaseHeightFogFOWState.effect->SetDword("Baop", alphaOperation);
-	D3DMATERIAL8 values;
+	D3DMATERIAL9 values;
 	std::memcpy(&values, &material->values, sizeof(values));
 	g_D3D.device->SetMaterial(&values);
 	if (useRGB || useAlpha)
@@ -284,7 +284,7 @@ HRESULT Gfx_RS_Base_HFog_FOW::SetMaterial(Gfx_Material* material, DWORD fogBits)
 	else g_D3D.SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, 0);
 	if (g_RSBaseHeightFogFOWState.techniqueChanged)
 	{
-		D3DXTECHNIQUE_DESC selected;
+		Gfx_DX9TechniqueDesc selected;
 		result = g_RSBaseHeightFogFOWState.effect->FindNextValidTechnique(g_RSBaseHeightFogFOWState.technique, &selected);
 		if (FAILED(result))
 			JE::FatalError("Gfx_RS_Base_HFog_FOW::SetMaterial - Failed to find valid technique (%x)\n", result);

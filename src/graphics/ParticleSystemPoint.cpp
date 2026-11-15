@@ -2,7 +2,7 @@
 #include "ParticleSystemOrdering.hpp"
 #include "ModelNode.hpp"
 #include "PacketData.hpp"
-#include <d3dx8mesh.h>
+#include "d3dx9mesh.h"
 #include <new>
 #include <stdlib.h>
 

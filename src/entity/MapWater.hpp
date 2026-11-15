@@ -1,7 +1,7 @@
 #pragma once
 
 #include "graphics/G3DModel.hpp"
-#include <d3dx8.h>
+#include "d3dx9.h"
 #include <string>
 #include <cstddef>
 

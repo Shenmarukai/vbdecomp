@@ -36,7 +36,7 @@ Gfx_Light::~Gfx_Light()
 {
 }
 
-D3DLIGHT8* Gfx_InitLightDescriptor(D3DLIGHT8* output, D3DLIGHTTYPE type,
+D3DLIGHT9* Gfx_InitLightDescriptor(D3DLIGHT9* output, D3DLIGHTTYPE type,
 	float diffuseRed, float diffuseGreen, float diffuseBlue,
 	float specularRed, float specularGreen, float specularBlue,
 	float ambientRed, float ambientGreen, float ambientBlue,

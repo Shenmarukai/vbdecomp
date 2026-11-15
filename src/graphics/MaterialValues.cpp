@@ -1,7 +1,7 @@
 #include "Material.hpp"
 #include "../diagnostics/DebugOutput.hpp"
 
-void Gfx_Material::SetValues(const D3DMATERIAL8& source)
+void Gfx_Material::SetValues(const D3DMATERIAL9& source)
 {
 	values = source;
 	values.Ambient = values.Diffuse;

@@ -1,7 +1,7 @@
 #include "Texture.hpp"
 #include "D3DState.hpp"
 #include "../JE.hpp"
-#include <dxerr8.h>
+#include "DX9Errors.hpp"
 
 HRESULT Gfx_Texture::CreateTexture(UINT width, UINT height, UINT levels,
 	D3DFORMAT format, D3DPOOL pool, DWORD usage, int frame)
@@ -12,7 +12,7 @@ HRESULT Gfx_Texture::CreateTexture(UINT width, UINT height, UINT levels,
 		if (!frames[frame].texture)
 		{
 			result = g_D3D.device->CreateTexture(width, height, levels, usage, format,
-				pool, &frames[frame].texture);
+				pool, &frames[frame].texture, nullptr);
 			if (SUCCEEDED(result)) UpdateMetadata();
 			else JE::LogDebugString("Gfx_Texture::CreateTexture() failed (%x %s)\n", result,
 				DXGetErrorDescription8A(result));
@@ -43,11 +43,11 @@ Gfx_Texture* Gfx_Texture::CloneDefaultToSystem()
 					frames[frame].mipCount, frames[frame].format, D3DPOOL_SYSTEMMEM, 0, frame);
 				for (UINT level = 0; level < frames[frame].mipCount; ++level)
 				{
-					IDirect3DSurface8* source = NULL;
-					IDirect3DSurface8* destination = NULL;
+					IDirect3DSurface9* source = NULL;
+					IDirect3DSurface9* destination = NULL;
 					frames[frame].texture->GetSurfaceLevel(level, &source);
 					copy->frames[frame].texture->GetSurfaceLevel(level, &destination);
-					g_D3D.device->CopyRects(source, NULL, 0, destination, NULL);
+					D3DXLoadSurfaceFromSurface(destination, NULL, NULL, source, NULL, NULL, D3DX_FILTER_NONE, 0);
 					if (source) { source->Release(); source = NULL; }
 					if (destination) { destination->Release(); destination = NULL; }
 				}

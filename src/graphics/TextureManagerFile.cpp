@@ -2,7 +2,7 @@
 #include "Texture.hpp"
 #include "CubeTexture.hpp"
 #include "../diagnostics/DebugOutput.hpp"
-#include <dxerr8.h>
+#include "DX9Errors.hpp"
 #include <stdio.h>
 #include <ddraw.h>
 

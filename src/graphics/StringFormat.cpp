@@ -2,7 +2,7 @@
 #include "VfxParameters.hpp"
 #include "VfxValueOwners.hpp"
 #include <windows.h>
-#include <d3dx8.h>
+#include "d3dx9.h"
 #include <cstdarg>
 #include <cstdlib>
 #include <cmath>

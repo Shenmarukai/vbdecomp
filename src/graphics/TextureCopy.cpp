@@ -1,8 +1,8 @@
 #include "Texture.hpp"
 #include "D3DState.hpp"
 #include "../JE.hpp"
-#include <d3dx8.h>
-#include <dxerr8.h>
+#include "d3dx9.h"
+#include "DX9Errors.hpp"
 
 HRESULT Gfx_Texture::CreateSystemTexture(std::string textureName, UINT width, UINT height,
 	UINT levels, D3DFORMAT format, int frame)
@@ -21,8 +21,8 @@ BYTE Gfx_Texture::CopyRect(UINT destinationMip, const RECT* destinationRect,
 		|| destinationFrame < 0 || destinationFrame >= frameCount) return 0;
 	// Original output storage reuses the source-mip and source-owner input slots.
 	// Preserve their bits if GetSurfaceLevel fails without writing its output.
-	IDirect3DSurface8* sourceSurface = reinterpret_cast<IDirect3DSurface8*>(sourceMip);
-	IDirect3DSurface8* destinationSurface = reinterpret_cast<IDirect3DSurface8*>(source);
+	IDirect3DSurface9* sourceSurface = reinterpret_cast<IDirect3DSurface9*>(sourceMip);
+	IDirect3DSurface9* destinationSurface = reinterpret_cast<IDirect3DSurface9*>(source);
 	BYTE copied = 1;
 	HRESULT result = source->frames[sourceFrame].texture->GetSurfaceLevel(sourceMip, &sourceSurface);
 	if (FAILED(result))

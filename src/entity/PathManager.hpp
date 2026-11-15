@@ -1,14 +1,10 @@
 #pragma once
 
-#include <windows.h>
-#include <d3dx8math.h>
-#include <list>
-#include <vector>
+#include "d3dx9math.h"
 #include "MapGrid.hpp"
 
 // VC7 hash container.
-
-#include <hash_map>
+//#include <hash_map>
 
 namespace JE
 {
@@ -40,7 +36,8 @@ namespace JE
 			return PathPointHash()(left) == PathPointHash()(right);
 		}
 	};
-	typedef std::hash_multimap<PathPoint, PathNode*, PathPointHash> PathNodeLookup;
+	//typedef std::hash_multimap<PathPoint, PathNode*, PathPointHash> PathNodeLookup;
+	typedef std::unordered_multimap<PathPoint, PathNode*, PathPointHash, PathPointHashEqual> PathNodeLookup;
 	struct PathRequest
 	{
 		PathRequest(Entity* owner, D3DXVECTOR3 destination, BYTE adjustGoal,

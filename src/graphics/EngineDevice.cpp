@@ -16,7 +16,7 @@ BYTE Gfx_Engine::CreateDevice(HWND owner, UINT adapter, UINT device, UINT mode,
 	if (FAILED(g_D3D.CreateDevice(owner, adapter, device, mode, windowed, flag))) return 0;
 	g_BufferManager->InitializeStreams(g_D3D.currentDevice->guardBand == 0);
 	Gfx_InitializeRenderStyles(value44);
-	D3DVIEWPORT8 descriptor;
+	D3DVIEWPORT9 descriptor;
 	descriptor.X = 0;
 	descriptor.Y = 0;
 	descriptor.Width = g_D3D.currentMode->display.Width;
@@ -139,7 +139,7 @@ void Gfx_Engine::SetVerticalSync(BYTE value)
 	{
 		ReleaseVideoResources();
 		D3DPRESENT_PARAMETERS parameters = g_D3D.presentation;
-		parameters.FullScreen_PresentationInterval = value ? D3DPRESENT_INTERVAL_ONE : D3DPRESENT_INTERVAL_IMMEDIATE;
+		parameters.PresentationInterval = value ? D3DPRESENT_INTERVAL_ONE : D3DPRESENT_INTERVAL_IMMEDIATE;
 		g_D3D.ResetDevice(&parameters);
 		RestoreVideoResources();
 	}
@@ -156,7 +156,7 @@ void Gfx_Engine::SetMode(DWORD mode)
 		Gfx_Viewport* viewport = defaultViewport;
 		const DWORD actualWidth = width ? width : viewport->viewport.Width;
 		const DWORD actualHeight = height ? height : viewport->viewport.Height;
-		D3DVIEWPORT8 descriptor = { 0, 0, actualWidth, actualHeight, 0.0f, 1.0f };
+		D3DVIEWPORT9 descriptor = { 0, 0, actualWidth, actualHeight, 0.0f, 1.0f };
 		viewport->SetViewport(descriptor);
 	}
 	if (g_D3D.currentMode->stencil) defaultViewport->clearFlags |= D3DCLEAR_STENCIL;
@@ -165,7 +165,7 @@ void Gfx_Engine::SetMode(DWORD mode)
 		Gfx_Viewport* viewport = postViewport;
 		const DWORD actualWidth = width ? width : viewport->viewport.Width;
 		const DWORD actualHeight = height ? height : viewport->viewport.Height;
-		D3DVIEWPORT8 descriptor = { 0, 0, actualWidth, actualHeight, 0.0f, 1.0f };
+		D3DVIEWPORT9 descriptor = { 0, 0, actualWidth, actualHeight, 0.0f, 1.0f };
 		viewport->SetViewport(descriptor);
 	}
 }
@@ -183,7 +183,7 @@ void Gfx_Engine::SetWindowMode(DWORD width, DWORD height, BYTE windowed, BYTE co
 		Gfx_Viewport* viewport = defaultViewport;
 		const DWORD actualWidth = width ? width : viewport->viewport.Width;
 		const DWORD actualHeight = height ? height : viewport->viewport.Height;
-		D3DVIEWPORT8 descriptor = { 0, 0, actualWidth, actualHeight, 0.0f, 1.0f };
+		D3DVIEWPORT9 descriptor = { 0, 0, actualWidth, actualHeight, 0.0f, 1.0f };
 		viewport->SetViewport(descriptor);
 	}
 	if (g_D3D.currentMode->stencil) defaultViewport->clearFlags |= D3DCLEAR_STENCIL;
@@ -192,7 +192,7 @@ void Gfx_Engine::SetWindowMode(DWORD width, DWORD height, BYTE windowed, BYTE co
 		Gfx_Viewport* viewport = postViewport;
 		const DWORD actualWidth = width ? width : viewport->viewport.Width;
 		const DWORD actualHeight = height ? height : viewport->viewport.Height;
-		D3DVIEWPORT8 descriptor = { 0, 0, actualWidth, actualHeight, 0.0f, 1.0f };
+		D3DVIEWPORT9 descriptor = { 0, 0, actualWidth, actualHeight, 0.0f, 1.0f };
 		viewport->SetViewport(descriptor);
 	}
 }

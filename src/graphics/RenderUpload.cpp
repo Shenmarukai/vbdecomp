@@ -29,15 +29,15 @@ void Gfx_RenderManager::Upload(UINT pass, BYTE shadowOnly)
 				UINT stride = first->mesh->vertexStride;
 				UINT count = first->mesh->vertexCount;
 				Gfx_StreamingVertexBuffer* vertexStream = g_BufferManager->vertexStream;
-				BYTE* destination = 0;
+				void* destination = 0;
 				UINT vertexBase;
 				if (SUCCEEDED(vertexStream->Lock(count, stride, &destination, &vertexBase, 0)))
 				{
 					std::memcpy(destination, first->mesh->vertices, count * stride);
 					vertexStream->buffer->Unlock();
-					IDirect3DVertexBuffer8* buffer = vertexStream->buffer;
+					IDirect3DVertexBuffer9* buffer = vertexStream->buffer;
 					++g_D3D.statistics[9];
-					g_D3D.device->SetStreamSource(0, buffer, stride);
+					g_D3D.device->SetStreamSource(0, buffer, 0, stride);
 					// Reload this same first node's mesh after the SDK callback.
 					Gfx_MeshData* mesh = first->mesh;
 					const void* source = reinterpret_cast<const void*>(mesh->value10);
@@ -45,14 +45,14 @@ void Gfx_RenderManager::Upload(UINT pass, BYTE shadowOnly)
 					{
 						UINT indexCount = mesh->value24;
 						UINT indexStride = mesh->value20;
-						BYTE* indices = 0;
+						void* indices = 0;
 						UINT indexBase;
 						if (SUCCEEDED(indexStream->Lock(indexCount, &indices, &indexBase, 0)))
 						{
 							std::memcpy(indices, source, indexCount * indexStride);
 							indexStream->buffer->Unlock();
 							group->indexBase = indexBase;
-							g_D3D.device->SetIndices(indexStream->buffer, vertexBase);
+							g_D3D.SetIndices(indexStream->buffer, vertexBase);
 						}
 						// Failure deliberately retains the previous indexBase/binding.
 					}

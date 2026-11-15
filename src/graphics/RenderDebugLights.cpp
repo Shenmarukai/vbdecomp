@@ -33,7 +33,7 @@ void Gfx_RenderManager::RenderDebugLights()
 	DWORD remaining = DWORD(debugLights.size());
 	if (!remaining) return;
 	Gfx_StreamingVertexBuffer* stream = g_BufferManager->vertexStream;
-	BYTE* data = NULL;
+	void* data = NULL;
 	std::map<Gfx_Light*, DWORD>::iterator entry = debugLights.begin();
 	if (g_GfxSystem->Lighting()) g_D3D.SetRenderState(D3DRS_LIGHTING, 0);
 	g_D3D.SetRenderState(D3DRS_ZENABLE, 0);
@@ -49,8 +49,8 @@ void Gfx_RenderManager::RenderDebugLights()
 	g_D3D.SetRenderState(D3DRS_POINTSCALE_B, 0);
 	g_D3D.SetRenderState(D3DRS_POINTSCALE_C, 0x3F800000);
 	++g_D3D.statistics[9];
-	g_D3D.device->SetStreamSource(0, stream->buffer, 16);
-	g_D3D.device->SetVertexShader(D3DFVF_XYZ | D3DFVF_DIFFUSE);
+	g_D3D.device->SetStreamSource(0, stream->buffer, 0, 16);
+	g_D3D.device->SetFVF(D3DFVF_XYZ | D3DFVF_DIFFUSE);
 	g_D3D.SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_DISABLE);
 	g_D3D.SetTransform(D3DTS_WORLD, &g_D3D.identity);
 	do

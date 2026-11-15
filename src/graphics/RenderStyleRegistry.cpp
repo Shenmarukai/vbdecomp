@@ -378,87 +378,87 @@ void Gfx_ReleaseRenderStyles()
 void Gfx_NotifyRenderStylesLost()
 {
 	{
-		ID3DXEffect* effect = g_RSBaseState.effect; //0070BBBC,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSBaseState.effect; //0070BBBC,read after prior callback.
 		if (effect) effect->OnLostDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSBaseLightmapState.normal; //0070BBDC,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSBaseLightmapState.normal; //0070BBDC,read after prior callback.
 		if (effect) effect->OnLostDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSBaseLightmapState.factored; //0070BBE0,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSBaseLightmapState.factored; //0070BBE0,read after prior callback.
 		if (effect) effect->OnLostDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSBaseEmissiveState.effect; //0070BC00,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSBaseEmissiveState.effect; //0070BC00,read after prior callback.
 		if (effect) effect->OnLostDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSBaseHeightFogState.effect; //0070BC20,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSBaseHeightFogState.effect; //0070BC20,read after prior callback.
 		if (effect) effect->OnLostDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSBaseLightmapHeightFogState.normal; //0070BC40,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSBaseLightmapHeightFogState.normal; //0070BC40,read after prior callback.
 		if (effect) effect->OnLostDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSBaseLightmapHeightFogState.factored; //0070BC44,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSBaseLightmapHeightFogState.factored; //0070BC44,read after prior callback.
 		if (effect) effect->OnLostDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSBaseFOWState.normal; //0070BC64,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSBaseFOWState.normal; //0070BC64,read after prior callback.
 		if (effect) effect->OnLostDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSBaseFOWState.factored; //0070BC68,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSBaseFOWState.factored; //0070BC68,read after prior callback.
 		if (effect) effect->OnLostDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSBaseLightmapFogOfWarState.effect; //0070BC88,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSBaseLightmapFogOfWarState.effect; //0070BC88,read after prior callback.
 		if (effect) effect->OnLostDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSBaseHeightFogFOWState.effect; //0070BCA8,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSBaseHeightFogFOWState.effect; //0070BCA8,read after prior callback.
 		if (effect) effect->OnLostDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSBaseLightmapHeightFogFOWState.normal; //0070BCC8,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSBaseLightmapHeightFogFOWState.normal; //0070BCC8,read after prior callback.
 		if (effect) effect->OnLostDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSBaseLightmapHeightFogFOWState.factored; //0070BCCC,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSBaseLightmapHeightFogFOWState.factored; //0070BCCC,read after prior callback.
 		if (effect) effect->OnLostDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSExpandState.effect; //0070BCEC,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSExpandState.effect; //0070BCEC,read after prior callback.
 		if (effect) effect->OnLostDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSSKBaseLightmapState.normal; //0070BD08,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSSKBaseLightmapState.normal; //0070BD08,read after prior callback.
 		if (effect) effect->OnLostDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSSKBaseLightmapState.factored; //0070BD0C,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSSKBaseLightmapState.factored; //0070BD0C,read after prior callback.
 		if (effect) effect->OnLostDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSSKBaseLightmapHeightFogState.normal; //0070BD2C,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSSKBaseLightmapHeightFogState.normal; //0070BD2C,read after prior callback.
 		if (effect) effect->OnLostDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSSKBaseLightmapHeightFogState.factored; //0070BD30,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSSKBaseLightmapHeightFogState.factored; //0070BD30,read after prior callback.
 		if (effect) effect->OnLostDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSSKBaseLightmapFOWState.effect; //0070BD50,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSSKBaseLightmapFOWState.effect; //0070BD50,read after prior callback.
 		if (effect) effect->OnLostDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSSKBaseLightmapHeightFogFOWState.normal; //0070BD70,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSSKBaseLightmapHeightFogFOWState.normal; //0070BD70,read after prior callback.
 		if (effect) effect->OnLostDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSSKBaseLightmapHeightFogFOWState.factored; //0070BD74,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSSKBaseLightmapHeightFogFOWState.factored; //0070BD74,read after prior callback.
 		if (effect) effect->OnLostDevice();
 	}
 }
@@ -468,87 +468,87 @@ void Gfx_NotifyRenderStylesLost()
 void Gfx_NotifyRenderStylesReset()
 {
 	{
-		ID3DXEffect* effect = g_RSBaseState.effect; //0070BBBC,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSBaseState.effect; //0070BBBC,read after prior callback.
 		if (effect) effect->OnResetDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSBaseLightmapState.normal; //0070BBDC,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSBaseLightmapState.normal; //0070BBDC,read after prior callback.
 		if (effect) effect->OnResetDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSBaseLightmapState.factored; //0070BBE0,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSBaseLightmapState.factored; //0070BBE0,read after prior callback.
 		if (effect) effect->OnResetDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSBaseEmissiveState.effect; //0070BC00,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSBaseEmissiveState.effect; //0070BC00,read after prior callback.
 		if (effect) effect->OnResetDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSBaseHeightFogState.effect; //0070BC20,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSBaseHeightFogState.effect; //0070BC20,read after prior callback.
 		if (effect) effect->OnResetDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSBaseLightmapHeightFogState.normal; //0070BC40,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSBaseLightmapHeightFogState.normal; //0070BC40,read after prior callback.
 		if (effect) effect->OnResetDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSBaseLightmapHeightFogState.factored; //0070BC44,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSBaseLightmapHeightFogState.factored; //0070BC44,read after prior callback.
 		if (effect) effect->OnResetDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSBaseFOWState.normal; //0070BC64,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSBaseFOWState.normal; //0070BC64,read after prior callback.
 		if (effect) effect->OnResetDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSBaseFOWState.factored; //0070BC68,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSBaseFOWState.factored; //0070BC68,read after prior callback.
 		if (effect) effect->OnResetDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSBaseLightmapFogOfWarState.effect; //0070BC88,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSBaseLightmapFogOfWarState.effect; //0070BC88,read after prior callback.
 		if (effect) effect->OnResetDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSBaseHeightFogFOWState.effect; //0070BCA8,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSBaseHeightFogFOWState.effect; //0070BCA8,read after prior callback.
 		if (effect) effect->OnResetDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSBaseLightmapHeightFogFOWState.normal; //0070BCC8,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSBaseLightmapHeightFogFOWState.normal; //0070BCC8,read after prior callback.
 		if (effect) effect->OnResetDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSBaseLightmapHeightFogFOWState.factored; //0070BCCC,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSBaseLightmapHeightFogFOWState.factored; //0070BCCC,read after prior callback.
 		if (effect) effect->OnResetDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSExpandState.effect; //0070BCEC,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSExpandState.effect; //0070BCEC,read after prior callback.
 		if (effect) effect->OnResetDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSSKBaseLightmapState.normal; //0070BD08,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSSKBaseLightmapState.normal; //0070BD08,read after prior callback.
 		if (effect) effect->OnResetDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSSKBaseLightmapState.factored; //0070BD0C,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSSKBaseLightmapState.factored; //0070BD0C,read after prior callback.
 		if (effect) effect->OnResetDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSSKBaseLightmapHeightFogState.normal; //0070BD2C,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSSKBaseLightmapHeightFogState.normal; //0070BD2C,read after prior callback.
 		if (effect) effect->OnResetDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSSKBaseLightmapHeightFogState.factored; //0070BD30,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSSKBaseLightmapHeightFogState.factored; //0070BD30,read after prior callback.
 		if (effect) effect->OnResetDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSSKBaseLightmapFOWState.effect; //0070BD50,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSSKBaseLightmapFOWState.effect; //0070BD50,read after prior callback.
 		if (effect) effect->OnResetDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSSKBaseLightmapHeightFogFOWState.normal; //0070BD70,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSSKBaseLightmapHeightFogFOWState.normal; //0070BD70,read after prior callback.
 		if (effect) effect->OnResetDevice();
 	}
 	{
-		ID3DXEffect* effect = g_RSSKBaseLightmapHeightFogFOWState.factored; //0070BD74,read after prior callback.
+		Gfx_DX9Effect* effect = g_RSSKBaseLightmapHeightFogFOWState.factored; //0070BD74,read after prior callback.
 		if (effect) effect->OnResetDevice();
 	}
 }

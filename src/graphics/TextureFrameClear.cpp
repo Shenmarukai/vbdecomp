@@ -7,7 +7,7 @@ BYTE Gfx_Texture::ClearFrame(int frame)
 		return 0;
 	}
 	frames[frame].name.erase();
-	IDirect3DTexture8*& texture = frames[frame].texture;
+	IDirect3DTexture9*& texture = frames[frame].texture;
 	if (texture)
 	{
 		texture->Release();

@@ -1,5 +1,5 @@
 #include "OctreeShape.hpp"
-#include <d3dx8math.h>
+#include "d3dx9math.h"
 #include <math.h>
 #include <stdexcept>
 #include <cstring>

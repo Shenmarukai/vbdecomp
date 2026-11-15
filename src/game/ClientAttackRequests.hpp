@@ -2,7 +2,7 @@
 
 #include <winsock2.h>
 #include <windows.h>
-#include <d3dx8.h>
+#include "d3dx9.h"
 
 namespace JE { namespace Net { class Client; class Packet; } }
 

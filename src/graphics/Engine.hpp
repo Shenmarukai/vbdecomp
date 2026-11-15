@@ -1,8 +1,8 @@
 #pragma once
 
 #include "SystemInterface.hpp"
-#include <d3dfont.h>
-#include <d3dx8math.h>
+#include "DX9Font.hpp"
+#include "d3dx9math.h"
 #include <list>
 #include <string>
 
@@ -150,10 +150,10 @@ public:
 	virtual BYTE AutomapReady(); //100,5C0350; actual requested+68, not complete+69.
 	virtual Gfx_Texture* AutomapMaskTexture(); //101,5C0360.
 	virtual Gfx_Texture* VisibleMaskTexture(); //102,5C0370.
-	virtual IDirect3DTexture8* FogOfWarRenderTexture(); //103,5C0380.
+	virtual IDirect3DTexture9* FogOfWarRenderTexture(); //103,5C0380.
 	virtual void SetGrayColor204(float intensity); //104,5BEB40.
 	virtual void SetGrayColor208(float intensity); //105,5BEBB0.
-	virtual IDirect3DTexture8* ProjectedShadowRenderTexture(); //106,5C0390.
+	virtual IDirect3DTexture9* ProjectedShadowRenderTexture(); //106,5C0390.
 	virtual void GetProjectedShadowDimensions(UINT* width, UINT* height); //107,5C03A0.
 	virtual void SetString248(const char* value); //108,5C0C00.
 	virtual void PrintTexturePools(); //119,5C0430->51F6D0.
@@ -196,18 +196,18 @@ public:
 	D3DXVECTOR3 levelMinimum, levelMaximum; //+74/+80.
 	float levelWidth, levelHeight; //+8C/+90.
 	UINT maskWidth, maskHeight; //+94/+98.
-	IDirect3DSurface8* automapRenderTarget; //+9C; owned COM reference.
-	IDirect3DSurface8* automapDepthSurface; //+A0; owned COM reference.
+	IDirect3DSurface9* automapRenderTarget; //+9C; owned COM reference.
+	IDirect3DSurface9* automapDepthSurface; //+A0; owned COM reference.
 	DWORD automapTexture; //+A4; released by TextureManager.Clear, not a separate shutdown DeleteTexture.
 	D3DFORMAT colorFormat, depthFormat; //+A8/+AC; ctor writes0.
 	std::string automapTextureName; //+B0; actual normal empty-string lifetime.
 	DWORD exploredGray, visibleGray; //+CC/+D0, FF808080/FFFFFFFF.
 	DWORD automapMaskHandle, visibleMaskHandle; //+D4/+D8; owning texture references.
-	IDirect3DTexture8* fogOfWarTarget; //+DC; owned COM reference.
+	IDirect3DTexture9* fogOfWarTarget; //+DC; owned COM reference.
 	UINT shadowWidth, shadowHeight; //+E0/+E4.
 	BYTE projectedShadows; // +E8; raw flag selecting the actual producer.
 	DWORD projectedShadowTexture; //+EC; E9..EB remains unwritten padding.
-	IDirect3DTexture8* projectedShadowTarget; //+F0; owned COM reference.
+	IDirect3DTexture9* projectedShadowTarget; //+F0; owned COM reference.
 	DWORD textureF4; //+F4; owning handle, exact producer role unresolved.
 	std::string mapName; //+F8; actual normal string lifetime.
 	CD3DFont statisticsFont; //+114..78B; supplied unmodified ANSI SDK class, Arial12/flags0.

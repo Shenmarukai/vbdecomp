@@ -31,7 +31,7 @@ public:
 		const std::string* names, const DWORD* indexCounts,
 		const DWORD* primitiveCounts, const void* const* indices); // 0x50E4F0.
 	void SetMaterial(DWORD index, DWORD style, const std::string& name, DWORD unused, DWORD blend,
-		const D3DMATERIAL8& values, DWORD textures, const std::string* names,
+		const D3DMATERIAL9& values, DWORD textures, const std::string* names,
 		const DWORD* handles, BYTE flagB9, BYTE flagBA); // 0x50E690; unconsumed return omitted.
 	DWORD value24;
 	BYTE flag28, flag29;

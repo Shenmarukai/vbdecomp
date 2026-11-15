@@ -1,6 +1,6 @@
 #pragma once
 
-#include <d3d8.h>
+#include "d3d9.h"
 
 // Global class identities are present in the original RTTI. The three real
 // virtual slots are deleting destruction, Create and Release; Lock is not virtual.
@@ -13,7 +13,7 @@ public:
 	virtual void Release(); // 0x505380; void source hypothesis, no observed return consumer.
 	HRESULT SetStreamSource(UINT stream, UINT stride); //4900F0; captures buffer before global counter publication.
 
-	IDirect3DVertexBuffer8* buffer; // +04; owned COM reference.
+	IDirect3DVertexBuffer9* buffer; // +04; owned COM reference.
 	UINT capacity; // +08; requested byte capacity, published before device creation.
 	DWORD fvf; // +0C.
 	UINT vertexStride; // +10; separately assigned by the stored-buffer upload API.
@@ -27,7 +27,7 @@ public:
 	virtual HRESULT Create(UINT length, DWORD usage, DWORD fvf, D3DPOOL pool); // 0x505600.
 	virtual void Release(); // 0x5053B0; clears the streaming cursor first.
 	bool CanFit(UINT count, UINT stride); // 0x5053C0; signed comparison of wrapped results.
-	HRESULT Lock(UINT count, UINT stride, BYTE** output, UINT* base, BYTE discard); // 0x505400.
+	HRESULT Lock(UINT count, UINT stride, void** output, UINT* base, BYTE discard); // 0x505400.
 
 	UINT bytePosition; // +14; ceil-aligned by Lock to its incoming stride.
 };

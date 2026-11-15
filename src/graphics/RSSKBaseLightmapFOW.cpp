@@ -152,7 +152,7 @@ HRESULT Gfx_RS_SK_B_LM_FOW::Initialize()
 	if (!g_RSSKBaseLightmapFOWState.effect)
 	{
 		ID3DXBuffer* errors;
-		result = D3DXCreateEffect(g_D3D.device, GFX_RS_SK_B_LM_FOW_SOURCE, sizeof(GFX_RS_SK_B_LM_FOW_SOURCE)-1,
+		result = Gfx_CreateDX9Effect(g_D3D.device, GFX_RS_SK_B_LM_FOW_SOURCE, sizeof(GFX_RS_SK_B_LM_FOW_SOURCE)-1,
 			&g_RSSKBaseLightmapFOWState.effect, &errors);
 		if (SUCCEEDED(result))
 		{
@@ -179,7 +179,7 @@ HRESULT Gfx_RS_SK_B_LM_FOW::Initialize()
 			g_RSSKBaseLightmapFOWState.effect->SetTexture("FOW", NULL);
 			g_RSSKBaseLightmapFOWState.effect->SetTexture("Base", NULL);
 			g_RSSKBaseLightmapFOWState.effect->SetTexture("LM", NULL);
-			D3DXTECHNIQUE_DESC selected;
+			Gfx_DX9TechniqueDesc selected;
 			result = g_RSSKBaseLightmapFOWState.effect->FindNextValidTechnique(g_RSSKBaseLightmapFOWState.technique, &selected);
 			if (SUCCEEDED(result))
 			{
@@ -287,7 +287,7 @@ HRESULT Gfx_RS_SK_B_LM_FOW::SetMaterial(Gfx_Material* material, DWORD)
 			g_RSSKBaseLightmapFOWState.effect->SetTexture("Base", NULL);
 			JE::LogDebugString("Gfx_RS_SK_B_LM_FOW: NULL Base Texture handle\n");
 		}
-		IDirect3DTexture8* fog = g_GfxSystem->FogOfWarRenderTexture();
+		IDirect3DTexture9* fog = g_GfxSystem->FogOfWarRenderTexture();
 		if (fog)
 		{
 			g_RSSKBaseLightmapFOWState.effect->SetTexture("FOW", fog);
@@ -315,7 +315,7 @@ HRESULT Gfx_RS_SK_B_LM_FOW::SetMaterial(Gfx_Material* material, DWORD)
 		g_RSSKBaseLightmapFOWState.effect->SetDword("Baop", alphaOperation);
 		g_RSSKBaseLightmapFOWState.effect->SetDword("LMcop", lightmapColorOperation);
 		g_RSSKBaseLightmapFOWState.effect->SetDword("LMaop", lightmapAlphaOperation);
-		D3DMATERIAL8 values;
+		D3DMATERIAL9 values;
 		std::memcpy(&values, &material->values, sizeof(values));
 		g_D3D.device->SetMaterial(&values);
 		if (!useRGB && !useAlpha)
@@ -357,7 +357,7 @@ HRESULT Gfx_RS_SK_B_LM_FOW::SetMaterial(Gfx_Material* material, DWORD)
 		else g_D3D.SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, 0); //Actual stage0 quirk.
 		if (g_RSSKBaseLightmapFOWState.techniqueChanged)
 		{
-			D3DXTECHNIQUE_DESC selected;
+			Gfx_DX9TechniqueDesc selected;
 			result = g_RSSKBaseLightmapFOWState.effect->FindNextValidTechnique(g_RSSKBaseLightmapFOWState.technique, &selected);
 			if (SUCCEEDED(result))
 			{

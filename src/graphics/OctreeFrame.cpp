@@ -13,7 +13,7 @@ int Octree2Gfx::UpdateCamera(Gfx_Viewport* viewport)
 		}
 		Gfx_Camera* active = viewport->activeCamera;
 		D3DXMATRIX transform = active->transform;
-		D3DVIEWPORT8 descriptor = viewport->viewport;
+		D3DVIEWPORT9 descriptor = viewport->viewport;
 		D3DXMATRIX projection;
 		active->GetProjectionMatrix(projection);
 		float degrees = active->fieldOfViewY * 57.295776f;

@@ -70,7 +70,7 @@ namespace F3
 			float sx, sy; ::GUI::g_Manager.GetScale(sx, sy);
 			const LONG scaledWidth = LONG(static_cast<LONGLONG>(float(width) * sx));
 			const LONG scaledHeight = LONG(static_cast<LONGLONG>(float(height) * sy));
-			D3DVIEWPORT8 descriptor;
+			D3DVIEWPORT9 descriptor;
 			descriptor.X = DWORD(static_cast<LONGLONG>(float(x) * sx));
 			descriptor.Y = DWORD(static_cast<LONGLONG>(float(y) * sy));
 			descriptor.Width = scaledWidth ? scaledWidth : viewport->viewport.Width;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <d3dx8.h>
+#include "d3dx9.h"
 
 // Actual global RTTI identity and seven observed virtual operations. English
 // method names and unconsumed void returns are source hypotheses. No unused

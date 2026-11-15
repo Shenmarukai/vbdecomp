@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Octree.hpp"
-#include <d3dx8.h>
+#include "d3dx9.h"
 
 // Actual map camera (436 bytes on x86), independent of Gfx_Camera.
 class OCTREE_Camera

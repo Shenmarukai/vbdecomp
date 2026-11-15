@@ -76,7 +76,7 @@ void Gfx_ApplyLights(const std::list<Gfx_Light*>* lights, const D3DXVECTOR4* ext
 			{
 				if (!automap)
 				{
-					D3DLIGHT8 description;
+					D3DLIGHT9 description;
 					std::memcpy(&description, &light->light, sizeof(description));
 					g_D3D.device->SetLight(index, &description);
 					g_D3D.device->LightEnable(index, TRUE);
@@ -84,7 +84,7 @@ void Gfx_ApplyLights(const std::list<Gfx_Light*>* lights, const D3DXVECTOR4* ext
 				}
 				else if (!light->value44)
 				{
-					D3DLIGHT8 description;
+					D3DLIGHT9 description;
 					std::memcpy(&description, &light->light, sizeof(description));
 					g_D3D.device->SetLight(index, &description);
 					g_D3D.device->LightEnable(index, TRUE);
@@ -94,7 +94,7 @@ void Gfx_ApplyLights(const std::list<Gfx_Light*>* lights, const D3DXVECTOR4* ext
 		}
 		if (extra)
 		{
-			D3DLIGHT8 description;
+			D3DLIGHT9 description;
 			std::memset(&description, 0, sizeof(description));
 			description.Type = D3DLIGHT_DIRECTIONAL;
 			std::memcpy(&description.Ambient, extra, sizeof(description.Ambient));
@@ -110,7 +110,7 @@ void Gfx_ApplyLights(const std::list<Gfx_Light*>* lights, const D3DXVECTOR4* ext
 	}
 	else if (extra)
 	{
-		D3DLIGHT8 description;
+		D3DLIGHT9 description;
 		std::memset(&description, 0, sizeof(description));
 		std::memcpy(&description.Ambient, extra, sizeof(description.Ambient));
 		description.Type = D3DLIGHT_DIRECTIONAL;

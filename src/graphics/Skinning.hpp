@@ -1,7 +1,7 @@
 #pragma once
 
 #include <windows.h>
-#include <d3dx8.h>
+#include "d3dx9.h"
 
 // Descriptive name for the original six-word scratch owner; broader producers
 // and exact field meanings remain unresolved. No available library is replaced.

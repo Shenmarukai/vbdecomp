@@ -3,7 +3,7 @@
 #include "resources/ResourceMemoryStream.hpp"
 #include "WorldCollections.hpp"
 #include "amx.h"
-#include <d3dx8.h>
+#include "d3dx9.h"
 #include <vector>
 #include <set>
 #include <string>

@@ -18,7 +18,7 @@ HRESULT Gfx_BufferRecord::InitializeVertices(UINT count, UINT stride,
 	if (SUCCEEDED(result))
 	{
 		Gfx_VertexBuffer* wrapper = vertices;
-		BYTE* destination = 0;
+		void* destination = 0;
 		result = wrapper->buffer->Lock(0, 0, &destination, 0);
 		if (SUCCEEDED(result))
 		{
@@ -52,7 +52,7 @@ HRESULT Gfx_BufferRecord::InitializeIndices(UINT count, DWORD usage,
 	if (SUCCEEDED(result))
 	{
 		Gfx_IndexBuffer* wrapper = indices;
-		BYTE* destination = 0;
+		void* destination = 0;
 		result = wrapper->buffer->Lock(0, 0, &destination, 0);
 		if (SUCCEEDED(result))
 		{

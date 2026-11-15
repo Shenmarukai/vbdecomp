@@ -9,7 +9,7 @@ void Gfx_RenderManager::RenderSkins(UINT pass)
 	{
 		if (!g_D3D.currentDevice->vertexShader)
 		{
-			g_D3D.SetRenderState(D3DRS_SOFTWAREVERTEXPROCESSING, TRUE);
+			g_D3D.SetSoftwareVertexProcessing(TRUE);
 		}
 		g_D3D.SetRenderState(D3DRS_VERTEXBLEND, D3DVBF_DISABLE);
 		g_D3D.SetRenderState(D3DRS_SHADEMODE, D3DSHADE_FLAT);
@@ -29,7 +29,7 @@ void Gfx_RenderManager::RenderSkins(UINT pass)
 		// The hardware flag and owner are live: callbacks above may replace them.
 		if (!g_D3D.currentDevice->vertexShader)
 		{
-			g_D3D.SetRenderState(D3DRS_SOFTWAREVERTEXPROCESSING, FALSE);
+			g_D3D.SetSoftwareVertexProcessing(FALSE);
 		}
 		g_D3D.SetRenderState(D3DRS_SHADEMODE, D3DSHADE_GOURAUD);
 		g_D3D.SetRenderState(D3DRS_ZWRITEENABLE, TRUE);

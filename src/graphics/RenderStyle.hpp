@@ -1,7 +1,7 @@
 #pragma once
 
 #include <windows.h>
-#include <d3dx8.h>
+#include "d3dx9.h"
 #include <list>
 
 class Gfx_Material;
@@ -9,7 +9,7 @@ class Gfx_Light;
 class Gfx_TextureParameters;
 
 // Actual fourteen-slot proprietary style interface. Its Begin/End/Pass slots
-// wrap SDK effects; this object is never an ID3DXEffect layout or pointer.
+// wrap SDK effects; this object is never an Gfx_DX9Effect layout or pointer.
 class Gfx_RenderStyle
 {
 public:

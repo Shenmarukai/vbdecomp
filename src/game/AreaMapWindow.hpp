@@ -2,7 +2,7 @@
 #include "gui/Picture.hpp"
 #include "graphics/MeshData.hpp"
 #include "graphics/PacketData.hpp"
-#include <d3dx8.h>
+#include "d3dx9.h"
 #include <stddef.h>
 #include <list>
 #include <vector>

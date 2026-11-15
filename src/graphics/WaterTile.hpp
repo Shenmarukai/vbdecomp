@@ -2,7 +2,7 @@
 
 #include "ModelMesh.hpp"
 #include "PacketData.hpp"
-#include <d3dx8.h>
+#include "d3dx9.h"
 
 class G3D_Node;
 class G3D_WaterTile;

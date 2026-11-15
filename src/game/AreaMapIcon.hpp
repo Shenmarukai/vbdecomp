@@ -3,7 +3,7 @@
 #include "graphics/MeshData.hpp"
 #include "graphics/PacketData.hpp"
 #include "graphics/UIVertex.hpp"
-#include <d3dx8.h>
+#include "d3dx9.h"
 
 namespace GUI { class Label; }
 namespace JE { class AreaMapNote; }

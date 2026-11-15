@@ -1,6 +1,6 @@
 #pragma once
 
-#include <d3d8.h>
+#include "d3d9.h"
 
 class Gfx_IndexBuffer
 {
@@ -10,7 +10,7 @@ public:
 	virtual HRESULT Create(UINT length, DWORD usage, D3DFORMAT format, D3DPOOL pool); // 0x5054C0.
 	virtual void Release(); // 0x505510; void source hypothesis, no observed return consumer.
 
-	IDirect3DIndexBuffer8* buffer; // +04; owned COM reference.
+	IDirect3DIndexBuffer9* buffer; // +04; owned COM reference.
 	UINT capacity; // +08; requested byte capacity, published before device creation.
 	UINT indexStride; // +0C; copied from g_D3D.value0A4, not derived from format.
 };
@@ -22,7 +22,7 @@ public:
 	virtual ~Gfx_StreamingIndexBuffer(); // 0x5056B0.
 	virtual HRESULT Create(UINT length, DWORD usage, D3DFORMAT format, D3DPOOL pool); // 0x505670.
 	virtual void Release(); // 0x505690; clears both cursors and descriptors first.
-	HRESULT Lock(UINT count, BYTE** output, UINT* base, BYTE discard); // 0x505540.
+	HRESULT Lock(UINT count, void** output, UINT* base, BYTE discard); // 0x505540.
 
 	UINT bytePosition; // +10.
 	UINT indexPosition; // +14.

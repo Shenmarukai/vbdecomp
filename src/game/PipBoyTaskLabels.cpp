@@ -1,5 +1,6 @@
 // Implementation fragment: compiled once by PipBoyCompilation.cpp.
 #include "game/PipBoyInterface.hpp"
+#include "game/PipBoyNames.hpp" // need this include (Adam)
 #include <cstring>
 #include "gui/Label.hpp"
 #include "graphics/StringFormat.hpp"

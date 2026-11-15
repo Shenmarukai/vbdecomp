@@ -3,8 +3,8 @@
 #include "OctreeRender.hpp"
 #include "resources/ResourceMemoryStream.hpp"
 #include "diagnostics/DebugOutput.hpp"
-#include <d3dx8.h>
-#include <dxerr8.h>
+#include "d3dx9.h"
+#include "DX9Errors.hpp"
 #include <cstdlib>
 
 namespace JE

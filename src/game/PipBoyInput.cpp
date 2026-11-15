@@ -1,6 +1,7 @@
 // Implementation fragment: compiled once by PipBoyCompilation.cpp.
 #include <winsock2.h>
 #include "game/PipBoyInterface.hpp"
+#include "game/PipBoyNames.hpp" // need this include (Adam)
 #include "game/PipBoyAddNoteInterface.hpp"
 #include "game/AreaMapWindow.hpp"
 #include "game/AreaMapIcon.hpp"
@@ -18,14 +19,96 @@
 
 namespace F3
 {
-	static LONG AlarmNameIndex(const std::string& name); //44A840, single actual owner in PipBoyInterface.cpp.
-	static LONG TaskGroupIndex(const std::string&, LONG top); //44A880.
-	static LONG TaskEntryIndex(const std::string&, LONG top, LONG openCount, LONG closedCount); //44A8C0.
-	static LONG MapGroupIndex(const std::string&, LONG top); //44A940.
-	static LONG MapEntryIndex(const std::string&, LONG top, LONG count); //44A980.
-	static LONG MapModeIndex(const std::string&, LONG top); //44A9E0.
-	static LONG DownloadHolodiscIndex(const std::string&, LONG top); //44AA30.
-	static LONG DownloadVideoIndex(const std::string&, LONG top, LONG count); //44AA70.
+	//static LONG AlarmNameIndex(const std::string& name); //44A840, single actual owner in PipBoyInterface.cpp.
+	//static LONG TaskGroupIndex(const std::string&, LONG top); //44A880.
+	//static LONG TaskEntryIndex(const std::string&, LONG top, LONG openCount, LONG closedCount); //44A8C0.
+	//static LONG MapGroupIndex(const std::string&, LONG top); //44A940.
+	//static LONG MapEntryIndex(const std::string&, LONG top, LONG count); //44A980.
+	//static LONG MapModeIndex(const std::string&, LONG top); //44A9E0.
+	//static LONG DownloadHolodiscIndex(const std::string&, LONG top); //44AA30.
+	//static LONG DownloadVideoIndex(const std::string&, LONG top, LONG count); //44AA70.
+
+	// Adding duplicate definitions for these, for now
+	static LONG AlarmNameIndex(const std::string& name) //44A840, original private argument ABI remains unproved.
+	{
+		for (LONG index = 0; index < 14; ++index)
+			if (!_stricmp(name.c_str(), AlarmNames[index].name)) return AlarmNames[index].index;
+		return -1;
+	}
+
+	static LONG DownloadHolodiscIndex(const std::string& name, LONG top) //44AA30.
+	{
+		LONG row = 0;
+		while (_stricmp(name.c_str(), DownloadNames[row][0]))
+			if (++row >= 14) return -1;
+		if (row + top <= 0) return -1;
+		return row + top - 1;
+	}
+
+	static LONG DownloadVideoIndex(const std::string& name, LONG top, LONG count) //44AA70.
+	{
+		LONG row = 0;
+		while (_stricmp(name.c_str(), DownloadNames[row][1]))
+			if (++row >= 14) return -1;
+		const LONG selected = row + top;
+		if (count <= 0 || selected < 1 || selected >= count + 1) return -1;
+		return selected - 1;
+	}
+
+	static LONG TaskGroupIndex(const std::string& name, LONG top) //44A880.
+	{
+		LONG row = 0;
+		while (_stricmp(name.c_str(), TaskLabelNames[row][0]))
+			if (++row >= 14) return -1;
+		if (row + top <= 0) return -1;
+		return row + top - 1;
+	}
+
+	static LONG TaskEntryIndex(const std::string& name, LONG top, LONG openCount, LONG closedCount) //44A8C0.
+	{
+		LONG row = 0;
+		while (_stricmp(name.c_str(), TaskLabelNames[row][1]))
+			if (++row >= 14) return -1;
+		LONG selected = row + top;
+		if (openCount <= 0 || selected < 1 || selected > openCount)
+		{
+			if (closedCount <= 0) return -1;
+			const LONG gap = openCount <= 0 ? 0 : 2;
+			if (selected < gap + openCount + 1 || selected > gap + openCount + closedCount + 1)
+				return -1;
+			selected -= gap;
+		}
+		return selected - 1;
+	}
+
+	static LONG MapGroupIndex(const std::string& name, LONG top) //44A940.
+	{
+		LONG row = 0;
+		while (_stricmp(name.c_str(), MapLabelNames[row][0]))
+			if (++row >= 14) return -1;
+		if (row + top <= 0) return -1;
+		return row + top - 1;
+	}
+
+	static LONG MapEntryIndex(const std::string& name, LONG top, LONG count) //44A980.
+	{
+		LONG row = 0;
+		while (_stricmp(name.c_str(), MapLabelNames[row][1]))
+			if (++row >= 14) return -1;
+		const LONG selected = row + top;
+		if (count <= 0 || selected < 7 || selected >= count + 7) return -1;
+		return selected - 7;
+	}
+
+	static LONG MapModeIndex(const std::string& name, LONG top) //44A9E0.
+	{
+		LONG row = 0;
+		while (_stricmp(name.c_str(), MapLabelNames[row][1]))
+			if (++row >= 14) return 0;
+		const LONG selected = row + top;
+		if (selected < 0 || selected > 4) return 0;
+		return selected + 1;
+	}
 
 	void PipBoyInterface::HandleButtonInput(::GUI::Window* window, LONG eventType) //451B80.
 	{

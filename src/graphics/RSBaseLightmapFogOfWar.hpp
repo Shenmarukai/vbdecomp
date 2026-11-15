@@ -2,13 +2,13 @@
 
 #include "RenderStyle.hpp"
 #include "Material.hpp"
-#include <d3dx8effect.h>
+#include "DX9EffectCompat.hpp"
 
 // Original70BC84..70BCA3. Normal SDK/shared state; no old object overlay.
 struct Gfx_RS_B_LM_FOWState
 {
 	DWORD users;
-	ID3DXEffect* effect;
+	Gfx_DX9Effect* effect;
 	D3DXEFFECT_DESC description;
 	LPCSTR technique;
 	BYTE usesShader, techniqueChanged;

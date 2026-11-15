@@ -1,5 +1,5 @@
 #include "Texture.hpp"
-#include <dxerr8.h>
+#include "DX9Errors.hpp"
 #include "diagnostics/DebugOutput.hpp"
 #include <string.h>
 

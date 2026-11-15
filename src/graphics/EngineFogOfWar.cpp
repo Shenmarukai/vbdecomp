@@ -1,9 +1,10 @@
+#include "DX9RenderTarget.hpp"
 #include "Engine.hpp"
 #include "SurfaceRelease.hpp"
 #include "D3DState.hpp"
 #include "Texture.hpp"
 #include "diagnostics/DebugOutput.hpp"
-#include <dxerr8.h>
+#include "DX9Errors.hpp"
 
 namespace
 {
@@ -23,19 +24,19 @@ void Gfx_Engine::ProcessFogOfWar()
 		return;
 	}
 	Gfx_Texture* mask = AutomapMaskTexture();
-	IDirect3DTexture8* explored = mask->frameCount > 0 ? mask->frames[0].texture : NULL;
+	IDirect3DTexture9* explored = mask->frameCount > 0 ? mask->frames[0].texture : NULL;
 	mask = VisibleMaskTexture();
-	IDirect3DTexture8* visible = mask->frameCount > 0 ? mask->frames[0].texture : NULL;
+	IDirect3DTexture9* visible = mask->frameCount > 0 ? mask->frames[0].texture : NULL;
 	if (!fogOfWarTarget || !explored || !visible)
 	{
 		JE::LogDebugString("Gfx_Engine::ProcessFogOfWar - trying to use an invalid texture!\n");
 		return;
 	}
 
-	IDirect3DSurface8* originalTarget = NULL;
-	IDirect3DSurface8* originalDepth = NULL;
-	IDirect3DSurface8* fogSurface = NULL;
-	HRESULT result = g_D3D.device->GetRenderTarget(&originalTarget);
+	IDirect3DSurface9* originalTarget = NULL;
+	IDirect3DSurface9* originalDepth = NULL;
+	IDirect3DSurface9* fogSurface = NULL;
+	HRESULT result = g_D3D.device->GetRenderTarget(0, &originalTarget);
 	if (FAILED(result))
 	{
 		const char* description = DXGetErrorDescription8A(result);
@@ -84,7 +85,7 @@ void Gfx_Engine::ProcessFogOfWar()
 		{0.0f, bottom, 0.01f, 1.0f, visibleColor, 0.0f, 1.0f},
 		{right, bottom, 0.01f, 1.0f, visibleColor, 1.0f, 1.0f}
 	};
-	result = g_D3D.device->SetRenderTarget(fogSurface, NULL);
+	result = Gfx_SetDX9RenderTarget(g_D3D.device, fogSurface, NULL);
 	if (SUCCEEDED(result))
 	{
 		++g_D3D.statistics[6];
@@ -93,7 +94,7 @@ void Gfx_Engine::ProcessFogOfWar()
 		{
 			if (revealExplored)
 			{
-				g_D3D.device->SetVertexShader(0x144);
+				g_D3D.device->SetFVF(0x144);
 				g_D3D.SetRenderState(D3DRS_ZENABLE, 0);
 				g_D3D.SetRenderState(D3DRS_ALPHABLENDENABLE, 0);
 				g_D3D.SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
@@ -123,7 +124,7 @@ void Gfx_Engine::ProcessFogOfWar()
 			{
 				//Unlike the quads, the original clear reloads the live Engine color.
 				g_D3D.device->Clear(0, NULL, D3DCLEAR_TARGET, exploredGray, 0.0f, 0);
-				g_D3D.device->SetVertexShader(0x144);
+				g_D3D.device->SetFVF(0x144);
 				g_D3D.SetRenderState(D3DRS_ZENABLE, 0);
 				g_D3D.SetRenderState(D3DRS_ALPHABLENDENABLE, 1);
 				g_D3D.SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
@@ -158,7 +159,7 @@ void Gfx_Engine::ProcessFogOfWar()
 			JE::LogDebugString("Gfx_Engine::ProcessFogOfWar - BeginScene failed: %s(%x) - %s\n",
 				name, result, description);
 		}
-		g_D3D.device->SetRenderTarget(originalTarget, originalDepth);
+		Gfx_SetDX9RenderTarget(g_D3D.device, originalTarget, originalDepth);
 	}
 	else
 	{

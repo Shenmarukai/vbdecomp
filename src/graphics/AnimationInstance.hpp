@@ -1,7 +1,7 @@
 #pragma once
 
 #include "AnimationObject.hpp"
-#include <d3dx8.h>
+#include "d3dx9.h"
 #include <list>
 #include <string>
 

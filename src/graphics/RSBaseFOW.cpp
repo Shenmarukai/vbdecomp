@@ -181,7 +181,7 @@ HRESULT Gfx_RS_Base_FOW::Initialize()
 	if (!g_RSBaseFOWState.normal)
 	{
 		ID3DXBuffer* errors;
-		result = D3DXCreateEffect(g_D3D.device, GFX_RS_BASE_FOW_NORMAL_SOURCE, sizeof(GFX_RS_BASE_FOW_NORMAL_SOURCE) - 1,
+		result = Gfx_CreateDX9Effect(g_D3D.device, GFX_RS_BASE_FOW_NORMAL_SOURCE, sizeof(GFX_RS_BASE_FOW_NORMAL_SOURCE) - 1,
 			&g_RSBaseFOWState.normal, &errors);
 		if (SUCCEEDED(result))
 		{
@@ -205,7 +205,7 @@ HRESULT Gfx_RS_Base_FOW::Initialize()
 			g_RSBaseFOWState.normal->SetMatrix("FOWmatrix", &identity);
 			g_RSBaseFOWState.normal->SetTexture("FOW", NULL);
 			g_RSBaseFOWState.normal->SetDword("bZEnable", 1);
-			D3DXTECHNIQUE_DESC selected;
+			Gfx_DX9TechniqueDesc selected;
 			result = g_RSBaseFOWState.normal->FindNextValidTechnique(g_RSBaseFOWState.technique, &selected);
 			if (SUCCEEDED(result))
 			{
@@ -228,7 +228,7 @@ HRESULT Gfx_RS_Base_FOW::Initialize()
 	if (!g_RSBaseFOWState.factored)
 	{
 		ID3DXBuffer* errors;
-		result = D3DXCreateEffect(g_D3D.device, GFX_RS_BASE_FOW_FACTORED_SOURCE, sizeof(GFX_RS_BASE_FOW_FACTORED_SOURCE) - 1,
+		result = Gfx_CreateDX9Effect(g_D3D.device, GFX_RS_BASE_FOW_FACTORED_SOURCE, sizeof(GFX_RS_BASE_FOW_FACTORED_SOURCE) - 1,
 			&g_RSBaseFOWState.factored, &errors);
 		if (SUCCEEDED(result))
 		{
@@ -252,7 +252,7 @@ HRESULT Gfx_RS_Base_FOW::Initialize()
 			g_RSBaseFOWState.factored->SetMatrix("FOWmatrix", &identity);
 			g_RSBaseFOWState.factored->SetTexture("FOW", NULL);
 			g_RSBaseFOWState.factored->SetDword("bZEnable", 1);
-			D3DXTECHNIQUE_DESC selected;
+			Gfx_DX9TechniqueDesc selected;
 			result = g_RSBaseFOWState.factored->FindNextValidTechnique(g_RSBaseFOWState.technique, &selected);
 			if (SUCCEEDED(result))
 			{
@@ -360,7 +360,7 @@ HRESULT Gfx_RS_Base_FOW::SetMaterial(Gfx_Material* material, DWORD)
 		}
 		else g_D3D.SetTexture(0, 0);
 
-		IDirect3DTexture8* fog = g_GfxSystem->FogOfWarRenderTexture();
+		IDirect3DTexture9* fog = g_GfxSystem->FogOfWarRenderTexture();
 		if (fog)
 		{
 			effect->SetTexture("FOW", fog);
@@ -384,7 +384,7 @@ HRESULT Gfx_RS_Base_FOW::SetMaterial(Gfx_Material* material, DWORD)
 		effect->SetDword("DiffuseSource", material->flagB8 != 0);
 		effect->SetDword("Bcop", colorOperation);
 		effect->SetDword("Baop", alphaOperation);
-		D3DMATERIAL8 values;
+		D3DMATERIAL9 values;
 		std::memcpy(&values, &material->values, sizeof(values));
 		g_D3D.device->SetMaterial(&values);
 		if (!useRGB && !useAlpha)
@@ -428,7 +428,7 @@ HRESULT Gfx_RS_Base_FOW::SetMaterial(Gfx_Material* material, DWORD)
 		else g_D3D.SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, 0);
 		if (g_RSBaseFOWState.techniqueChanged)
 		{
-			D3DXTECHNIQUE_DESC selected;
+			Gfx_DX9TechniqueDesc selected;
 			result = effect->FindNextValidTechnique(g_RSBaseFOWState.technique, &selected);
 			if (SUCCEEDED(result))
 			{

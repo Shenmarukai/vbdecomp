@@ -1,7 +1,7 @@
 #pragma once
 
 #include <windows.h>
-#include <d3dx8.h>
+#include "d3dx9.h"
 
 struct Gfx_D3DMode
 {
@@ -32,7 +32,7 @@ struct Gfx_D3DDeviceInfo
 {
 	D3DDEVTYPE type;
 	char description[4]; // Inline HAL/REF/NUL, not an owned string or pointer.
-	D3DCAPS8 caps;
+	D3DCAPS9 caps;
 	BYTE windowed, guardBand, vertexShader, pixelShader;
 	DWORD unknown0E0;
 	DWORD modeCount; // +0E4.
@@ -41,7 +41,7 @@ struct Gfx_D3DDeviceInfo
 
 struct Gfx_D3DAdapterInfo
 {
-	D3DADAPTER_IDENTIFIER8 identifier;
+	D3DADAPTER_IDENTIFIER9 identifier;
 	DWORD deviceCount; // +42C.
 	Gfx_D3DDeviceInfo* devices; // +430; owned POD array.
 	D3DDISPLAYMODE desktop; // +434.
@@ -51,8 +51,9 @@ struct Gfx_D3DAdapterInfo
 
 struct Gfx_D3DTextureState
 {
-	IDirect3DBaseTexture8* texture;
-	DWORD values[29];
+	IDirect3DBaseTexture9* texture;
+	DWORD values[64];
+	DWORD samplerValues[16];
 };
 
 // Descriptive declaration of original global0x7082F8, through known +0x6B8.
@@ -80,14 +81,17 @@ public:
 	HRESULT ApplyDefaultRenderStates(); // 0x503120; last SDK HRESULT.
 	DWORD ApplyDefaultTextureStates(); // 0x503170; live count after the last stage, or0.
 	DWORD ApplyCachedStates(BYTE defaults); // 0x503220; raw EAX result, see function record.
-	HRESULT SetTexture(DWORD stage, IDirect3DBaseTexture8* texture); // 0x503390.
+	HRESULT SetTexture(DWORD stage, IDirect3DBaseTexture9* texture);
+	HRESULT SetIndices(IDirect3DIndexBuffer9* buffer, INT baseVertex); // 0x503390.
 	HRESULT SetTransform(D3DTRANSFORMSTATETYPE state, const D3DMATRIX* matrix); // 0x503360.
 	HRESULT DrawPrimitive(D3DPRIMITIVETYPE type, UINT startVertex, UINT primitiveCount); //490060; counters publish before SDK call.
 	HRESULT DrawIndexedPrimitive(D3DPRIMITIVETYPE type, UINT minimumIndex, UINT vertexCount,
 		UINT startIndex, UINT primitiveCount); //0x4900A0; actual draw/statistics wrapper.
 	HRESULT GetRenderState(D3DRENDERSTATETYPE state, DWORD* value); // 0x503300; cached value and explicit success0.
 	HRESULT SetRenderState(D3DRENDERSTATETYPE state, DWORD value); // 0x503320; cache updates even on SDK failure.
-	HRESULT SetTextureStageState(DWORD stage, D3DTEXTURESTAGESTATETYPE state, DWORD value); // 0x503400.
+	HRESULT SetSoftwareVertexProcessing(BOOL software); // DX9 VP mode is not a render state.
+	HRESULT SetTextureStageState(DWORD stage, D3DTEXTURESTAGESTATETYPE state, DWORD value);
+	HRESULT SetSamplerState(DWORD stage, D3DSAMPLERSTATETYPE state, DWORD value); // 0x503400.
 	void DescribeTextureFormat(int format, DWORD* bits, char* name); // 0x503450; signed selector.
 	BYTE* DescribeDepthStencilFormat(D3DFORMAT format, DWORD* depth, DWORD* stencil, BYTE* lockable); // 0x5037B0; thiscall/RET16.
 	DWORD GetFreeTextureMemory(); // 0x502BB0; live cache reload after diagnostics.
@@ -95,8 +99,8 @@ public:
 	void UpdateStatistics(); // 0x502BE0; uses the unrounded x87 product.
 
 	HWND window; // +000.
-	IDirect3D8* direct3D; // +004.
-	IDirect3DDevice8* device; // +008.
+	IDirect3D9* direct3D; // +004.
+	IDirect3DDevice9* device; // +008.
 	D3DPRESENT_PARAMETERS presentation; // +00C.
 	D3DXMATRIX identity; // +040; actual SDK matrix, unchanged ABI.
 	ID3DXMatrixStack* matrixStack; // +080; actual SDK interface.
@@ -108,7 +112,8 @@ public:
 	Gfx_D3DMode* currentMode; // +09C; borrowed.
 	BYTE requestedWindowed; // +0A0.
 	BYTE unknown0A1[3];
-	DWORD value0A4, vertexLimit, value0AC; // +0A4/+0A8/+0AC.
+	DWORD value0A4, vertexLimit, value0AC;
+	INT indexBaseVertex = 0; // +0A4/+0A8/+0AC.
 	union
 	{
 		DWORD statistics[16]; // +0B0; raw counter projection.
@@ -116,8 +121,8 @@ public:
 	};
 	BYTE ready; // +0F0.
 	BYTE unknown0F1[3];
-	DWORD defaultRenderStates[174]; // +0F4.
-	DWORD renderStates[174]; // +3AC.
+	DWORD defaultRenderStates[256]; // +0F4.
+	DWORD renderStates[256]; // +3AC.
 	DWORD textureStageCount; // +664.
 	Gfx_D3DTextureState* defaultTextureStates; // +668; owned.
 	Gfx_D3DTextureState* textureStates; // +66C; owned.

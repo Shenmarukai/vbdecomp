@@ -5,6 +5,43 @@
 #include "diagnostics/DebugOutput.hpp"
 #include <cstring>
 
+// D3D9 surface descriptors no longer expose the size in bytes.
+namespace
+{
+	static DWORD EstimateSurfaceSize(const D3DSURFACE_DESC& desc)
+	{
+		DWORD bytesPerPixel = 0;
+
+		switch (desc.Format)
+		{
+		case D3DFMT_A8R8G8B8:
+		case D3DFMT_X8R8G8B8:
+		case D3DFMT_D32:
+		case D3DFMT_D24S8:
+		case D3DFMT_D24X8:
+		case D3DFMT_D24X4S4:
+			bytesPerPixel = 4;
+			break;
+
+		case D3DFMT_R5G6B5:
+		case D3DFMT_X1R5G5B5:
+		case D3DFMT_A1R5G5B5:
+		case D3DFMT_A4R4G4B4:
+		case D3DFMT_D16:
+		case D3DFMT_D16_LOCKABLE:
+		case D3DFMT_D15S1:
+			bytesPerPixel = 2;
+			break;
+
+		default:
+			return 0;
+		}
+
+		return desc.Width * desc.Height * bytesPerPixel;
+	}
+
+}
+
 void Gfx_Engine::GetVRAMStatistics(DWORD* output)
 {
 	std::memset(output, 0, 68);
@@ -17,22 +54,22 @@ void Gfx_Engine::GetVRAMStatistics(DWORD* output)
 	if (automapRenderTarget)
 	{
 		automapRenderTarget->GetDesc(&descriptor);
-		renderTargets = descriptor.Size;
+		renderTargets += EstimateSurfaceSize(descriptor);
 	}
 	if (automapDepthSurface)
 	{
 		automapDepthSurface->GetDesc(&descriptor);
-		renderTargets += descriptor.Size;
+		renderTargets += EstimateSurfaceSize(descriptor);
 	}
 	if (fogOfWarTarget)
 	{
 		fogOfWarTarget->GetLevelDesc(0, &descriptor);
-		renderTargets += descriptor.Size;
+		renderTargets += EstimateSurfaceSize(descriptor);
 	}
 	if (projectedShadowTarget)
 	{
 		projectedShadowTarget->GetLevelDesc(0, &descriptor);
-		renderTargets += descriptor.Size;
+		renderTargets += EstimateSurfaceSize(descriptor);
 	}
 	DWORD depth, stencil;
 	BYTE lockable;

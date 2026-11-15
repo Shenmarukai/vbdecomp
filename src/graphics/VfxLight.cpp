@@ -98,7 +98,7 @@ namespace JE
 		VFX_EffectInstance::SetData(input);
 		data = *static_cast<const VFX_LightData*>(input); // 0x4E8160 typed member copy.
 		if (light) { delete light; light = NULL; }
-		D3DLIGHT8 value;
+		D3DLIGHT9 value;
 		Gfx_InitLightDescriptor(&value, D3DLIGHTTYPE(data.lightType + 1),
 			data.diffuse[0] * data.diffusePercent * 0.000039215687f,
 			data.diffuse[1] * data.diffusePercent * 0.000039215687f,

@@ -1,7 +1,7 @@
 #include "D3DState.hpp"
 #include "../diagnostics/DebugOutput.hpp"
 
-HRESULT Gfx_D3D::SetTexture(DWORD stage, IDirect3DBaseTexture8* texture)
+HRESULT Gfx_D3D::SetTexture(DWORD stage, IDirect3DBaseTexture9* texture)
 {
 	DWORD count = textureStageCount;
 	if (stage >= count)

@@ -1,6 +1,6 @@
 #include "OctreeShape.hpp"
 #include "Octree.hpp"
-#include <d3dx8math.h>
+#include "d3dx9math.h"
 #include <new>
 #include <stdexcept>
 

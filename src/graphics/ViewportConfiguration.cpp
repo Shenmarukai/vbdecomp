@@ -1,8 +1,8 @@
 #include "Viewport.hpp"
 #include "RenderManager.hpp"
-#include <d3dx8.h>
+#include "d3dx9.h"
 
-HRESULT Gfx_Viewport::SetViewport(const D3DVIEWPORT8& descriptor)
+HRESULT Gfx_Viewport::SetViewport(const D3DVIEWPORT9& descriptor)
 {
 	// SDK assignment copies all six words, including raw MinZ/MaxZ bits. The
 	// source dimensions are read after the copy, as in the original.

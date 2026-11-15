@@ -1,7 +1,7 @@
 #pragma once
 
 #include <windows.h>
-#include <d3d8.h>
+#include "d3d9.h"
 #include <string>
 
 struct Gfx_D3DMode;
@@ -242,12 +242,12 @@ public:
 	virtual Gfx_Texture* AutomapMaskTexture() = 0; //101,+194,5C0360; borrowed+D8(engine+212)
 	virtual Gfx_Texture* VisibleMaskTexture() = 0; //102,+198,5C0370; borrowed+D8(engine+216)
 	//103,+19C,5C0380; constructor/SDK owner proof; bogus Concurrency FLIRT name rejected
-	virtual IDirect3DTexture8* FogOfWarRenderTexture() = 0;
+	virtual IDirect3DTexture9* FogOfWarRenderTexture() = 0;
 	//104,+1A0,5BEB40; clamp/convert -> opaque grayscale ARGB; role unresolved; H-RETURN
 	virtual void SetGrayColor204(float intensity) = 0;
 	virtual void SetGrayColor208(float intensity) = 0; //105,+1A4,5BEBB0; same for engine+208; H-RETURN
 	//106,+1A8,5C0390; actual D3D8 CreateTexture owner proof; bogus FLIRT name rejected
-	virtual IDirect3DTexture8* ProjectedShadowRenderTexture() = 0;
+	virtual IDirect3DTexture9* ProjectedShadowRenderTexture() = 0;
 	//107,+1AC,5C03A0; engine+224/+228; H-RETURN
 	virtual void GetProjectedShadowDimensions(UINT* width, UINT* height) = 0;
 	//108,+1B0,5C0C00; strlen then real string assign at+F8 (248 decimal), statistics map name; H-RETURN

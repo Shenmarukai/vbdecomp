@@ -2,7 +2,7 @@
 
 #include "MeshData.hpp"
 #include "PacketData.hpp"
-#include <d3dx8.h>
+#include "d3dx9.h"
 
 class Gfx_Viewport;
 class Gfx_Camera;

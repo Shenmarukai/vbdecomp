@@ -1,6 +1,6 @@
 #pragma once
 #include <windows.h>
-#include <d3dx8math.h>
+#include "d3dx9math.h"
 #include "../startup/FrameLookupCaches.hpp"
 
 namespace F3

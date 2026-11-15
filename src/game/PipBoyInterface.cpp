@@ -1,5 +1,6 @@
 // Implementation fragment: compiled once by PipBoyCompilation.cpp.
 #include "game/PipBoyInterface.hpp"
+#include "game/PipBoyNames.hpp" // need this include (Adam)
 #include "audio/Sound.hpp"
 #include "game/PipBoyAddNoteInterface.hpp"
 #include "game/CounterControl.hpp"
@@ -14,6 +15,7 @@
 #include "graphics/SystemInterface.hpp"
 #include "graphics/StringFormat.hpp"
 #include "startup/EngineStringSystem.hpp"
+#include "startup/NetworkComponent.hpp" // need this include (Adam)
 #include "entity/EntityEnvironment.hpp"
 #include "entity/Gregorian.hpp"
 #include "entity/Map.hpp"

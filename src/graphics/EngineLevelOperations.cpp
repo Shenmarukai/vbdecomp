@@ -5,11 +5,11 @@
 #include "Texture.hpp"
 #include "TextureManager.hpp"
 #include "diagnostics/DebugOutput.hpp"
-#include <d3dx8.h>
-#include <dxerr8.h>
+#include "d3dx9.h"
+#include "DX9Errors.hpp"
 #include <cstring>
 
-ULONG __cdecl Gfx_ReleaseSurface(IDirect3DSurface8*& surface) //5024D0; return spelling inferred.
+ULONG __cdecl Gfx_ReleaseSurface(IDirect3DSurface9*& surface) //5024D0; return spelling inferred.
 {
 	ULONG result = 0;
 	if (surface)
@@ -65,16 +65,16 @@ HRESULT Gfx_D3D::ScreenCapture(const char* filename)
 		return result;
 
 	D3DDISPLAYMODE display;
-	result = device->GetDisplayMode(&display);
+	result = device->GetDisplayMode(0, &display);
 	if (FAILED(result))
 	{
 		JE::LogDebugString("Gfx_D3D::ScreenCapture - GetDisplayMode failed (%x)\n", result);
 		return result;
 	}
 
-	IDirect3DSurface8* image;
-	result = device->CreateImageSurface(display.Width, display.Height,
-		D3DFMT_A8R8G8B8, &image);
+	IDirect3DSurface9* image;
+	result = device->CreateOffscreenPlainSurface(display.Width, display.Height,
+		D3DFMT_A8R8G8B8, D3DPOOL_SYSTEMMEM, &image, nullptr);
 	if (FAILED(result))
 	{
 		JE::LogDebugString("Gfx_D3D::ScreenCapture - CreateImageSurface failed (%x)\n", result);
@@ -83,16 +83,16 @@ HRESULT Gfx_D3D::ScreenCapture(const char* filename)
 
 	if (requestedWindowed)
 	{
-		result = device->GetFrontBuffer(image);
+		result = device->GetFrontBufferData(0, image);
 		if (FAILED(result))
 		{
 			JE::LogDebugString("Gfx_D3D::ScreenCapture - GetFrontBuffer failed (%x)\n", result);
 			return result;
 		}
 
-		IDirect3DSurface8* cropped;
-		result = device->CreateImageSurface(presentation.BackBufferWidth,
-			presentation.BackBufferHeight, D3DFMT_A8R8G8B8, &cropped);
+		IDirect3DSurface9* cropped;
+		result = device->CreateOffscreenPlainSurface(presentation.BackBufferWidth,
+			presentation.BackBufferHeight, D3DFMT_A8R8G8B8, D3DPOOL_SYSTEMMEM, &cropped, nullptr);
 		if (FAILED(result))
 		{
 			JE::LogDebugString("Gfx_D3D::ScreenCapture - CreateImageSurface(2) failed (%x)\n",
@@ -130,7 +130,7 @@ HRESULT Gfx_D3D::ScreenCapture(const char* filename)
 		return result;
 	}
 
-	result = device->GetFrontBuffer(image);
+	result = device->GetFrontBufferData(0, image);
 	if (FAILED(result))
 	{
 		JE::LogDebugString("Gfx_D3D::ScreenCapture - GetFrontBuffer failed (%x)\n", result);
@@ -151,7 +151,7 @@ HRESULT Gfx_Engine::ScreenCapture(const char* filename)
 
 void Gfx_Engine::SetLevelAABB(const float* minimumXYZ, const float* maximumXYZ)
 {
-	g_D3D.device->ResourceManagerDiscardBytes(0);
+	// ResourceManagerDiscardBytes was removed from the Direct3D9 device API.
 	std::memcpy(&levelMinimum, minimumXYZ, 12);
 	std::memcpy(&levelMaximum, maximumXYZ, 12);
 	levelWidth = levelMaximum.x - levelMinimum.x;
@@ -320,11 +320,11 @@ void Gfx_Engine::CreateAutomapRenderTarget()
 	if (automapWidth && automapHeight)
 	{
 		HRESULT result = g_D3D.device->CreateRenderTarget(automapWidth, automapHeight,
-			colorFormat, D3DMULTISAMPLE_NONE, FALSE, &automapRenderTarget);
+			colorFormat, D3DMULTISAMPLE_NONE, 0, FALSE, &automapRenderTarget, nullptr);
 		if (SUCCEEDED(result))
 		{
 			result = g_D3D.device->CreateDepthStencilSurface(automapWidth, automapHeight,
-				depthFormat, D3DMULTISAMPLE_NONE, &automapDepthSurface);
+				depthFormat, D3DMULTISAMPLE_NONE, 0, TRUE, &automapDepthSurface, nullptr);
 			if (SUCCEEDED(result))
 			{
 				automapRequested = 1;
@@ -351,7 +351,7 @@ void Gfx_Engine::CreateFogOfWarRenderTarget()
 	if (maskWidth && maskHeight)
 	{
 		HRESULT result = g_D3D.device->CreateTexture(maskWidth, maskHeight, 1,
-			D3DUSAGE_RENDERTARGET, colorFormat, D3DPOOL_DEFAULT, &fogOfWarTarget);
+			D3DUSAGE_RENDERTARGET, colorFormat, D3DPOOL_DEFAULT, &fogOfWarTarget, nullptr);
 		if (FAILED(result))
 		{
 			fogOfWar = 0;
@@ -371,7 +371,7 @@ void Gfx_Engine::CreateProjectedShadowRenderTarget()
 	if (shadowWidth && shadowHeight)
 	{
 		HRESULT result = g_D3D.device->CreateTexture(shadowWidth, shadowHeight, 1,
-			D3DUSAGE_RENDERTARGET, colorFormat, D3DPOOL_DEFAULT, &projectedShadowTarget);
+			D3DUSAGE_RENDERTARGET, colorFormat, D3DPOOL_DEFAULT, &projectedShadowTarget, nullptr);
 		if (FAILED(result))
 		{
 			JE::LogDebugString("Gfx_Engine::CreateProjectedShadowRenderTarget - CreateRenderTarget failed: %s(%x) - %s\n",
@@ -400,7 +400,7 @@ Gfx_Texture* Gfx_Engine::VisibleMaskTexture()
 	return LookupTexture(visibleMaskHandle);
 }
 
-IDirect3DTexture8* Gfx_Engine::FogOfWarRenderTexture()
+IDirect3DTexture9* Gfx_Engine::FogOfWarRenderTexture()
 {
 	return fogOfWarTarget;
 }
@@ -423,7 +423,7 @@ void Gfx_Engine::SetGrayColor208(float intensity)
 	visibleGray = (((DWORD(channel) | 0xFFFFFF00u) << 8) | channel) << 8 | channel;
 }
 
-IDirect3DTexture8* Gfx_Engine::ProjectedShadowRenderTexture()
+IDirect3DTexture9* Gfx_Engine::ProjectedShadowRenderTexture()
 {
 	return projectedShadowTarget;
 }

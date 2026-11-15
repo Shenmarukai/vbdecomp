@@ -313,7 +313,7 @@ namespace F3
    modelViewport=new Gfx_Viewport;modelCamera=new Gfx_CamCtrl_Orbit;
    LONG width,height,x,y;window->GetSize(width,height);window->GetAbsolutePosition(x,y);
    float scaleX,scaleY;::GUI::g_Manager.GetScale(scaleX,scaleY);
-   D3DVIEWPORT8 view={static_cast<DWORD>(x*scaleX),static_cast<DWORD>(y*scaleY),static_cast<DWORD>(width*scaleX),static_cast<DWORD>(height*scaleY),0,1};
+   D3DVIEWPORT9 view={static_cast<DWORD>(x*scaleX),static_cast<DWORD>(y*scaleY),static_cast<DWORD>(width*scaleX),static_cast<DWORD>(height*scaleY),0,1};
    modelViewport->SetViewport(view);modelViewport->clearColor=0;
    for(LONG i=0;i<4;++i) modelViewport->vertices[i].diffuse=0;
    modelViewport->SetCameraController(modelCamera);
@@ -325,7 +325,7 @@ namespace F3
   cameraAzimuth=FloatBits(1134336410);cameraElevation=FloatBits(0xC0900000);cameraDistance=FloatBits(1131741184);cameraFov=FloatBits(1108082688);
   alternateCameraTarget=D3DXVECTOR3(FloatBits(1125240013),FloatBits(1107296256),FloatBits(1136535142));
   alternateAzimuth=FloatBits(1134336410);alternateElevation=FloatBits(0xC0900000);alternateDistance=FloatBits(1131741184);alternateFov=FloatBits(1108082688);
-  D3DLIGHT8 lightDescriptor;
+  D3DLIGHT9 lightDescriptor;
   Gfx_InitLightDescriptor(&lightDescriptor,D3DLIGHT_POINT,
    1.0f,1.0f,1.0f,0.0f,0.0f,1.0f,0.0f,0.0f,0.0f,
    FloatBits(1153138688),1.0f,1.0f,FloatBits(1008981770),0.0f,0.0f,0.0f);

@@ -8,11 +8,8 @@
 #include "graphics/OctreeShape.hpp"
 #include "graphics/GfxVector3.hpp"
 #include "diagnostics/DebugOutput.hpp"
-#include <float.h>
-#include <math.h>
-#include <vector>
 
-#include <hash_map>
+//#include <hash_map>
 
 namespace F3
 {
@@ -24,7 +21,8 @@ namespace F3
 			size_t operator()(float value) const { return static_cast<size_t>(value); }
 			bool operator()(float first,float second) const { return first<second; }
 		};
-		typedef std::hash_multimap<float,GameCreature*,AngularHash> AngularCandidates;
+		//typedef std::hash_multimap<float, GameCreature*, AngularHash> AngularCandidates;
+		typedef std::unordered_multimap<float,GameCreature*,AngularHash> AngularCandidates;
 		float DirectionYaw(const D3DXVECTOR3& origin,const D3DXVECTOR3& target)
 		{
 			Gfx_Vector3f direction;

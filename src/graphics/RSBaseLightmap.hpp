@@ -2,15 +2,15 @@
 
 #include "RenderStyle.hpp"
 #include "Material.hpp"
-#include <d3dx8effect.h>
+#include "DX9EffectCompat.hpp"
 
 // Original shared70BBD8..70BBFB. techniqueCount has readers but no observed
 // writes: do not invent effect GetDesc or initialize it from SDK capabilities.
 struct Gfx_RS_B_LMState
 {
 	DWORD users;
-	ID3DXEffect* normal;
-	ID3DXEffect* factored;
+	Gfx_DX9Effect* normal;
+	Gfx_DX9Effect* factored;
 	DWORD unknown0C, techniqueCount, technique;
 	BYTE usesShader, techniqueChanged;
 	BYTE unknown1A[2];
@@ -39,7 +39,7 @@ public:
 	virtual HRESULT End(); // 0x537BC0.
 	virtual HRESULT Pass(UINT pass); // 0x536CE0.
 
-	ID3DXEffect* effect; // +04; borrowed selected normal/factored effect, initiallyNULL.
+	Gfx_DX9Effect* effect; // +04; borrowed selected normal/factored effect, initiallyNULL.
 	DWORD colorOperation, alphaOperation; // +08/+0C.
 	DWORD lightmapColorOperation, lightmapAlphaOperation, alphaTest; // +10/+14/+18.
 };

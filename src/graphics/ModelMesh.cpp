@@ -93,7 +93,7 @@ BYTE Gfx_ModelMesh::SetPrimitives(DWORD count, const D3DPRIMITIVETYPE* types,
 }
 
 void Gfx_ModelMesh::SetMaterial(DWORD index, DWORD style, const std::string& materialName,
-	DWORD /*unused*/, DWORD blend, const D3DMATERIAL8& values, DWORD textures, const std::string* names,
+	DWORD /*unused*/, DWORD blend, const D3DMATERIAL9& values, DWORD textures, const std::string* names,
 	const DWORD* handles, BYTE flagB9, BYTE flagBA)
 {
 	if (index >= mesh.primitiveCount) return;

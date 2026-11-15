@@ -1,6 +1,6 @@
 #include "VfxParameters.hpp"
 #include "StringFormat.hpp"
-#include <d3dx8.h>
+#include "d3dx9.h"
 #include <mbstring.h>
 #include <stdlib.h>
 #include <string.h>

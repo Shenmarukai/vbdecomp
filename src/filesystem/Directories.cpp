@@ -7,8 +7,7 @@
 namespace JE
 {
 	typedef char FindDataWidthRequired[(sizeof(LegacyFilesystem::FindData32) == 280) ? 1 : -1];
-	typedef char FindDataAttributesRequired[
-		(offsetof(LegacyFilesystem::FindData32, attrib) == 0) ? 1 : -1];
+	typedef char FindDataAttributesRequired[(offsetof(LegacyFilesystem::FindData32, attrib) == 0) ? 1 : -1];
 
 	// 0x4C56B0.
 	bool __cdecl DirectoryExists(const char* pszPath)

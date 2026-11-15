@@ -1,4 +1,5 @@
 #include "D3DState.hpp"
+#include <cstdio>
 #include "../diagnostics/DebugOutput.hpp"
 
 HRESULT Gfx_D3D::ResetDevice(const D3DPRESENT_PARAMETERS* parameters)
@@ -19,7 +20,7 @@ HRESULT Gfx_D3D::ResetDevice(const D3DPRESENT_PARAMETERS* parameters)
 		else
 		{
 			JE::LogDebugString("DeviceReset failed!\n");
-			D3DXGetErrorStringA(result, error, sizeof(error));
+			std::snprintf(error, sizeof(error), "HRESULT: %08lX", static_cast<unsigned long>(result));
 			JE::LogDebugString("DXErr: %s\n", error);
 		}
 	}

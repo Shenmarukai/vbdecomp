@@ -112,7 +112,7 @@ namespace JE
 		const LONG modelWidth = s.modelWidth, modelHeight = s.modelHeight;
 		float sx, sy;
 		::GUI::g_Manager.GetScale(sx, sy);
-		D3DVIEWPORT8 descriptor;
+		D3DVIEWPORT9 descriptor;
 		descriptor.Height = ScaleCoordinate(modelHeight, sy);
 		descriptor.Width = ScaleCoordinate(modelWidth, sx);
 		descriptor.Y = ScaleCoordinate(modelY, sy);
@@ -134,7 +134,7 @@ namespace JE
 		for (int i = 0; i < 4; ++i) portraitViewport->vertices[i].diffuse = 0;
 		portraitViewport->SetCameraController(portraitOrbit);
 
-		D3DLIGHT8 lightDescriptor;
+		D3DLIGHT9 lightDescriptor;
 		lightDescriptor.Type = D3DLIGHT_DIRECTIONAL;
 		lightDescriptor.Diffuse.r = 1.0f;
 		lightDescriptor.Diffuse.g = 1.0f;

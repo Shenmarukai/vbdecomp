@@ -22,3 +22,5 @@
 #include <mmsystem.h>
 #include <process.h>
 #include <uuids.h>
+#include <math.h>
+#include <float.h>

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "VfxEffectData.hpp"
-#include <d3dx8.h>
+#include "d3dx9.h"
 #include <list>
 #include <vector>
 #include <stddef.h>

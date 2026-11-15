@@ -1,6 +1,6 @@
 #include "Texture.hpp"
 #include "../diagnostics/DebugOutput.hpp"
-#include <dxerr8.h>
+#include "DX9Errors.hpp"
 
 HRESULT Gfx_Texture::LockRect(UINT level, D3DLOCKED_RECT* locked,
 	const RECT* rectangle, DWORD flags, int frame)

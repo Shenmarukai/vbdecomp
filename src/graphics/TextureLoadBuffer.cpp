@@ -1,8 +1,8 @@
 #include "Texture.hpp"
 #include "D3DState.hpp"
 #include "../JE.hpp"
-#include <d3dx8.h>
-#include <dxerr8.h>
+#include "d3dx9.h"
+#include "DX9Errors.hpp"
 #include <string.h>
 
 HRESULT Gfx_Texture::LoadFromBuffer(const BYTE* data, UINT size, D3DFORMAT format,
@@ -27,7 +27,7 @@ HRESULT Gfx_Texture::LoadFrameFromBuffer(const BYTE* data, UINT size, D3DFORMAT 
 	D3DPOOL pool, UINT levels, DWORD filter, DWORD mipFilter, DWORD usage, int frame)
 {
 	if (frame < 0 || frame >= frameCount) return D3DERR_INVALIDCALL;
-	IDirect3DTexture8*& texture = frames[frame].texture;
+	IDirect3DTexture9*& texture = frames[frame].texture;
 	if (texture)
 	{
 		texture->Release();

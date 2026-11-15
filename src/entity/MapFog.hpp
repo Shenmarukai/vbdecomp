@@ -1,7 +1,7 @@
 #pragma once
 
 #include <windows.h>
-#include <d3dx8.h>
+#include "d3dx9.h"
 #include <stdio.h>
 #include <string>
 #include <vector>

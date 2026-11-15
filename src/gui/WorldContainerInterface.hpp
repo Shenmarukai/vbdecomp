@@ -3,7 +3,7 @@
 #include "gui/Interface.hpp"
 #include "gui/WorldContainerServices.hpp"
 #include "audio/Sound.hpp"
-#include <d3dx8.h>
+#include "d3dx9.h"
 #include <vector>
 
 namespace GUI { class Window; class Picture; class Button; class ScrollBar; }

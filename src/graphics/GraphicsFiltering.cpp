@@ -11,8 +11,8 @@ namespace JE
 		//and reloads it after both cache/device calls on every iteration.
 		while (stage < g_D3D.currentDevice->caps.MaxTextureBlendStages)
 		{
-			g_D3D.SetTextureStageState(stage, D3DTSS_MAGFILTER, filter);
-			g_D3D.SetTextureStageState(stage, D3DTSS_MINFILTER, filter);
+			g_D3D.SetSamplerState(stage, D3DSAMP_MAGFILTER, filter);
+			g_D3D.SetSamplerState(stage, D3DSAMP_MINFILTER, filter);
 			++stage;
 		}
 	}
@@ -23,7 +23,7 @@ namespace JE
 		DWORD stage = 0;
 		while (stage < g_D3D.currentDevice->caps.MaxTextureBlendStages)
 		{
-			g_D3D.SetTextureStageState(stage, D3DTSS_MIPFILTER, filter);
+			g_D3D.SetSamplerState(stage, D3DSAMP_MIPFILTER, filter);
 			++stage;
 		}
 	}

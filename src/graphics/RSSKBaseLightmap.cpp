@@ -60,10 +60,10 @@ HRESULT Gfx_RS_SK_B_LM::Initialize()
 	HRESULT result = D3DERR_INVALIDCALL;
 	++g_RSSKBaseLightmapState.users;
 	ID3DXBuffer* errors;
-	D3DXTECHNIQUE_DESC selected;
+	Gfx_DX9TechniqueDesc selected;
 	if (!g_RSSKBaseLightmapState.normal)
 	{
-		result = D3DXCreateEffect(g_D3D.device, normalSource, sizeof(normalSource) - 1,
+		result = Gfx_CreateDX9Effect(g_D3D.device, normalSource, sizeof(normalSource) - 1,
 			&g_RSSKBaseLightmapState.normal, &errors);
 		if (SUCCEEDED(result))
 		{
@@ -99,7 +99,7 @@ HRESULT Gfx_RS_SK_B_LM::Initialize()
 	}
 	if (!g_RSSKBaseLightmapState.factored)
 	{
-		result = D3DXCreateEffect(g_D3D.device, factoredSource, sizeof(factoredSource) - 1,
+		result = Gfx_CreateDX9Effect(g_D3D.device, factoredSource, sizeof(factoredSource) - 1,
 			&g_RSSKBaseLightmapState.factored, &errors);
 		if (SUCCEEDED(result))
 		{
@@ -192,7 +192,7 @@ HRESULT Gfx_RS_SK_B_LM::SetMaterial(Gfx_Material* material, DWORD)
 		effect->SetDword("Baop", alphaOperation);
 		effect->SetDword("LMcop", lightmapColorOperation);
 		effect->SetDword("LMaop", lightmapAlphaOperation);
-		D3DMATERIAL8 values;
+		D3DMATERIAL9 values;
 		std::memcpy(&values, &material->values, sizeof(values));
 		g_D3D.device->SetMaterial(&values);
 		if (!useRGB && !useAlpha)
@@ -217,7 +217,7 @@ HRESULT Gfx_RS_SK_B_LM::SetMaterial(Gfx_Material* material, DWORD)
 		else g_D3D.SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, 0);
 		if (g_RSSKBaseLightmapState.techniqueChanged)
 		{
-			D3DXTECHNIQUE_DESC selected;
+			Gfx_DX9TechniqueDesc selected;
 			result = effect->FindNextValidTechnique(0, &selected);
 			if (SUCCEEDED(result))
 			{

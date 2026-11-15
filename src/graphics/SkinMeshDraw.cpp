@@ -9,6 +9,7 @@
 #include "ModelNode.hpp"
 #include "../diagnostics/DebugOutput.hpp"
 #include <math.h>
+#include <cstring>
 #include <string.h>
 
 void Gfx_SkinMesh::CopyBoneMatrices(Gfx_AnimationInstance* instance)
@@ -19,7 +20,11 @@ void Gfx_SkinMesh::CopyBoneMatrices(Gfx_AnimationInstance* instance)
 		for (DWORD bone = 0; bone < boneCount; ++bone)
 		{
 			const LONG semantic = LONG(semanticBones[bone]);
-			if (semantic == 212) continue;
+			if (semantic == 212)
+			{
+				D3DXMatrixIdentity(boneMatrices + bone);
+				continue;
+			}
 			const DWORD index = semantic < 212 ? instance->animationObject->semanticBoneIndices[semantic] : 0;
 			memcpy(boneMatrices + bone, matrices + index, 64);
 		}
@@ -45,7 +50,34 @@ void Gfx_SkinMesh::ProcessShadowVolumeRenderSilhouette(
 		Gfx_SkinMeshPkt* packet = entry->packet;
 		if (!packet->castsShadow && !entry->flag) continue;
 		CopyBoneMatrices(packet->animation);
-		HRESULT result = skin->UpdateSkinnedMesh(boneMatrices, NULL, shadowMesh);
+		// D3DX9 skins vertex memory, not ID3DXMesh instances. Keep both
+		// buffers locked for the duration of the update; preserve untouched data.
+		void* sourceVertices = nullptr;
+		HRESULT result = sourceMesh->LockVertexBuffer(D3DLOCK_READONLY, &sourceVertices);
+		if (FAILED(result))
+		{
+			JE::LogDebugString("Gfx_SkinMesh::ProcessShadowVolumeRenderSilhouette - source vertex lock failed %x\n", result);
+			continue;
+		}
+		void* destinationVertices = nullptr;
+		result = shadowMesh->LockVertexBuffer(0, &destinationVertices);
+		if (SUCCEEDED(result))
+		{
+			const size_t bytes = size_t(sourceMesh->GetNumVertices()) * sourceMesh->GetNumBytesPerVertex();
+			std::memcpy(destinationVertices, sourceVertices, bytes);
+			result = skin->UpdateSkinnedMesh(boneMatrices, nullptr,
+				sourceVertices, destinationVertices);
+			const HRESULT unlockResult = shadowMesh->UnlockVertexBuffer();
+			if (SUCCEEDED(result))
+			{
+				result = unlockResult;
+			}
+		}
+		const HRESULT sourceUnlock = sourceMesh->UnlockVertexBuffer();
+		if (SUCCEEDED(result))
+		{
+			result = sourceUnlock;
+		}
 		if (FAILED(result))
 		{
 			JE::LogDebugString("Gfx_SkinMesh::ProcessShadowVolumeRenderSilhouette - UpdateSkinnedMesh failed %x\n", result);
@@ -59,8 +91,9 @@ void Gfx_SkinMesh::ProcessShadowVolumeRenderSilhouette(
 			const D3DXVECTOR3 bounds = root->maximum;
 			const float heightBias = g_GfxSystem->Parameter84() * bounds.y;
 			const float length = g_GfxSystem->Parameter88() * bounds.y;
-			BYTE* vertices;
-			result = shadowMesh->LockVertexBuffer(D3DLOCK_READONLY, &vertices);
+			void* lockedVertices = nullptr;
+			result = shadowMesh->LockVertexBuffer(D3DLOCK_READONLY, &lockedVertices);
+			const BYTE* vertices = static_cast<const BYTE*>(lockedVertices);
 			if (FAILED(result))
 			{
 				JE::LogDebugString("Gfx_SkinMesh::ProcessShadowVolumeRenderSilhouette - failed to lock vertex buffer to compute shadow volume\n");
@@ -187,19 +220,19 @@ void Gfx_SkinMesh::ProcessShadowVolumeRenderSilhouette(
 			D3DXMatrixTranspose(&worldViewProjection, &worldViewProjection);
 			D3DXMatrixInverse(&inverse, NULL, &packet->transform);
 			D3DXMatrixTranspose(&transposeWorld, &packet->transform);
-			g_D3D.device->SetVertexShaderConstant(0, &worldViewProjection, 4);
-			g_D3D.device->SetVertexShaderConstant(4, &inverse, 4);
-			g_D3D.device->SetVertexShaderConstant(8, &transposeWorld, 4);
-			g_D3D.device->SetVertexShaderConstant(12, color, 1);
-			g_D3D.device->SetVertexShaderConstant(13, parameters, 1);
-			g_D3D.device->SetVertexShaderConstant(14, cameraPosition, 1);
-			IDirect3DVertexBuffer8* vertices = NULL;
-			IDirect3DIndexBuffer8* indices = NULL;
+			g_D3D.device->SetVertexShaderConstantF(0, reinterpret_cast<const float*>(&worldViewProjection), 4);
+			g_D3D.device->SetVertexShaderConstantF(4, reinterpret_cast<const float*>(&inverse), 4);
+			g_D3D.device->SetVertexShaderConstantF(8, reinterpret_cast<const float*>(&transposeWorld), 4);
+			g_D3D.device->SetVertexShaderConstantF(12, reinterpret_cast<const float*>(color), 1);
+			g_D3D.device->SetVertexShaderConstantF(13, reinterpret_cast<const float*>(parameters), 1);
+			g_D3D.device->SetVertexShaderConstantF(14, reinterpret_cast<const float*>(cameraPosition), 1);
+			IDirect3DVertexBuffer9* vertices = NULL;
+			IDirect3DIndexBuffer9* indices = NULL;
 			shadowMesh->GetVertexBuffer(&vertices);
 			shadowMesh->GetIndexBuffer(&indices);
 			if (vertices)
-				g_D3D.device->SetStreamSource(0, vertices, D3DXGetFVFVertexSize(shadowMesh->GetFVF()));
-			if (indices) g_D3D.device->SetIndices(indices, 0);
+				g_D3D.device->SetStreamSource(0, vertices, 0, D3DXGetFVFVertexSize(shadowMesh->GetFVF()));
+			if (indices) g_D3D.SetIndices(indices, 0);
 			if (vertices && indices)
 			{
 				Gfx_RenderStyleController* controller = g_RenderStyles[27];
@@ -215,7 +248,7 @@ void Gfx_SkinMesh::ProcessShadowVolumeRenderSilhouette(
 						if (!packet->materialEnabled[range.AttribId]) continue;
 						g_D3D.statistics[3] += range.FaceCount;
 						++g_D3D.statistics[12];
-						g_D3D.device->DrawIndexedPrimitive(D3DPT_TRIANGLELIST,
+						g_D3D.DrawIndexedPrimitive(D3DPT_TRIANGLELIST,
 							range.VertexStart, range.VertexCount, 3 * range.FaceStart, range.FaceCount);
 					}
 				}
@@ -303,7 +336,13 @@ void Gfx_SkinMesh::Render(UINT pass, std::list<Gfx_RenderSubmission16>* submissi
 	}
 	if (softwareBlends)
 	{
-		g_D3D.SetRenderState(D3DRS_SOFTWAREVERTEXPROCESSING, TRUE);
+		const BOOL previousSoftwareVP = g_D3D.device->GetSoftwareVertexProcessing();
+		const HRESULT vpResult = g_D3D.SetSoftwareVertexProcessing(TRUE);
+		if (FAILED(vpResult))
+		{
+			JE::LogDebugString("Gfx_SkinMesh::Render - software VP unavailable (%x)\n", vpResult);
+			return;
+		}
 		for (std::list<Gfx_RenderSubmission16>::iterator entry = submissions->begin();
 			entry != submissions->end(); ++entry)
 		{
@@ -360,6 +399,6 @@ void Gfx_SkinMesh::Render(UINT pass, std::list<Gfx_RenderSubmission16>* submissi
 				controller->styles[controller->activeIndex]->End();
 			}
 		}
-		g_D3D.SetRenderState(D3DRS_SOFTWAREVERTEXPROCESSING, FALSE);
+		g_D3D.SetSoftwareVertexProcessing(previousSoftwareVP);
 	}
 }

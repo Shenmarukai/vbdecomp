@@ -18,7 +18,7 @@ HRESULT Gfx_VertexBuffer::Create(UINT length, DWORD usage, DWORD fvf, D3DPOOL po
 		if (usage & D3DUSAGE_DYNAMIC) pool = D3DPOOL_DEFAULT;
 		capacity = length;
 		this->fvf = fvf;
-		result = g_D3D.device->CreateVertexBuffer(length, usage, fvf, pool, &buffer);
+		result = g_D3D.device->CreateVertexBuffer(length, usage, fvf, pool, &buffer, nullptr);
 	}
 	return result;
 }
@@ -53,7 +53,7 @@ bool Gfx_StreamingVertexBuffer::CanFit(UINT count, UINT stride)
 	return fits;
 }
 
-HRESULT Gfx_StreamingVertexBuffer::Lock(UINT count, UINT stride, BYTE** output,
+HRESULT Gfx_StreamingVertexBuffer::Lock(UINT count, UINT stride, void** output,
 	UINT* base, BYTE discard)
 {
 	const UINT bytes = stride * count;
@@ -94,7 +94,7 @@ HRESULT Gfx_IndexBuffer::Create(UINT length, DWORD usage, D3DFORMAT format, D3DP
 		if (usage & D3DUSAGE_DYNAMIC) pool = D3DPOOL_DEFAULT;
 		capacity = length;
 		indexStride = g_D3D.value0A4;
-		result = g_D3D.device->CreateIndexBuffer(length, usage, format, pool, &buffer);
+		result = g_D3D.device->CreateIndexBuffer(length, usage, format, pool, &buffer, nullptr);
 	}
 	return result;
 }
@@ -122,7 +122,7 @@ Gfx_StreamingIndexBuffer::~Gfx_StreamingIndexBuffer()
 	indexPosition = 0;
 }
 
-HRESULT Gfx_StreamingIndexBuffer::Lock(UINT count, BYTE** output, UINT* base, BYTE discard)
+HRESULT Gfx_StreamingIndexBuffer::Lock(UINT count, void** output, UINT* base, BYTE discard)
 {
 	UINT offset = bytePosition;
 	UINT first = indexPosition;
@@ -150,7 +150,7 @@ HRESULT Gfx_StreamingIndexBuffer::Lock(UINT count, BYTE** output, UINT* base, BY
 
 HRESULT Gfx_VertexBuffer::SetStreamSource(UINT stream, UINT stride) //4900F0.
 {
-	IDirect3DVertexBuffer8* vertexBuffer = buffer;
+	IDirect3DVertexBuffer9* vertexBuffer = buffer;
 	++g_D3D.statistics[9];
-	return g_D3D.device->SetStreamSource(stream, vertexBuffer, stride);
+	return g_D3D.device->SetStreamSource(stream, vertexBuffer, 0, stride);
 }

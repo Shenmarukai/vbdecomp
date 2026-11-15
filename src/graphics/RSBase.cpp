@@ -34,7 +34,7 @@ HRESULT Gfx_RS_Base::Initialize()
 	if (!g_RSBaseState.effect)
 	{
 		ID3DXBuffer* errors;
-		result = D3DXCreateEffect(g_D3D.device, source, sizeof(source) - 1,
+		result = Gfx_CreateDX9Effect(g_D3D.device, source, sizeof(source) - 1,
 			&g_RSBaseState.effect, &errors);
 		if (SUCCEEDED(result))
 		{
@@ -51,7 +51,7 @@ HRESULT Gfx_RS_Base::Initialize()
 			g_RSBaseState.effect->SetDword("bFog", 0);
 			g_RSBaseState.effect->SetDword("DiffuseSource", 1);
 			g_RSBaseState.effect->SetDword("bZEnable", 1);
-			D3DXTECHNIQUE_DESC selected;
+			Gfx_DX9TechniqueDesc selected;
 			result = g_RSBaseState.effect->FindNextValidTechnique(g_RSBaseState.technique, &selected);
 			if (SUCCEEDED(result))
 			{
@@ -159,7 +159,7 @@ HRESULT Gfx_RS_Base::SetMaterial(Gfx_Material* material, DWORD)
 		g_RSBaseState.effect->SetDword("DiffuseSource", material->flagB8 != 0);
 		g_RSBaseState.effect->SetDword("Bcop", colorOperation);
 		g_RSBaseState.effect->SetDword("Baop", alphaOperation);
-		D3DMATERIAL8 values;
+		D3DMATERIAL9 values;
 		std::memcpy(&values, &material->values, sizeof(values));
 		g_D3D.device->SetMaterial(&values);
 		if (useRGB || useAlpha)
@@ -184,7 +184,7 @@ HRESULT Gfx_RS_Base::SetMaterial(Gfx_Material* material, DWORD)
 		else g_D3D.SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, 0);
 		if (g_RSBaseState.techniqueChanged)
 		{
-			D3DXTECHNIQUE_DESC selected;
+			Gfx_DX9TechniqueDesc selected;
 			result = g_RSBaseState.effect->FindNextValidTechnique(g_RSBaseState.technique, &selected);
 			if (SUCCEEDED(result))
 			{

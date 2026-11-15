@@ -6,7 +6,7 @@ HRESULT Gfx_D3D::SetMode(DWORD mode)
 	requestedWindowed = 0;
 	Gfx_D3DMode* selected = &currentDevice->modes[mode];
 	currentMode = selected;
-	D3DPRESENT_PARAMETERS parameters;
+	D3DPRESENT_PARAMETERS parameters = {};
 	parameters.BackBufferWidth = selected->display.Width;
 	parameters.BackBufferHeight = selected->display.Height;
 	parameters.BackBufferFormat = selected->backBufferFormat;
@@ -19,7 +19,7 @@ HRESULT Gfx_D3D::SetMode(DWORD mode)
 	parameters.AutoDepthStencilFormat = selected->depthStencilFormat;
 	parameters.Flags = 0;
 	parameters.FullScreen_RefreshRateInHz = selected->display.RefreshRate;
-	parameters.FullScreen_PresentationInterval = sync ? D3DPRESENT_INTERVAL_ONE : D3DPRESENT_INTERVAL_IMMEDIATE;
+	parameters.PresentationInterval = sync ? D3DPRESENT_INTERVAL_ONE : D3DPRESENT_INTERVAL_IMMEDIATE;
 	//503D90 does not publish currentModeIndex, including after successful reset.
 	return ResetDevice(&parameters);
 }
@@ -28,13 +28,13 @@ HRESULT Gfx_D3D::SetWindowMode(DWORD width, DWORD height)
 {
 	Gfx_D3DAdapterInfo* adapter = &adapters[currentAdapter];
 	requestedWindowed = 1;
-	D3DPRESENT_PARAMETERS parameters;
+	D3DPRESENT_PARAMETERS parameters = {};
 	parameters.Windowed = TRUE;
 	parameters.SwapEffect = D3DSWAPEFFECT_DISCARD;
 	parameters.BackBufferFormat = adapter->desktop.Format;
 	parameters.AutoDepthStencilFormat = adapter->windowDepthStencil;
 	parameters.FullScreen_RefreshRateInHz = 0;
-	parameters.FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
+	parameters.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
 	currentMode = &windowMode;
 	currentMode->behavior = adapter->windowBehavior;
 	Gfx_D3DMode* mode = currentMode;

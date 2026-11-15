@@ -2,8 +2,9 @@
 
 #include "EngineRegistry.hpp"
 #include "network/Types.hpp"
+
 // The original allocation map uses the supplied VC7 hash container.
-#include <hash_map>
+//#include <hash_map>
 
 namespace F3
 {
@@ -16,7 +17,8 @@ namespace F3
 	};
 
 	//Native uses signed32 address keys, list nodes and bucket-vector ownership.
-	typedef std::hash_map<JE::Net::Int32, MemoryPoolNode*> MemoryAllocationMap;
+	//typedef std::hash_map<JE::Net::Int32, MemoryPoolNode*> MemoryAllocationMap;
+	typedef std::unordered_map<JE::Net::Int32, MemoryPoolNode*> MemoryAllocationMap;
 	class MemoryPool
 	{
 	public:

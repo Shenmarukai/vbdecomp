@@ -1,6 +1,6 @@
 #include "Octree.hpp"
 #include <new>
-#include <d3dx8math.h>
+#include "d3dx9math.h"
 
 D3DXVECTOR3 GfxAddVectors(const float* first, const float* second);
 D3DXVECTOR3 GfxSubtractVectors(const float* first, const float* second);

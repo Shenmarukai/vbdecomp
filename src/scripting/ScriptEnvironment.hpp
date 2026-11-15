@@ -2,7 +2,7 @@
 
 #include <windows.h>
 #include "amx.h"
-#include <d3dx8math.h>
+#include "d3dx9math.h"
 
 namespace JE
 {

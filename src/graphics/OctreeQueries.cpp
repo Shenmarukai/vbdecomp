@@ -1,5 +1,5 @@
 #include "Octree.hpp"
-#include <d3dx8.h>
+#include "d3dx9.h"
 #include <cstddef>
 #include <float.h>
 #include <stdexcept>

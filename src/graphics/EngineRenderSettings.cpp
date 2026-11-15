@@ -86,8 +86,8 @@ void Gfx_Engine::SetLinearFiltering(BYTE enabled)
 	{
 		while (stage < g_D3D.currentDevice->caps.MaxTextureBlendStages)
 		{
-			g_D3D.SetTextureStageState(stage, D3DTSS_MAGFILTER, D3DTEXF_LINEAR);
-			g_D3D.SetTextureStageState(stage, D3DTSS_MINFILTER, D3DTEXF_LINEAR);
+			g_D3D.SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+			g_D3D.SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
 			++stage;
 		}
 	}
@@ -95,8 +95,8 @@ void Gfx_Engine::SetLinearFiltering(BYTE enabled)
 	{
 		while (stage < g_D3D.currentDevice->caps.MaxTextureBlendStages)
 		{
-			g_D3D.SetTextureStageState(stage, D3DTSS_MAGFILTER, D3DTEXF_POINT);
-			g_D3D.SetTextureStageState(stage, D3DTSS_MINFILTER, D3DTEXF_POINT);
+			g_D3D.SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+			g_D3D.SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_POINT);
 			++stage;
 		}
 	}
@@ -109,7 +109,7 @@ void Gfx_Engine::SetMipFiltering(BYTE enabled)
 	{
 		while (stage < g_D3D.currentDevice->caps.MaxTextureBlendStages)
 		{
-			g_D3D.SetTextureStageState(stage, D3DTSS_MIPFILTER, D3DTEXF_LINEAR);
+			g_D3D.SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
 			++stage;
 		}
 	}
@@ -117,7 +117,7 @@ void Gfx_Engine::SetMipFiltering(BYTE enabled)
 	{
 		while (stage < g_D3D.currentDevice->caps.MaxTextureBlendStages)
 		{
-			g_D3D.SetTextureStageState(stage, D3DTSS_MIPFILTER, D3DTEXF_NONE);
+			g_D3D.SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_NONE);
 			++stage;
 		}
 	}

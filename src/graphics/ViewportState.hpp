@@ -1,6 +1,6 @@
 #pragma once
 
-#include <d3d8.h>
+#include "d3d9.h"
 #include <list>
 
 class Gfx_Viewport;

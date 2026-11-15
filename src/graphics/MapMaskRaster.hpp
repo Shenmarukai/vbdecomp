@@ -1,5 +1,5 @@
 #pragma once
-#include <d3d8.h>
+#include "d3d9.h"
 class Gfx_Texture;
 namespace JE { class AreaMap; struct AreaMapBits; }
 namespace MapMaskRaster

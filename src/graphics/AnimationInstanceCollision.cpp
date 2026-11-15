@@ -4,7 +4,7 @@
 #include "SystemInterface.hpp"
 #include "../diagnostics/DebugOutput.hpp"
 
-#include <dxerr8.h>
+#include "DX9Errors.hpp"
 #include <float.h>
 #include <string.h>
 
@@ -90,7 +90,7 @@ void Gfx_AnimationInstance::RenderOBB(const D3DXMATRIX& transform) //4A4F10.
 	Gfx_StreamingVertexBuffer* vertexStream = g_BufferManager->vertexStream;
 	Gfx_StreamingIndexBuffer* indexStream = g_BufferManager->indexStream;
 	WORD edges[24] = {0,1,1,2,2,3,3,0,4,5,5,6,6,7,7,4,0,4,1,5,2,6,3,7};
-	g_D3D.device->SetVertexShader(D3DFVF_XYZ | D3DFVF_DIFFUSE);
+	g_D3D.device->SetFVF(D3DFVF_XYZ | D3DFVF_DIFFUSE);
 	g_D3D.SetTexture(0, NULL);
 	g_D3D.SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_DISABLE);
 	g_D3D.SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
@@ -101,7 +101,7 @@ void Gfx_AnimationInstance::RenderOBB(const D3DXMATRIX& transform) //4A4F10.
 	UINT vertexBase;
 	BYTE vertexDiscard = vertexStream->CanFit(8 * mesh->boneBindingCount, 16);
 	HRESULT result = vertexStream->Lock(8 * mesh->boneBindingCount, 16,
-		reinterpret_cast<BYTE**>(&vertices), &vertexBase,
+		reinterpret_cast<void**>(&vertices), &vertexBase,
 		vertexDiscard);
 	if (FAILED(result))
 	{
@@ -113,7 +113,7 @@ void Gfx_AnimationInstance::RenderOBB(const D3DXMATRIX& transform) //4A4F10.
 	WORD* indices;
 	UINT indexBase;
 	result = indexStream->Lock(24 * mesh->boneBindingCount,
-		reinterpret_cast<BYTE**>(&indices), &indexBase, indexDiscard);
+		reinterpret_cast<void**>(&indices), &indexBase, indexDiscard);
 	if (FAILED(result))
 	{
 		vertexStream->buffer->Unlock();
@@ -166,8 +166,8 @@ void Gfx_AnimationInstance::RenderOBB(const D3DXMATRIX& transform) //4A4F10.
 	vertexStream->buffer->Unlock();
 	indexStream->buffer->Unlock();
 	++g_D3D.statistics[9];
-	g_D3D.device->SetStreamSource(0, vertexStream->buffer, 16);
-	g_D3D.device->SetIndices(indexStream->buffer, vertexBase);
+	g_D3D.device->SetStreamSource(0, vertexStream->buffer, 0, 16);
+	g_D3D.SetIndices(indexStream->buffer, vertexBase);
 	g_D3D.DrawIndexedPrimitive(D3DPT_LINELIST, 0, 8 * mesh->boneBindingCount, indexBase, 12 * mesh->boneBindingCount);
 	g_D3D.SetRenderState(D3DRS_LIGHTING, g_GfxSystem->Lighting());
 	flagC4 = 0;

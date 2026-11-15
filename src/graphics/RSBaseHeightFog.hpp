@@ -2,12 +2,12 @@
 
 #include "RenderStyle.hpp"
 #include "Material.hpp"
-#include <d3dx8effect.h>
+#include "DX9EffectCompat.hpp"
 
 struct Gfx_RS_BaseHeightFogState
 {
 	DWORD users;
-	ID3DXEffect* effect;
+	Gfx_DX9Effect* effect;
 	D3DXEFFECT_DESC description;
 	LPCSTR technique;
 	BYTE usesShader, techniqueChanged;

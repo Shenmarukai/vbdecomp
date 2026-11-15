@@ -3,7 +3,7 @@
 #include "resources/ResourceSystem.hpp"
 #include "resources/ResourceFormats.hpp"
 #include "graphics/SystemInterface.hpp"
-#include <d3dx8.h>
+#include "d3dx9.h"
 #include <string.h>
 
 namespace JE { namespace ModelServices

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <d3d8.h>
+#include "d3d9.h"
 #include <string>
 
 // Original frame array element: its string has normal compiler/library lifetime.
@@ -16,7 +16,7 @@ struct Gfx_TextureFrame
 	D3DPOOL pool; // +38.
 	DWORD value3C; // +3C; mip level saved by LockRect, consumed by UnlockRect.
 	BYTE flag40; // +40; raw locked flag; padding+41..43 remains unwritten.
-	IDirect3DTexture8* texture; // +44; owned COM reference.
+	IDirect3DTexture9* texture; // +44; owned COM reference.
 };
 
 class Gfx_Texture

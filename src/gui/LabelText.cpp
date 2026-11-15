@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <new>
-#include <d3dx8mesh.h>
+#include "d3dx9mesh.h"
 
 namespace GUI
 {

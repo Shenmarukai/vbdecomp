@@ -1,6 +1,6 @@
 #pragma once
 #include "GameScriptNatives.hpp"
-#include <d3dx8math.h>
+#include "d3dx9math.h"
 
 namespace F3
 {

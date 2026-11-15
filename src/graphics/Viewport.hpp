@@ -1,6 +1,6 @@
 #pragma once
 
-#include <d3d8.h>
+#include "d3d9.h"
 #include "Camera.hpp"
 #include "MeshData.hpp"
 #include "UIVertex.hpp"
@@ -18,12 +18,12 @@ public:
 	~Gfx_Viewport(); // 0x4296C0; ordinary destruction, not owner storage deletion.
 	HRESULT SetViewport(UINT x, UINT y, UINT width, UINT height, float minimumZ, float maximumZ); //4248F0.
 	void SetClearColor(BYTE red, BYTE green, BYTE blue, BYTE alpha); //424DB0.
-	HRESULT SetViewport(const D3DVIEWPORT8& descriptor); // 0x424880; forwards renderer result.
+	HRESULT SetViewport(const D3DVIEWPORT9& descriptor); // 0x424880; forwards renderer result.
 	void RebuildQuad(); // 0x4BFFD0; borrowed embedded vertices, actual mesh ownership.
 	void Render(BYTE clear); // 0x4BFF20; camera/fog/clear then live renderer; incidental AL unused.
 	void SetCameraController(Gfx_CamCtrl* controller); // 0x429D20; borrowed owner/keys.
 
-	D3DVIEWPORT8 viewport; // +00..17; actual six-word SDK layout copied by0x424880.
+	D3DVIEWPORT9 viewport; // +00..17; actual six-word SDK layout copied by0x424880.
 	float aspect; // +18.
 	BYTE flag1C; // +1C; padding+1D..1F remains unwritten.
 	DWORD clearFlags; // +20; source spelling hypothesis, initialized3.

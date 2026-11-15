@@ -6,7 +6,7 @@ BYTE g_GfxDebugFrames; //Original70C968; canonical static-zero global, shared by
 
 bool Gfx_Engine::RenderFrame(BYTE clearQueues, BYTE present)
 {
-	IDirect3DDevice8* beginDevice = g_D3D.device;
+	IDirect3DDevice9* beginDevice = g_D3D.device;
 	bool result = false;
 	++g_D3D.statistics[6];
 	if (SUCCEEDED(beginDevice->BeginScene()))

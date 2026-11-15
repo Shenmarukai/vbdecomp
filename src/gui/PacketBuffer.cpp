@@ -1,7 +1,7 @@
 #include "PacketBuffer.hpp"
 #include "PacketStorage.hpp"
 #include "gui/Manager.hpp"
-#include <d3dx8mesh.h>
+#include "d3dx9mesh.h"
 
 // Recovered proprietary batch configuration; source spellings remain hypotheses.
 // The real SDK provides D3DXGetFVFVertexSize. The actual mesh/material/instance

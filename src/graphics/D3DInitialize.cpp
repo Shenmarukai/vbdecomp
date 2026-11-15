@@ -43,20 +43,20 @@ Gfx_D3D *Gfx_D3D::Initialize(BYTE allowReference)
 	statistics[10] = statistics[11] = statistics[12] = statistics[13] = 0;
 	verticalSync = 1;
 	inverseFrequency = reciprocal;
-	direct3D = Direct3DCreate8(D3D_SDK_VERSION);
+	direct3D = Direct3DCreate9(D3D_SDK_VERSION);
 	if (direct3D)
 	{
 		JE::LogDebugString("Created D3D\n");
 		EnumerateDevices(allowReference);
 		return this;
 	}
-	JE::FatalError("Failed to Create D3D!  Please ensure that DX8.1 is installed properly.\n");
+	JE::FatalError("Failed to Create D3D!  Please ensure that Direct3D 9 is installed properly.\n");
 	return this;
 }
 
 namespace
 {
-static bool CheckDeviceRequirements(Gfx_D3DDeviceInfo* info, IDirect3D8*,
+static bool CheckDeviceRequirements(Gfx_D3DDeviceInfo* info, IDirect3D9*,
 	UINT adapter, const Gfx_D3DFormatInfo& format)
 {
 	if (info->type == D3DDEVTYPE_HAL)
@@ -217,7 +217,7 @@ void Gfx_D3D::EnumerateDevices(BYTE allowReference)
 {
 	DWORD count = direct3D->GetAdapterCount();
 	if (!count)
-		JE::FatalError("No D3D Adapters found!  Please ensure that DX8.1 device drivers is "
+		JE::FatalError("No D3D Adapters found!  Please ensure that Direct3D 9 device drivers is "
 					   "installed properly.\n");
 	std::vector<Gfx_D3DFormatInfo> formats;
 	formats.reserve(5);
@@ -235,31 +235,57 @@ void Gfx_D3D::EnumerateDevices(BYTE allowReference)
 							   result);
 			continue;
 		}
-		DWORD available = direct3D->GetAdapterModeCount(a);
-		D3DDISPLAYMODE *modes = new D3DDISPLAYMODE[available];
-		if (!modes)
-			JE::FatalError("Out of memory - could not allocate pD3D_displaymodes\n");
-		DWORD kept = 0;
-		for (DWORD m = 0; m < available; ++m)
+		// Direct3D9 enumerates modes per display format, unlike Direct3D8.
+		// Include the desktop format and the two standard fullscreen formats.
+		const D3DFORMAT candidateFormats[] =
 		{
-			D3DDISPLAYMODE mode;
-			result = direct3D->EnumAdapterModes(a, m, &mode);
-			if (FAILED(result))
-				JE::LogDebugString("Gfx_D3D::EnumDevices - EnumAdapterModes() failed! Code: %x\n",
-								   result);
-			else if (mode.Width >= 640 && mode.Height >= 480)
+			adapter->desktop.Format, D3DFMT_X8R8G8B8, D3DFMT_R5G6B5
+		};
+		std::vector<D3DDISPLAYMODE> foundModes;
+		for (UINT formatIndex = 0; formatIndex < 3; ++formatIndex)
+		{
+			const D3DFORMAT candidate = candidateFormats[formatIndex];
+			bool alreadyVisited = false;
+			for (UINT previous = 0; previous < formatIndex; ++previous)
 			{
-				modes[kept++] = mode;
-				DWORD f = 0;
-				while (f < formats.size() && formats[f].display != mode.Format)
-					++f;
-				if (f == formats.size())
+				if (candidateFormats[previous] == candidate)
 				{
-					Gfx_D3DFormatInfo format; // Other bytes intentionally unwritten.
-					format.display = format.backBuffer = mode.Format;
-					formats.push_back(format);
+					alreadyVisited = true;
 				}
 			}
+			if (alreadyVisited) continue;
+			const UINT available = direct3D->GetAdapterModeCount(a, candidate);
+			for (UINT m = 0; m < available; ++m)
+			{
+				D3DDISPLAYMODE mode = {};
+				result = direct3D->EnumAdapterModes(a, candidate, m, &mode);
+				if (FAILED(result))
+				{
+					JE::LogDebugString("Gfx_D3D::EnumDevices - EnumAdapterModes() failed: %x\n", result);
+					continue;
+				}
+				if (mode.Width >= 640 && mode.Height >= 480)
+				{
+					foundModes.push_back(mode);
+					bool hasFormat = false;
+					for (const Gfx_D3DFormatInfo& format : formats)
+					{
+						if (format.display == mode.Format) hasFormat = true;
+					}
+					if (!hasFormat)
+					{
+						Gfx_D3DFormatInfo format = {};
+						format.display = format.backBuffer = mode.Format;
+						formats.push_back(format);
+					}
+				}
+			}
+		}
+		DWORD kept = static_cast<DWORD>(foundModes.size());
+		D3DDISPLAYMODE* modes = new D3DDISPLAYMODE[kept];
+		for (DWORD m = 0; m < kept; ++m)
+		{
+			modes[m] = foundModes[m];
 		}
 		std::qsort(modes, kept, sizeof(D3DDISPLAYMODE), CompareD3DDisplayModes);
 		const D3DDEVTYPE types[] = {D3DDEVTYPE_HAL, D3DDEVTYPE_REF};
@@ -293,7 +319,13 @@ void Gfx_D3D::EnumerateDevices(BYTE allowReference)
 				std::memcpy(info->description, "???", 4);
 				JE::LogDebugString("Gfx_D3D::EnumDevices - Unknown type for device: #%d.\n", t);
 			}
-			info->windowed = (info->caps.Caps2 & D3DCAPS2_CANRENDERWINDOWED) != 0;
+
+
+			/* D3DCAPS2_CANRENDERWINDOWED removed in DX9 (Adam) */
+			//info->windowed = (info->caps.Caps2 & D3DCAPS2_CANRENDERWINDOWED) != 0;
+			result = direct3D->CheckDeviceType(a, info->caps.DeviceType, adapter->desktop.Format, adapter->desktop.Format, TRUE);
+			info->windowed = SUCCEEDED(result);
+
 			info->vertexShader = ((info->caps.VertexShaderVersion >> 8) & 255) != 0;
 			info->pixelShader = ((info->caps.PixelShaderVersion >> 8) & 255) != 0;
 			info->guardBand = info->caps.GuardBandLeft != 0 && info->caps.GuardBandRight != 0 &&

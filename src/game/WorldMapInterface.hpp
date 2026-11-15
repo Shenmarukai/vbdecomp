@@ -19,7 +19,9 @@ namespace F3
 	class WorldMapRouteRecord
 	{
 		friend class WorldMapInterface;
-		void ReleaseChild(); //458770, declared-only until the actual child is known.
+
+		// I could not find the definition, so making it a no-op for now (Adam)
+		void ReleaseChild() {}; //458770, declared-only until the actual child is known.
 		WorldMapRouteRecord();
 		~WorldMapRouteRecord();
 		WorldMapRouteRecord(const WorldMapRouteRecord&);

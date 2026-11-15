@@ -3,7 +3,7 @@
 #include "resources/ResourceLock.hpp"
 #include <dsound.h>
 #include <list>
-#include <d3dx8.h>
+#include "d3dx9.h"
 
 namespace JE
 {

@@ -16,7 +16,7 @@ Gfx_Texture::~Gfx_Texture()
 	{
 		for (int i = 0; i < frameCount; ++i)
 		{
-			IDirect3DTexture8*& texture = frames[i].texture;
+			IDirect3DTexture9*& texture = frames[i].texture;
 			if (texture)
 			{
 				texture->Release();
@@ -33,7 +33,7 @@ void Gfx_Texture::ResizeFrames(int count)
 	{
 		for (int i = 0; i < frameCount; ++i)
 		{
-			IDirect3DTexture8*& texture = frames[i].texture;
+			IDirect3DTexture9*& texture = frames[i].texture;
 			if (texture)
 			{
 				texture->Release();

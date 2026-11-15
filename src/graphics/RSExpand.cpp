@@ -23,18 +23,11 @@ namespace
 "ColorOp[ 1 ]\t\t= Disable;\n" \
 "AlphaOp[ 1 ]\t\t= Disable;\n" \
 "VertexShader =\n" \
-"decl\n" \
-"{\n" \
-"stream 0;\n" \
-"float\t\tv0[ 3 ];\n" \
-"float\t\tv3[ 3 ];\n" \
-"D3DCOLOR\tv5;\n" \
-"float\t\tv7[ 2 ];\n" \
-"float\t\tv8[ 2 ];\n" \
-"}\n" \
 "asm\n" \
 "{\n" \
-"vs.1.0\n" \
+"vs_1_1\n" \
+"dcl_position v0\n" \
+"dcl_normal v3\n" \
 "mul\tr0, v3, c[ 13 ].xxxy\n" \
 "add\tr0, v0, r0\n" \
 "m4x4\toPos, r0, c[ 0 ]\n" \
@@ -67,17 +60,11 @@ namespace
 "ColorOp[ 1 ]\t\t= Disable;\n" \
 "AlphaOp[ 1 ]\t\t= Disable;\n" \
 "VertexShader =\n" \
-"decl\n" \
-"{\n" \
-"stream 0;\n" \
-"float\t\tv0[ 3 ];\n" \
-"float\t\tv3[ 3 ];\n" \
-"D3DCOLOR\tv5;\n" \
-"float\t\tv7[ 2 ];\n" \
-"}\n" \
 "asm\n" \
 "{\n" \
-"vs.1.0\n" \
+"vs_1_1\n" \
+"dcl_position v0\n" \
+"dcl_normal v3\n" \
 "mul\tr0, v3, c[ 13 ].xxxy\n" \
 "add\tr0, v0, r0\n" \
 "m4x4\toPos, r0, c[ 0 ]\n" \
@@ -96,14 +83,13 @@ namespace
 "};\n" \
 "}\n" \
 "}\n"
-	typedef char ExactEffectSize[(sizeof(GFX_RS_EXPAND_SOURCE) - 1 == 1385) ? 1 : -1];
+	typedef char ExactEffectSize[(sizeof(GFX_RS_EXPAND_SOURCE) - 1 == 1269) ? 1 : -1];
 }
 
 Gfx_RS_ExpandState g_RSExpandState;
 
 Gfx_RS_Expand::Gfx_RS_Expand()
-{
-}
+{}
 
 Gfx_RS_Expand::~Gfx_RS_Expand()
 {
@@ -116,7 +102,7 @@ HRESULT Gfx_RS_Expand::Initialize()
 	if (g_RSExpandState.effect)
 		return S_OK;
 	ID3DXBuffer* errors;
-	HRESULT result = D3DXCreateEffect(g_D3D.device, GFX_RS_EXPAND_SOURCE, sizeof(GFX_RS_EXPAND_SOURCE) - 1,
+	HRESULT result = Gfx_CreateDX9Effect(g_D3D.device, GFX_RS_EXPAND_SOURCE, sizeof(GFX_RS_EXPAND_SOURCE) - 1,
 		&g_RSExpandState.effect, &errors);
 	if (SUCCEEDED(result))
 	{
@@ -132,8 +118,8 @@ HRESULT Gfx_RS_Expand::Initialize()
 		if (FAILED(result))
 			JE::FatalError("Gfx_RS_Expand::Gfx_RS_Expand - Failed to initialize technique (%x)\n", result);
 		if (!g_D3D.currentDevice->vertexShader)
-			g_D3D.SetRenderState(D3DRS_SOFTWAREVERTEXPROCESSING, 1);
-		D3DXTECHNIQUE_DESC selected;
+			g_D3D.SetSoftwareVertexProcessing(TRUE);
+		Gfx_DX9TechniqueDesc selected;
 		result = g_RSExpandState.effect->FindNextValidTechnique(g_RSExpandState.technique, &selected);
 		if (SUCCEEDED(result))
 		{
@@ -146,7 +132,7 @@ HRESULT Gfx_RS_Expand::Initialize()
 		else
 			JE::FatalError("Gfx_RS_Expand::Gfx_RS_Expand - Failed to find valid technique (%x)\n", result);
 		if (!g_D3D.currentDevice->vertexShader)
-			g_D3D.SetRenderState(D3DRS_SOFTWAREVERTEXPROCESSING, 0);
+			g_D3D.SetSoftwareVertexProcessing(FALSE);
 	}
 	else
 	{
@@ -217,7 +203,7 @@ HRESULT Gfx_RS_Expand::SetMaterial(Gfx_Material*, DWORD)
 	}
 	if (g_RSExpandState.techniqueChanged)
 	{
-		D3DXTECHNIQUE_DESC selected;
+		Gfx_DX9TechniqueDesc selected;
 		result = g_RSExpandState.effect->FindNextValidTechnique(g_RSExpandState.technique, &selected);
 		if (SUCCEEDED(result))
 		{

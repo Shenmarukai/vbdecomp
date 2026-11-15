@@ -6,7 +6,7 @@
 #include "gui/Manager.hpp"
 #include "resources/ResourceMemoryStream.hpp"
 #include "diagnostics/DebugOutput.hpp"
-#include <dxerr8.h>
+#include "DX9Errors.hpp"
 #include <string>
 
 void Graphics::SetShadowMode(DWORD requested)

@@ -6,7 +6,7 @@
 #include "SystemInterface.hpp"
 #include "diagnostics/DebugOutput.hpp"
 #include <cstring>
-#include <dxerr8.h>
+#include "DX9Errors.hpp"
 
 void Octree2Gfx::RenderFloorCB()
 {
@@ -45,8 +45,8 @@ void Octree2Gfx::RenderFloorCB()
 	g_D3D.SetTexture(0, g_GfxSystem->ProjectedShadowRenderTexture());
 	g_D3D.SetTextureStageState(0, D3DTSS_TEXCOORDINDEX, D3DTSS_TCI_CAMERASPACEPOSITION);
 	g_D3D.SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_COUNT2);
-	g_D3D.SetTextureStageState(0, D3DTSS_ADDRESSU, D3DTADDRESS_CLAMP);
-	g_D3D.SetTextureStageState(0, D3DTSS_ADDRESSV, D3DTADDRESS_CLAMP);
+	g_D3D.SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
+	g_D3D.SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
 	g_D3D.SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
 	g_D3D.SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
 	g_D3D.SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
@@ -55,7 +55,7 @@ void Octree2Gfx::RenderFloorCB()
 	g_D3D.SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
 	g_D3D.SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
 	g_D3D.SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
-	g_D3D.device->SetVertexShader(0x252);
+	g_D3D.device->SetFVF(0x252);
 
 	//Captured once before the loop, as original BufferManager+30.
 	Gfx_StreamingIndexBuffer* stream = g_BufferManager->indexStream;
@@ -76,7 +76,7 @@ void Octree2Gfx::RenderFloorCB()
 		{
 			OctreeFloorSegment& segment = floorGroups[group].segments[index];
 			if (!segment.visible) continue;
-			BYTE* destination;
+			void* destination;
 			UINT base;
 			HRESULT result = stream->Lock(segment.indexCount, &destination, &base, 0);
 			if (FAILED(result))
@@ -88,11 +88,11 @@ void Octree2Gfx::RenderFloorCB()
 			//Always WORD source/copy, even if stream.indexStride differs.
 			std::memcpy(destination, segment.indices, 2 * segment.indexCount);
 			stream->buffer->Unlock(); //HRESULT ignored.
-			g_D3D.device->SetIndices(stream->buffer, 0);
+			g_D3D.SetIndices(stream->buffer, 0);
 			const DWORD triangles = segment.triangleCount;
 			++g_D3D.statistics[12];
 			g_D3D.statistics[3] += triangles;
-			result = g_D3D.device->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, vertexCount, base, triangles);
+			result = g_D3D.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, vertexCount, base, triangles);
 			if (FAILED(result))
 				JE::LogDebugString("Octree2Gfx::RenderFloorCB - DIP failed! (%x %s)\n",
 					result, DXGetErrorDescription8A(result));
@@ -100,8 +100,8 @@ void Octree2Gfx::RenderFloorCB()
 	}
 	g_D3D.SetTextureStageState(0, D3DTSS_TEXCOORDINDEX, 0);
 	g_D3D.SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, 0);
-	g_D3D.SetTextureStageState(0, D3DTSS_ADDRESSU, D3DTADDRESS_WRAP);
-	g_D3D.SetTextureStageState(0, D3DTSS_ADDRESSV, D3DTADDRESS_WRAP);
+	g_D3D.SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
+	g_D3D.SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
 	g_D3D.SetRenderState(D3DRS_SHADEMODE, D3DSHADE_GOURAUD);
 	if (g_GfxSystem->Lighting()) g_D3D.SetRenderState(D3DRS_LIGHTING, 1);
 	if (g_GfxSystem->FogEnabled(NULL)) g_D3D.SetRenderState(D3DRS_FOGENABLE, 1);

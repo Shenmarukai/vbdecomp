@@ -1,3 +1,4 @@
+#include "DX9RenderTarget.hpp"
 #include "Engine.hpp"
 #include "AutomapDimensions.hpp"
 #include "Camera.hpp"
@@ -5,7 +6,7 @@
 #include "Texture.hpp"
 #include "Viewport.hpp"
 #include "diagnostics/DebugOutput.hpp"
-#include <dxerr8.h>
+#include "DX9Errors.hpp"
 
 namespace
 {
@@ -21,7 +22,7 @@ HRESULT Gfx_Viewport::SetViewport(UINT x, UINT y, UINT width, UINT height, float
 {
 	if (!width) width = viewport.Width;
 	if (!height) height = viewport.Height;
-	D3DVIEWPORT8 descriptor;
+	D3DVIEWPORT9 descriptor;
 	descriptor.X = x;
 	descriptor.Y = y;
 	descriptor.Width = width;
@@ -53,14 +54,14 @@ void Gfx_Engine::RenderAutomap()
 	const float width = float(double(levelMaximum.x) - levelMinimum.x);
 	const float height = float(double(levelMaximum.z) - levelMinimum.z);
 	const float cameraY = float(double(levelMaximum.y) + 10.0);
-	IDirect3DSurface8* originalTarget = NULL;
-	IDirect3DSurface8* originalDepth = NULL;
+	IDirect3DSurface9* originalTarget = NULL;
+	IDirect3DSurface9* originalDepth = NULL;
 	if (!automapRenderTarget || !automapDepthSurface)
 	{
 		JE::LogDebugString("Gfx_Engine::RenderAutomap - invalid Automap RenderTarget and DepthStencil\n");
 		return;
 	}
-	HRESULT result = g_D3D.device->GetRenderTarget(&originalTarget);
+	HRESULT result = g_D3D.device->GetRenderTarget(0, &originalTarget);
 	if (FAILED(result))
 	{
 		AutomapFailure("failed to get original render target", result);
@@ -83,7 +84,7 @@ void Gfx_Engine::RenderAutomap()
 		}
 		return;
 	}
-	result = g_D3D.device->SetRenderTarget(automapRenderTarget, automapDepthSurface);
+	result = Gfx_SetDX9RenderTarget(g_D3D.device, automapRenderTarget, automapDepthSurface);
 	if (FAILED(result))
 	{
 		AutomapFailure("SetRenderTarget failed", result);
@@ -96,7 +97,7 @@ void Gfx_Engine::RenderAutomap()
 		viewport->clearFlags = depthFormat == D3DFMT_D15S1 || depthFormat == D3DFMT_D24S8
 			? D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER | D3DCLEAR_STENCIL
 			: D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER;
-		const D3DVIEWPORT8 originalViewport = viewport->viewport;
+		const D3DVIEWPORT9 originalViewport = viewport->viewport;
 		viewport->SetViewport(0, 0, automapWidth, automapHeight, 0.0f, 1.0f);
 		const D3DCOLOR clearColor = viewport->clearColor;
 		viewport->SetClearColor(0, 0, 0, 255);
@@ -122,7 +123,7 @@ void Gfx_Engine::RenderAutomap()
 		RenderFrame(0, 0);
 		statistics = originalStatistics;
 		SetFogOfWarEnabled(originalFogOfWar, NULL);
-		g_D3D.device->SetRenderTarget(originalTarget, originalDepth);
+		Gfx_SetDX9RenderTarget(g_D3D.device, originalTarget, originalDepth);
 		viewport->SetViewport(originalViewport);
 		viewport->SetClearColor(BYTE(clearColor >> 16), BYTE(clearColor >> 8), BYTE(clearColor), BYTE(clearColor >> 24));
 		viewport->clearFlags = clearFlags;
@@ -147,9 +148,9 @@ void Gfx_Engine::RenderAutomap()
 		{
 			Gfx_Texture* texture = LookupTexture(automapTexture);
 			texture->name = "[AutomapTexture]";
-			IDirect3DTexture8* deviceTexture = texture->frameCount > 0
+			IDirect3DTexture9* deviceTexture = texture->frameCount > 0
 				? texture->frames[0].texture : NULL;
-			IDirect3DSurface8* outputSurface = NULL;
+			IDirect3DSurface9* outputSurface = NULL;
 			//The original does not test this HRESULT before CopyRects.
 			deviceTexture->GetSurfaceLevel(0, &outputSurface);
 			RECT sourceRect;
@@ -162,8 +163,11 @@ void Gfx_Engine::RenderAutomap()
 				- UINT(static_cast<__int64>(double(automapWidth) * 0.5)));
 			destination.y = LONG((textureHeight >> 1)
 				- UINT(static_cast<__int64>(double(automapHeight) * 0.5)));
-			result = g_D3D.device->CopyRects(automapRenderTarget, &sourceRect, 1,
-				outputSurface, &destination);
+			RECT destinationRect = { destination.x, destination.y,
+                destination.x + sourceRect.right, destination.y + sourceRect.bottom };
+            result = D3DXLoadSurfaceFromSurface(outputSurface, nullptr,
+                &destinationRect, automapRenderTarget, nullptr, &sourceRect,
+                D3DX_FILTER_NONE, 0);
 			if (FAILED(result))
 			{
 				AutomapFailure("failed to copy surface", result);

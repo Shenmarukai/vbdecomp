@@ -15,7 +15,7 @@ void Gfx_RenderManager::DrawGroup(UINT pass, Gfx_RenderGroup* group, BYTE shadow
 	// This identity is captured before the SDK callback. Bounds are read from
 	// that same mesh afterward, even if the callback changes group.mesh.
 	Gfx_MeshData* initialMesh = group->mesh;
-	g_D3D.device->SetVertexShader(initialMesh->vertexFVF);
+	g_D3D.device->SetFVF(initialMesh->vertexFVF);
 	D3DXVECTOR3 bounds;
 	std::memcpy(&bounds, initialMesh->unknown54 + 3, sizeof(bounds));
 	const float shadowYOffset = g_GfxSystem->Parameter84() * bounds.y;
@@ -128,12 +128,12 @@ void Gfx_RenderManager::DrawGroup(UINT pass, Gfx_RenderGroup* group, BYTE shadow
 						D3DXMatrixTranspose(&constants, &constants);
 						D3DXMatrixInverse(&inverseWorld, 0, worldPointer);
 						D3DXMatrixTranspose(&transposedWorld, worldPointer);
-						g_D3D.device->SetVertexShaderConstant(0, &constants, 4);
-						g_D3D.device->SetVertexShaderConstant(4, &inverseWorld, 4);
-						g_D3D.device->SetVertexShaderConstant(8, &transposedWorld, 4);
-						g_D3D.device->SetVertexShaderConstant(12, &vectors.rgb, 1);
-						g_D3D.device->SetVertexShaderConstant(13, &vectors.parameters, 1);
-						g_D3D.device->SetVertexShaderConstant(14, &vectors.cameraPosition, 1);
+						g_D3D.device->SetVertexShaderConstantF(0, reinterpret_cast<const float*>(&constants), 4);
+						g_D3D.device->SetVertexShaderConstantF(4, reinterpret_cast<const float*>(&inverseWorld), 4);
+						g_D3D.device->SetVertexShaderConstantF(8, reinterpret_cast<const float*>(&transposedWorld), 4);
+						g_D3D.device->SetVertexShaderConstantF(12, reinterpret_cast<const float*>(&vectors.rgb), 1);
+						g_D3D.device->SetVertexShaderConstantF(13, reinterpret_cast<const float*>(&vectors.parameters), 1);
+						g_D3D.device->SetVertexShaderConstantF(14, reinterpret_cast<const float*>(&vectors.cameraPosition), 1);
 						style = 27;
 					}
 					if (previousStyle != style)
@@ -173,7 +173,7 @@ void Gfx_RenderManager::DrawGroup(UINT pass, Gfx_RenderGroup* group, BYTE shadow
 								controller->styles[controller->activeIndex]->Pass(i);
 								g_D3D.statistics[3] += count;
 								++g_D3D.statistics[12];
-								g_D3D.device->DrawIndexedPrimitive(type, 0, mesh->vertexCount, group->indexBase + first, count);
+								g_D3D.DrawIndexedPrimitive(type, 0, mesh->vertexCount, group->indexBase + first, count);
 							}
 						}
 						else

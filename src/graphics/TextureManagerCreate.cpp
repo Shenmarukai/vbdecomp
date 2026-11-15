@@ -1,7 +1,7 @@
 #include "TextureManager.hpp"
 #include "Texture.hpp"
 #include "../JE.hpp"
-#include <dxerr8.h>
+#include "DX9Errors.hpp"
 
 HRESULT Gfx_TextureManager::AddTexture(DWORD* output, Gfx_Texture* source, D3DPOOL pool)
 {

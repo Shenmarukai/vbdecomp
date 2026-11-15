@@ -1,10 +1,11 @@
+#include "DX9RenderTarget.hpp"
 #include "Engine.hpp"
 #include "BufferManager.hpp"
 #include "D3DState.hpp"
 #include "Texture.hpp"
 #include "diagnostics/DebugOutput.hpp"
 #include <cstring>
-#include <dxerr8.h>
+#include "DX9Errors.hpp"
 
 namespace
 {
@@ -27,10 +28,10 @@ void Gfx_Engine::ProjectShadows()
 		shadowPointCount = 0;
 		return;
 	}
-	IDirect3DSurface8* originalTarget = NULL;
-	IDirect3DSurface8* originalDepth = NULL;
-	IDirect3DSurface8* shadowSurface = NULL;
-	HRESULT result = g_D3D.device->GetRenderTarget(&originalTarget);
+	IDirect3DSurface9* originalTarget = NULL;
+	IDirect3DSurface9* originalDepth = NULL;
+	IDirect3DSurface9* shadowSurface = NULL;
+	HRESULT result = g_D3D.device->GetRenderTarget(0, &originalTarget);
 	if (FAILED(result))
 	{
 		ShadowFailure("failed to get original render target", result);
@@ -51,7 +52,7 @@ void Gfx_Engine::ProjectShadows()
 		if (originalDepth) originalDepth->Release();
 		return;
 	}
-	result = g_D3D.device->SetRenderTarget(shadowSurface, NULL);
+	result = Gfx_SetDX9RenderTarget(g_D3D.device, shadowSurface, NULL);
 	if (FAILED(result))
 	{
 		JE::LogDebugString("Gfx_Engine::ProjectShadows - SetRenderTarget failed:  %s(%x) - %s\n",
@@ -75,11 +76,11 @@ void Gfx_Engine::ProjectShadows()
 				g_D3D.SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
 				g_D3D.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
 				g_D3D.SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-				g_D3D.SetTextureStageState(0, D3DTSS_MAGFILTER, D3DTEXF_LINEAR);
-				g_D3D.SetTextureStageState(0, D3DTSS_MINFILTER, D3DTEXF_LINEAR);
-				g_D3D.SetTextureStageState(0, D3DTSS_MIPFILTER, D3DTEXF_LINEAR);
-				g_D3D.SetTextureStageState(0, D3DTSS_ADDRESSU, D3DTADDRESS_CLAMP);
-				g_D3D.SetTextureStageState(0, D3DTSS_ADDRESSV, D3DTADDRESS_CLAMP);
+				g_D3D.SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+				g_D3D.SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+				g_D3D.SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
+				g_D3D.SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
+				g_D3D.SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
 				g_D3D.SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
 				g_D3D.SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
 				g_D3D.SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
@@ -99,10 +100,10 @@ void Gfx_Engine::ProjectShadows()
 				if (available >= vertexLimit) available = vertexLimit;
 				UINT maximum = stream->capacity / stride;
 				if (maximum >= vertexLimit) maximum = vertexLimit;
-				g_D3D.device->SetVertexShader(0x104);
+				g_D3D.device->SetFVF(0x104);
 				g_D3D.SetTransform(D3DTS_WORLD, &g_D3D.identity);
 				stream->SetStreamSource(0, stride);
-				BYTE* output = NULL;
+				void* output = NULL;
 				UINT first = 0, triangles = 0, written = 0;
 				UINT remaining = 6 * shadowPointCount;
 				BYTE locked = 0;
@@ -146,20 +147,20 @@ void Gfx_Engine::ProjectShadows()
 						{left, top, 0, 1, 0, 0}, {right, top, 0, 1, 1, 0},
 						{left, bottom, 0, 1, 0, 1}, {left, bottom, 0, 1, 0, 1},
 						{right, top, 0, 1, 1, 0}, {right, bottom, 0, 1, 1, 1}};
-					std::memcpy(output + stride * written, quad, sizeof(quad));
+					std::memcpy(static_cast<BYTE*>(output) + stride * written, quad, sizeof(quad));
 					written += 6;
 					triangles += 2;
 				}
 				if (locked) stream->buffer->Unlock();
 				if (triangles) g_D3D.DrawPrimitive(D3DPT_TRIANGLELIST, first, triangles);
 				g_D3D.SetRenderState(D3DRS_ALPHABLENDENABLE, 0);
-				g_D3D.SetTextureStageState(0, D3DTSS_ADDRESSU, D3DTADDRESS_WRAP);
-				g_D3D.SetTextureStageState(0, D3DTSS_ADDRESSV, D3DTADDRESS_WRAP);
+				g_D3D.SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
+				g_D3D.SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
 			}
 			++g_D3D.statistics[7];
 			g_D3D.device->EndScene();
 		}
-		g_D3D.device->SetRenderTarget(originalTarget, originalDepth);
+		Gfx_SetDX9RenderTarget(g_D3D.device, originalTarget, originalDepth);
 	}
 	shadowPointCount = 0;
 	if (shadowSurface) shadowSurface->Release();
