@@ -34,7 +34,8 @@ namespace F3
 		target=JE::GetEntityPtr(targetID);
 		if (!target) { completed=1;return 0; }
 		GameContainer* container=dynamic_cast<GameContainer*>(target);
-		GameCreature* creature; //406B03 leaves the saved discriminator unwritten for containers.
+		//GameCreature* creature; //406B03 leaves the saved discriminator unwritten for containers.
+		GameCreature* creature = nullptr; //406B03 leaves the saved discriminator unwritten for containers.
 		if (!container)
 		{
 			creature=dynamic_cast<GameCreature*>(target);

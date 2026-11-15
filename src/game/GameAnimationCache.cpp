@@ -559,8 +559,7 @@ namespace F3
 		return group < GetGroupCount() ? g_animationGroups[group].c_str() : NULL;
 	}
 
-	void GameAnimationCache::ReadAnimations(Gfx_AnimationObject* object, std::string name,
-		BOOL requested)
+	void GameAnimationCache::ReadAnimations(Gfx_AnimationObject* object, std::string name, BOOL requested)
 	{
 		std::string resource;
 		DWORD first;
@@ -593,12 +592,22 @@ namespace F3
 				if (bytes == NULL)
 				{
 					//45D57C..45D5B9: original unchecked30-byte prefix buffer.
-					char prefix[30];
-					memset(prefix, 0, sizeof(prefix));
-					strncpy(prefix, name.c_str(), name.length() - 3);
-					resource = std::string(prefix) + g_animationGroups[group] + ordinal + ".gr2";
+					// 
+					// This is unsafe, may cause stack corruption (Adam)
+					//char prefix[30];
+					//memset(prefix, 0, sizeof(prefix));
+					//strncpy(prefix, name.c_str(), name.length() - 3);
+
+					const std::string prefix = name.length() >= 3 ? name.substr(0, name.length() - 3) : std::string();
+
+					//resource = std::string(prefix) + g_animationGroups[group] + ordinal + ".gr2";
+					resource = prefix + g_animationGroups[group] + ordinal + ".gr2"; // (Adam)
+
 					bytes = ReadSkeletonResource(resource, &size);
-					if (bytes == NULL) break;
+					if (bytes == NULL)
+					{
+						break;
+					}
 				}
 				JE::g_GrannyError = 0;
 				if (!object->LoadAnimationFileFromBuffer(group, size, bytes, 10.0f))
@@ -607,19 +616,24 @@ namespace F3
 				}
 				if (JE::g_GrannyError)
 				{
-					JE::LogDebugString("GameAnimationCache::ReadAnimations() - LoadAnimationFileFromBuffer (%s) Granny error\n",
-						resource.c_str());
+					JE::LogDebugString("GameAnimationCache::ReadAnimations() - LoadAnimationFileFromBuffer (%s) Granny error\n", resource.c_str());
 				}
-				::operator delete(bytes);
+				// scalar delete operator used on array (Adam)
+				//::operator delete(bytes);
+				delete[] bytes;
+
 				size = 0;
 				resource = name + g_animationGroups[group] + ordinal + ".ini";
 				JE::Configuration::Settings settings;
 				BYTE loaded = JE::Configuration::ReadResourceConfigurationFile(resource, settings);
 				if (!loaded)
 				{
-					char prefix[30];
-					memset(prefix, 0, sizeof(prefix));
-					strncpy(prefix, name.c_str(), name.length() - 3);
+					// This is unsafe, may cause stack corruption (Adam)
+					//char prefix[30];
+					//memset(prefix, 0, sizeof(prefix));
+					//strncpy(prefix, name.c_str(), name.length() - 3);
+					const std::string prefix = name.length() >= 3 ? name.substr(0, name.length() - 3) : std::string();
+
 					resource = prefix + g_animationGroups[group] + ordinal + ".ini";
 					loaded = JE::Configuration::ReadResourceConfigurationFile(resource, settings);
 				}
