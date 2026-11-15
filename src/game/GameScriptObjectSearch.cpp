@@ -16,19 +16,23 @@
 namespace
 {
 	const D3DXVECTOR3* g_ObjectSearchPosition; //Original70BEB0, borrowed through sort.
-	BOOL __cdecl CompareObjectDistance(void* first, void* second)
+	bool CompareObjectDistance(void* first, void* second)
 	{
-		const D3DXVECTOR3* origin=g_ObjectSearchPosition;
-		const JE::Entity* firstEntity=static_cast<JE::Entity*>(first);
-		const JE::Entity* secondEntity=static_cast<JE::Entity*>(second);
-		double firstX=double(origin->x)-firstEntity->position.x;
-		double firstY=double(origin->y)-firstEntity->position.y;
-		double firstZ=double(origin->z)-firstEntity->position.z;
-		D3DXVECTOR3 secondDelta(origin->x-secondEntity->position.x,
-			origin->y-secondEntity->position.y,origin->z-secondEntity->position.z);
-		double firstDistance=std::sqrt(firstZ*firstZ+firstY*firstY+firstX*firstX);
-		return firstDistance>=std::sqrt(double(secondDelta.z*secondDelta.z
-			+secondDelta.y*secondDelta.y+secondDelta.x*secondDelta.x));
+		const D3DXVECTOR3& origin = *g_ObjectSearchPosition;
+
+		const JE::Entity* firstEntity = static_cast<JE::Entity*>(first);
+		const JE::Entity* secondEntity = static_cast<JE::Entity*>(second);
+
+		auto distanceSquared = [&origin](const JE::Entity* entity) -> double
+			{
+				const double dx = double(origin.x) - double(entity->position.x);
+				const double dy = double(origin.y) - double(entity->position.y);
+				const double dz = double(origin.z) - double(entity->position.z);
+
+				return dx * dx + dy * dy + dz * dz;
+			};
+
+		return distanceSquared(firstEntity) > distanceSquared(secondEntity);
 	}
 	DWORD FindObjects(DWORD* handle,DWORD mapID,const D3DXVECTOR3& position,float radius,DWORD exclude)
 	{

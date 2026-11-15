@@ -178,13 +178,21 @@ namespace JE
 		if (!removed) return;
 		for (Iterator cell = cells.begin(); cell != cells.end(); ++cell)
 		{
-			Iterator previous = cell;
-			--previous;
+			//Iterator previous = cell;
+			//--previous;
+			//RLECell<T>* current = *cell;
+			//Iterator next = cell;
+			//++next; //40F10E: hold the next node before either neighboring deletion.
+			//if (previous != cells.end())
 			RLECell<T>* current = *cell;
+
 			Iterator next = cell;
-			++next; //40F10E: hold the next node before either neighboring deletion.
-			if (previous != cells.end())
+			++next;
+
+			if (cell != cells.begin())
 			{
+				Iterator previous = cell;
+				--previous;
 				RLECell<T>* merged = *previous;
 				if (merged->values.size() == current->values.size())
 				{
@@ -195,7 +203,8 @@ namespace JE
 					{
 						current->count += merged->count;
 						current->first = merged->first;
-						cells.remove(merged);
+						//cells.remove(merged);
+						cells.erase(previous);
 						delete merged;
 					}
 				}
@@ -211,7 +220,8 @@ namespace JE
 					if (member == merged->values.end())
 					{
 						current->count += merged->count;
-						cells.remove(merged);
+						//cells.remove(merged);
+						cells.erase(next);
 						delete merged;
 					}
 				}

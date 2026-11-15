@@ -34,22 +34,36 @@ namespace GUI
 	void Window::Refresh()
 	{
 		Base::Refresh();
+
 		if (!hidden)
 		{
 			if (frameVisible)
-				for (int i = 0; i < 4; ++i)
-					fragments[i].Refresh();
-			if (centerVisible)
-				fragments[4].Refresh();
-			if (frameVisible)
-				for (int j = 5; j < 9; ++j)
-					fragments[j].Refresh();
-			std::list<Window*>::iterator entry = children.end();
-			--entry;
-			while (entry != children.end())
 			{
-				(*entry)->Refresh();
+				for (int i = 0; i < 4; ++i)
+				{
+					fragments[i].Refresh();
+				}
+			}
+
+			if (centerVisible)
+			{
+				fragments[4].Refresh();
+			}
+
+			if (frameVisible)
+			{
+				for (int j = 5; j < 9; ++j)
+				{
+					fragments[j].Refresh();
+				}
+			}
+
+			auto entry = children.end();
+
+			while (entry != children.begin())
+			{
 				--entry;
+				(*entry)->Refresh();
 			}
 		}
 	}
@@ -68,12 +82,20 @@ namespace GUI
 			if (frameVisible)
 				for (int j = 5; j < 9; ++j)
 					fragments[j].Draw(viewport, flags);
-			std::list<Window*>::iterator entry = children.end();
-			--entry;
-			while (entry != children.end())
+
+			//std::list<Window*>::iterator entry = children.end();
+			//--entry;
+			//while (entry != children.end())
+			//{
+			//	(*entry)->Draw();
+			//	--entry;
+			//}
+			auto entry = children.end();
+
+			while (entry != children.begin())
 			{
-				(*entry)->Draw();
 				--entry;
+				(*entry)->Draw();
 			}
 		}
 	}

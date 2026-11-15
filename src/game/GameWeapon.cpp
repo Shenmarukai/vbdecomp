@@ -34,8 +34,43 @@ namespace F3
 			secondaryAmmoCapacity = weapon->secondaryAmmoCapacity;
 			value1020 = weapon->value1020;
 			value1024 = weapon->value1024;
-			attackModes = weapon->attackModes;
-			activeAttackModes = weapon->activeAttackModes;
+            // Assignment of std::list contents may invalidate the old
+            // selection. Keep the same position when possible.
+            std::size_t selectedIndex = 0;
+            bool selectedActive = currentAttackMode.BelongsTo(activeAttackModes);
+            bool selectedBase = currentAttackMode.BelongsTo(attackModes);
+
+            if (selectedActive || selectedBase)
+            {
+                std::list<AttackMode>& selectedList = selectedActive
+                    ? activeAttackModes : attackModes;
+
+                AttackModeIterator cursor = AttackModeIterator::First(selectedList);
+                while (cursor && cursor != currentAttackMode)
+                {
+                    ++selectedIndex;
+                    ++cursor;
+                }
+            }
+
+            currentAttackMode = {};
+            attackModes = weapon->attackModes;
+            activeAttackModes = weapon->activeAttackModes;
+
+            if (selectedActive || selectedBase)
+            {
+                std::list<AttackMode>& selectedList = selectedActive
+                    ? activeAttackModes : attackModes;
+                AttackModeIterator cursor = AttackModeIterator::First(selectedList);
+
+                while (cursor && selectedIndex > 0)
+                {
+                    ++cursor;
+                    --selectedIndex;
+                }
+
+                currentAttackMode = cursor;
+            }
 		}
 		//Original leaves modifiers, loaded counts, selected mode and ammo owners untouched.
 		GameItem::CopyFrom(source);
@@ -52,6 +87,7 @@ namespace F3
 	void GameWeapon::RebuildAttackModes(JE::Entity* owner)
 	{
 		GameCreature* creature = dynamic_cast<GameCreature*>(owner);
+		currentAttackMode = {};
 		activeAttackModes.clear();
 		for (std::list<AttackMode>::const_iterator i = attackModes.begin(); i != attackModes.end(); ++i)
 		{
@@ -81,7 +117,7 @@ namespace F3
 				activeAttackModes.push_back(copy);
 			}
 		}
-		currentAttackMode = activeAttackModes.begin();
+		currentAttackMode = AttackModeIterator::First(activeAttackModes);
 	}
 
 	BYTE GameWeapon::ReadVersion0(JE::Resources::ResourceMemoryStream* stream)
@@ -220,7 +256,7 @@ namespace F3
 			JE::Resources::g_pResourceSystem->CloseMemoryStream(stream);
 			return 0;
 		}
-		currentAttackMode = attackModes.begin();
+		currentAttackMode = AttackModeIterator::First(attackModes);
 		// Actual41559A/4155B4 test capacities at+1008/+1016, not loaded counts.
 		if (primaryAmmoCapacity) primaryAmmo = FindAmmunition(primaryCaliber, primaryModifier);
 		if (secondaryAmmoCapacity) secondaryAmmo = FindAmmunition(secondaryCaliber, secondaryModifier);

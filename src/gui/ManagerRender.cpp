@@ -43,16 +43,29 @@ namespace GUI
 		// Keep the currently held node across the callback. An ordinary
 		// reverse_iterator instead retains its one-ahead base and can revisit
 		// an appended entry. Only valid current-node-preserving lists apply.
-		std::list<Interface*>::iterator entry = interfaces.end();
-		--entry;
-		while (entry != interfaces.end())
+		//std::list<Interface*>::iterator entry = interfaces.end();
+		//--entry;
+		//while (entry != interfaces.end())
+		//{
+		//	Interface* current = *entry;
+		//	if (!current->GetHidden())
+		//	{
+		//		current->Draw();
+		//	}
+		//	--entry;
+		//}
+		auto entry = interfaces.end();
+
+		while (entry != interfaces.begin())
 		{
+			--entry;
+
 			Interface* current = *entry;
+
 			if (!current->GetHidden())
 			{
 				current->Draw();
 			}
-			--entry;
 		}
 		packets->Flush();
 	}

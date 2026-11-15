@@ -39,20 +39,49 @@ namespace JE
 		pending.push_back(copy); //4C60A0, actual vector<string> append.
 	}
 
-	void ConsoleCommandProcessor::Dispatch() //580BA0.
+	//void ConsoleCommandProcessor::Dispatch() //580BA0.
+	//{
+	//	F3::CommandArguments arguments;
+	//	char buffer[256];
+	//	std::vector<std::string>::iterator current=pending.begin();
+	//	while (current!=pending.end())
+	//	{
+	//		std::strcpy(buffer,current->c_str());
+	//		AppendCommandArguments(buffer,arguments);
+	//		F3::CommandCallback callback=F3::FindConsoleCommand(arguments.front());
+	//		if (callback) callback(&arguments);
+	//		else LogDebugString("Unknown command %s\n",current->c_str());
+	//		//pending.erase(current);
+	//		current = pending.erase(current);
+	//		//Keep the captured iterator and borrowed tokens across commands.
+	//	}
+	//}
+	void ConsoleCommandProcessor::Dispatch()
 	{
-		F3::CommandArguments arguments;
-		char buffer[256];
-		std::vector<std::string>::iterator current=pending.begin();
-		while (current!=pending.end())
+		while (!pending.empty())
 		{
-			std::strcpy(buffer,current->c_str());
-			AppendCommandArguments(buffer,arguments);
-			F3::CommandCallback callback=F3::FindConsoleCommand(arguments.front());
-			if (callback) callback(&arguments);
-			else LogDebugString("Unknown command %s\n",current->c_str());
-			pending.erase(current);
-			//Keep the captured iterator and borrowed tokens across commands.
+			std::string command = pending.front();
+			pending.erase(pending.begin());
+
+			std::string buffer = command;
+			F3::CommandArguments arguments;
+
+			AppendCommandArguments(buffer.data(), arguments);
+
+			if (arguments.empty())
+			{
+				continue;
+			}
+
+			F3::CommandCallback callback = F3::FindConsoleCommand(arguments.front());
+			if (callback)
+			{
+				callback(&arguments);
+			}
+			else
+			{
+				LogDebugString("Unknown command %s\n", command.c_str());
+			}
 		}
 	}
 }

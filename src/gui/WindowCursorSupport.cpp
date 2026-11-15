@@ -16,9 +16,14 @@ namespace GUI
 	void Window::SetViewport(Gfx_Viewport* value) //4AF980, reverse live child traversal.
 	{
 		viewport = value;
-		std::list<Window*>::iterator i = children.end();
-		for (--i; i != children.end(); --i)
+		//std::list<Window*>::iterator i = children.end();
+		//for (--i; i != children.end(); --i)
+		//	(*i)->SetViewport(value);
+
+		for (auto i = children.rbegin(); i != children.rend(); ++i)
+		{
 			(*i)->SetViewport(value);
+		}
 	}
 	Gfx_Viewport* Window::GetViewport() { return viewport; } //4AF4C0.
 }

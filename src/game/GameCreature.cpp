@@ -46,7 +46,7 @@ namespace F3
 		}
 		memset(skills, 0, sizeof(skills)); //Original repeats this before the refresh.
 		GameCreature::OnRefreshAssociations();
-		currentAttackMode = std::list<AttackMode>::iterator();
+		currentAttackMode = {};
 		attackModeCount = 0;
 		value7FC = 0;
 	}
@@ -305,6 +305,7 @@ namespace F3
 
 	void GameCreature::RebuildAttackModes()
 	{
+		currentAttackMode = {};
 		activeAttackModes.clear();
 		for (std::list<AttackMode>::const_iterator i = attackModes.begin(); i != attackModes.end(); ++i)
 		{
@@ -325,7 +326,7 @@ namespace F3
 				activeAttackModes.push_back(copy);
 			}
 		}
-		currentAttackMode = activeAttackModes.begin();
+		currentAttackMode = AttackModeIterator::First(activeAttackModes);
 	}
 
 	void GameCreature::RecalculateArmor()

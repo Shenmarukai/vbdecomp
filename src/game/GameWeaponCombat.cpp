@@ -36,7 +36,7 @@ namespace F3
 	LONG GameWeapon::CalculateToHit(AttackModeIterator attack,JE::Entity* source,JE::Entity* victim,
 		DWORD calledPart)
 	{
-		if (!source || !victim || currentAttackMode == AttackModeIterator())
+		if (!source || !victim || !currentAttackMode || !attack)
 		{
 			JE::LogDebugString("GameWeapon::CalculateToHit() - Recieved a NULL pointer in critical data.");
 			return 0;
@@ -49,8 +49,17 @@ namespace F3
 
 	LONG GameWeapon::GetEffectiveRange(AttackModeIterator attack)
 	{
-		if ((attack != AttackModeIterator() ? attack : currentAttackMode) == AttackModeIterator()) return 0;
-		if (!attack->shots) return LONG(attack->range);
+        if (!attack)
+        {
+            attack = currentAttackMode;
+        }
+
+        if (!attack)
+        {
+            return 0;
+        }
+
+        if (!attack->shots) return LONG(attack->range);
 		if (attack->shots>primaryAmmoLoaded || attack->values18[0]>secondaryAmmoLoaded) return 0;
 		if (!primaryAmmo)
 		{

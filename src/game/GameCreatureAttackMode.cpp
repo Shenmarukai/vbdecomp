@@ -25,9 +25,15 @@ namespace F3
 						128,128,128);
 				return 0;
 			}
-			GameWeapon* selected=dynamic_cast<GameWeapon*>(item);
-			*weapon=selected; //Original publishes the RTTI result before reading its mode.
-			*mode=selected->currentAttackMode;
+            GameWeapon* selected=dynamic_cast<GameWeapon*>(item);
+            *weapon=selected;
+
+            if (!selected)
+            {
+                return 0;
+            }
+
+            *mode=selected->currentAttackMode;
 		}
 		else
 		{
@@ -35,12 +41,19 @@ namespace F3
 			*mode=currentAttackMode;
 			//Original deliberately leaves the prior weapon output untouched here.
 		}
-		//The output retains the original iterator; operator-> skips the list links.
-		if ((*mode)->kind==3 && !*unarmed)
+        // A missing attack mode must not be dereferenced. This can occur
+        // before the attack-mode lists are loaded or rebuilt.
+        if (!*mode)
+        {
+            return 0;
+        }
+
+        if ((*mode)->kind==3 && !*unarmed)
 		{
 			*unarmed=1;
-			*mode=currentAttackMode;
-		}
-		return 1;
+            *mode=currentAttackMode;
+        }
+
+        return *mode ? 1 : 0;
 	}
 }

@@ -14,12 +14,19 @@ namespace GUI
 		if (!hidden)
 		{
 			BeforeUpdate();
-			std::list<Window*>::iterator entry = roots.end();
-			--entry;
-			while (entry != roots.end())
+			//std::list<Window*>::iterator entry = roots.end();
+			//--entry;
+			//while (entry != roots.end())
+			//{
+			//	(*entry)->Refresh();
+			//	--entry;
+			//}
+			auto entry = roots.end();
+
+			while (entry != roots.begin())
 			{
-				(*entry)->Refresh();
 				--entry;
+				(*entry)->Refresh();
 			}
 		}
 	}
@@ -29,12 +36,19 @@ namespace GUI
 		if (!hidden)
 		{
 			BeforeDraw();
-			std::list<Window*>::iterator entry = roots.end();
-			--entry;
-			while (entry != roots.end())
+			//std::list<Window*>::iterator entry = roots.end();
+			//--entry;
+			//while (entry != roots.end())
+			//{
+			//	(*entry)->Draw();
+			//	--entry;
+			//}
+			auto entry = roots.end();
+
+			while (entry != roots.begin())
 			{
-				(*entry)->Draw();
 				--entry;
+				(*entry)->Draw();
 			}
 		}
 	}

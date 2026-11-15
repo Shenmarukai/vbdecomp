@@ -92,16 +92,29 @@ namespace GUI
 		}
 
 		// Retain the current node across callbacks, as in the recovered Render.
+		//entry = interfaces.end();
+		//--entry;
+		//while (entry != interfaces.end())
+		//{
+		//	Interface* current = *entry;
+		//	if (!current->GetHidden())
+		//	{
+		//		current->Update();
+		//	}
+		//	--entry;
+		//}
 		entry = interfaces.end();
-		--entry;
-		while (entry != interfaces.end())
+
+		while (entry != interfaces.begin())
 		{
+			--entry;
+
 			Interface* current = *entry;
+
 			if (!current->GetHidden())
 			{
 				current->Update();
 			}
-			--entry;
 		}
 		AssignDepth();
 	}

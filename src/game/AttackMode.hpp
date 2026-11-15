@@ -24,8 +24,108 @@ namespace F3
 		std::string effectName;
 		BYTE flag64, flag65, flag66;
 	private:
-		BYTE ReadData(JE::Common::Chunk& chunk, JE::Resources::ResourceMemoryStream* stream,
-			BYTE weapon, DWORD weaponClass); // Factored identical proprietary read sequence.
+		BYTE ReadData(JE::Common::Chunk& chunk, JE::Resources::ResourceMemoryStream* stream, BYTE weapon, DWORD weaponClass); // Factored identical proprietary read sequence.
 	};
-	typedef std::list<AttackMode>::iterator AttackModeIterator;
+
+
+    // A default-constructed iterator was used as a nullable selection throughout
+// the VC7 engine. Comparing that iterator to real std::list iterators is
+// invalid with today's checked STL. Keep null separate from an STL iterator,
+// and retain the owning list so different weapons/creatures cannot have
+// their iterators compared accidentally.
+    class AttackModeIterator
+    {
+    public:
+        using Container = std::list<AttackMode>;
+        using Iterator = Container::iterator;
+
+        AttackModeIterator() = default;
+
+        static AttackModeIterator First(Container& modes)
+        {
+            if (modes.empty())
+            {
+                return {};
+            }
+
+            return AttackModeIterator(modes, modes.begin());
+        }
+
+        static AttackModeIterator From(Container& modes, Iterator position)
+        {
+            if (position == modes.end())
+            {
+                return {};
+            }
+
+            return AttackModeIterator(modes, position);
+        }
+
+        explicit operator bool() const noexcept
+        {
+            return m_owner != nullptr;
+        }
+
+        bool BelongsTo(const Container& modes) const noexcept
+        {
+            return m_owner == &modes;
+        }
+
+        AttackMode& operator*() const
+        {
+            return *m_position;
+        }
+
+        AttackMode* operator->() const
+        {
+            return &**this;
+        }
+
+        AttackModeIterator& operator++()
+        {
+            ++m_position;
+
+            if (m_position == m_owner->end())
+            {
+                *this = {};
+            }
+
+            return *this;
+        }
+
+        AttackModeIterator operator++(int)
+        {
+            AttackModeIterator previous = *this;
+            ++*this;
+            return previous;
+        }
+
+        friend bool operator==(const AttackModeIterator& lhs, const AttackModeIterator& rhs)
+        {
+            if (lhs.m_owner != rhs.m_owner)
+            {
+                return false;
+            }
+
+            if (!lhs.m_owner)
+            {
+                return true;
+            }
+
+            return lhs.m_position == rhs.m_position;
+        }
+
+        friend bool operator!=(const AttackModeIterator& lhs, const AttackModeIterator& rhs)
+        {
+            return !(lhs == rhs);
+        }
+
+    private:
+        AttackModeIterator(Container& modes, Iterator position)
+            : m_owner(&modes), m_position(position)
+        {}
+
+        Container* m_owner = nullptr;
+        Iterator m_position{};
+    };
 }

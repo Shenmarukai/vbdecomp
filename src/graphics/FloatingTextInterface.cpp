@@ -132,46 +132,83 @@ namespace JE
 	}
 	void FloatingTextInterface::UpdatePositions()
 	{
-		if (activeLabels.empty()) return;
+		if (activeLabels.empty())
+		{
+			return;
+		}
+
 		const DWORD now = timeGetTime();
-		std::list<::GUI::FloatingLabel*>::iterator entry = activeLabels.begin();
+
+		auto entry = activeLabels.begin();
+
 		while (entry != activeLabels.end())
 		{
 			::GUI::FloatingLabel* label = *entry;
+
+			if (label && now > label->birthTime + label->duration)
+			{
+				entry = activeLabels.erase(entry);
+
+				label->SetHidden(1);
+				label->background.SetHidden(1);
+				label->duration = 0;
+
+				continue;
+			}
+
 			if (label)
 			{
-				if (now > label->birthTime + label->duration)
+				Entity* entity = GetEntityPtr(label->entityID);
+
+				if (entity)
 				{
-					entry = activeLabels.erase(entry);
-					label->SetHidden(1); label->background.SetHidden(1); label->duration = 0;
-				}
-				else
-				{
-					Entity* entity = GetEntityPtr(label->entityID);
-					if (entity)
-					{
-						D3DXVECTOR3 position;
-						position.x = entity->position.x;
-						position.y = entity->position.y;
-						position.z = entity->position.z;
-						const double height = entity->GetModelHeight();
-						D3DXVECTOR3 point(position.x, float(position.y + height), position.z);
-						D3DXMATRIX view, projection, combined;
-						g_GfxSystem->Camera()->GetViewMatrix(view);
-						g_GfxSystem->Camera()->GetProjectionMatrix(projection);
-						D3DXMatrixMultiply(&combined, &view, &projection);
-						D3DXVECTOR4 clip; D3DXVec3Transform(&clip, &point, &combined);
-						const float inverseW = 1.0f / clip.w;
-						const float screenX = static_cast<float>((clip.x * inverseW + 1.0f) * 512.0f);
-						const float screenY = static_cast<float>((2.0f - (clip.y * inverseW + 1.0f)) * 384.0f);
-						LONG width, labelHeight; label->GetSize(width, labelHeight);
-						const LONG y = static_cast<LONG>(screenY), x = static_cast<LONG>(screenX);
-						label->MoveAtScreen(x, y, width, labelHeight, now);
-						AfterPosition(label, x, y, width, labelHeight);
-					}
+					D3DXVECTOR3 position(
+						entity->position.x,
+						entity->position.y,
+						entity->position.z
+					);
+
+					const double height = entity->GetModelHeight();
+
+					D3DXVECTOR3 point(
+						position.x,
+						float(position.y + height),
+						position.z
+					);
+
+					D3DXMATRIX view;
+					D3DXMATRIX projection;
+					D3DXMATRIX combined;
+
+					g_GfxSystem->Camera()->GetViewMatrix(view);
+					g_GfxSystem->Camera()->GetProjectionMatrix(projection);
+
+					D3DXMatrixMultiply(&combined, &view, &projection);
+
+					D3DXVECTOR4 clip;
+					D3DXVec3Transform(&clip, &point, &combined);
+
+					const float inverseW = 1.0f / clip.w;
+
+					const float screenX =
+						(clip.x * inverseW + 1.0f) * 512.0f;
+
+					const float screenY =
+						(1.0f - clip.y * inverseW) * 384.0f;
+
+					LONG width;
+					LONG labelHeight;
+
+					label->GetSize(width, labelHeight);
+
+					const LONG x = static_cast<LONG>(screenX);
+					const LONG y = static_cast<LONG>(screenY);
+
+					label->MoveAtScreen(x, y, width, labelHeight, now);
+					AfterPosition(label, x, y, width, labelHeight);
 				}
 			}
-			// Follow the next node after either live processing or erase, including sentinel wrap.
+
 			++entry;
 		}
 	}

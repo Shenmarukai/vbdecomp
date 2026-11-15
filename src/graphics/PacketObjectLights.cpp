@@ -10,8 +10,7 @@ namespace
 	{
 		bool operator()(const Gfx_Light* left, const Gfx_Light* right) const
 		{
-			// Original merge moves equal signed priorities before the held node.
-			return static_cast<LONG>(left->value44) >= static_cast<LONG>(right->value44);
+			return static_cast<LONG>(left->value44) > static_cast<LONG>(right->value44);
 		}
 	};
 }
