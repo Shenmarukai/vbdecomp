@@ -4,7 +4,6 @@
 #include <new>
 #include <stdexcept>
 
-float GfxDistanceSquaredXZ(const float* first, const float* second);
 D3DXVECTOR3 GfxAddVectors(const float* first, const float* second);
 D3DXVECTOR3 GfxSubtractVectors(const float* first, const float* second);
 
@@ -80,6 +79,10 @@ int OCTREE_Shape::SetTransform(const float* matrix)
 	return 0;
 }
 OctreeShapeNodes* OCTREE_Shape::GetNodes() { return &nodes; }
+__declspec(noinline) void OCTREE_Shape::ClearNodes() //53B4D0; original caller keeps this boundary.
+{
+	nodes.clear();
+}
 int OCTREE_Shape::EnableNodeCache(DWORD capacity)
 {
 	if (cachedNodes) return 0;
@@ -87,7 +90,7 @@ int OCTREE_Shape::EnableNodeCache(DWORD capacity)
 	cachedNodes=new OctreeShapeNodeCache(blockCount,128);
 	return cachedNodes==NULL;
 }
-void OCTREE_Shape::AddNode(const OctreeNode* node)
+__declspec(noinline) void OCTREE_Shape::AddNode(const OctreeNode* node)
 {
 	if (node && (node->flags & 1)) nodes[node->vertexBuffer].push_back(node->ordinal);
 }
@@ -242,33 +245,47 @@ int CreateOctreeRing2D(float outerRadius, float innerRadius, OCTREE_Shape** outp
 	return 0;
 }
 
+int CreateOctreeTriangle2D(float angle, float length, OCTREE_Shape** output) //5BBC00.
+{
+	if (angle > 180.0f) return 2;
+	OCTREE_Tri2D* triangle = new OCTREE_Tri2D;
+	if (!triangle) return 1;
+	triangle->Configure(angle, length);
+	*output = triangle;
+	return 0;
+}
+
+int CreateOctreePie2D(float angle, float radius, OCTREE_Shape** output) //5BB090.
+{
+	if (angle > 180.0f) return 2;
+	OCTREE_Pie2D* pie = new OCTREE_Pie2D;
+	if (!pie) return 1;
+	pie->Configure(angle, radius);
+	*output = pie;
+	return 0;
+}
+
 int OCTREE::CreateShape(const OctreeShapeConfiguration* configuration, OCTREE_Shape** output)
 {
 	OCTREE_Shape* shape = NULL;
 	switch (configuration->type)
 	{
+	case 0:
+		{
+			const int result = CreateOctreeTriangle2D(configuration->first, configuration->radius, &shape);
+			if (result) return result;
+		}
+		break;
 	case 1:
 		{
 			const int result = CreateOctreeCircle2D(configuration->radius, &shape);
 			if (result) return result;
 		}
 		break;
-	case 0:
-		{
-			if (configuration->first>180.0f) return 2;
-			OCTREE_Tri2D* triangle=new(std::nothrow) OCTREE_Tri2D;
-			if (!triangle) return 1;
-			triangle->Configure(configuration->first,configuration->radius); //5BBC00.
-			shape=triangle;
-		}
-		break;
 	case 2:
 		{
-			if (configuration->first>180.0f) return 2;
-			OCTREE_Pie2D* pie=new(std::nothrow) OCTREE_Pie2D;
-			if (!pie) return 1;
-			pie->Configure(configuration->first,configuration->radius);
-			shape=pie;
+			const int result = CreateOctreePie2D(configuration->first, configuration->radius, &shape);
+			if (result) return result;
 		}
 		break;
 	case 3:
@@ -341,72 +358,5 @@ int OCTREE::CacheShape(OCTREE_Shape* shape) //5B0730.
 	}
 	OctreeNode* end=NULL;
 	if (shape->cachedNodes) shape->cachedNodes->Append(end);
-	return 0;
-}
-int OCTREE::UpdateShape(OCTREE_Shape* shape)
-{
-	if (!shape) return 2;
-	if (currentShape) currentShape->selectedObjects = NULL;
-	currentShape = shape;
-	OctreeSpatialObject** selected = reinterpret_cast<OctreeSpatialObject**>(scratch);
-	shape->selectedObjects = selected;
-	shape->queryCursor = 0;
-	//5B08EF keeps the existing selection/leaf map when a cached prefix exists;
-	//QueryObjects lazily rebuilds object references. Do not add eager cleanup.
-	if (shape->cachedNodes && shape->cachedNodes->Node(0)) return 0;
-	shape->nodes.clear();
-	for (DWORD index = 0; selected[index]; ++index)
-	{
-		OctreeSpatialObject* object = selected[index];
-		if (!--object->references) delete object;
-		selected[index] = NULL;
-	}
-	DWORD written = 0;
-	OctreeNode* node = &root;
-	int level = 0, classification = 0;
-	do
-	{
-		OctreeTraversal& frame = traversal[level];
-		DWORD child = frame.nextChild;
-		if (!child)
-		{
-			if (classification != 2)
-			{
-				classification = shape->ClassifyBox(node->bounds);
-				if (!classification) child = 8;
-			}
-			frame.classification = classification;
-			if (classification)
-			{
-				if (node->flags & 1) shape->AddNode(node);
-				for (OctreeSpatialObject* object = node->objects; object; object = object->next)
-					if (classification == 2 || shape->ClassifyObject(object->center,object->extent))
-					{
-						selected[written++] = object;
-						++object->references;
-					}
-			}
-		}
-		if (!(node->flags & 1))
-			while (child < 8)
-			{
-				OctreeNode* descendant = node->children[child++];
-				if (descendant)
-				{
-					frame.nextChild = child;
-					node = descendant;
-					++level;
-					goto NextShapeNode;
-				}
-			}
-		frame.nextChild = 0;
-		node = node->parent;
-		--level;
-		if (level >= 0) classification = traversal[level].classification;
-		//Original has one unused traversal[-8] load at the terminal root exit.
-NextShapeNode:;
-	}
-	while (node && level >= 0);
-	selected[written] = NULL;
 	return 0;
 }

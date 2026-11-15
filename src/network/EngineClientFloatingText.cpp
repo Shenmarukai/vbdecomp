@@ -18,6 +18,12 @@ namespace JE
 		child0xAC->AddSpeech(entityID, text, duration, red, green, blue);
 	}
 
+	void Client::AddFloatingSpeechText(DWORD entityID, const std::string& text, DWORD duration,
+		DWORD red, DWORD green, DWORD blue) //587A60.
+	{
+		child0xAC->AddSpeech(entityID, text, duration, red, green, blue);
+	}
+
 	void Client::AddFloatingDamageText(DWORD entityID, const std::string& text,
 		DWORD red, DWORD green, DWORD blue) //587A70.
 	{

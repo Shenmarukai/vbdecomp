@@ -744,6 +744,11 @@ namespace JE
 		if (model) { g_pModelCache->ReleaseModelInstance(model); model = NULL; }
 	}
 
+	void Entity::ProcessAnimationCues(DWORD milliseconds)
+	{
+		if (model) model->ProcessAnimationCues(milliseconds);
+	}
+
 	void Entity::SetModel(const char* name, BYTE loadAnimations)
 	{
 		modelName = name;

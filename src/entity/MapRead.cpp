@@ -2,10 +2,10 @@
 #include "MapEffect.hpp"
 #include "World.hpp"
 #include "diagnostics/DebugOutput.hpp"
+#include "graphics/StringFormat.hpp"
+#include "model/CommonException.hpp"
 #include "resources/ResourceSystem.hpp"
 #include <cstring>
-#include <cctype>
-#include <stdexcept>
 
 namespace JE
 {
@@ -263,12 +263,16 @@ namespace JE
 		MapEffect* effect=new MapEffect(this);
 		effect->name=name; effect->position=position; effect->angles=angles;
 		effect->enabled=enabled!=0;
-		effect->resources.assign(names.begin(),names.end());
-		for(size_t i=0;i<name.size();++i) name[i]=char(toupper((unsigned char)name[i]));
+		for(std::list<std::string>::const_iterator i=names.begin();i!=names.end();++i)
+			effect->resources.push_back(*i);
+		UpperString(name);
 		if(mapEffects.find(name)!=mapEffects.end())
 		{
 			delete effect;
-			throw std::runtime_error(std::string("Duplicate instance name in Map::ReadMapEffect(): ")+name+".");
+			std::string message;
+			FormatString(message,"Duplicate instance name in Map::ReadMapEffect(): %s.",name.c_str());
+			//Original exception borrows this local buffer, which unwinding destroys.
+			throw ::Common::Exception(message.c_str());
 		}
 		mapEffects[name]=effect;
 		return 1;

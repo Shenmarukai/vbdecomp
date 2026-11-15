@@ -7,6 +7,7 @@
 #include "graphics/Octree.hpp"
 #include "graphics/OctreeShape.hpp"
 #include "graphics/GfxVector3.hpp"
+#include "graphics/GfxMatrix.hpp"
 #include "diagnostics/DebugOutput.hpp"
 
 //#include <hash_map>
@@ -43,7 +44,9 @@ namespace F3
 			D3DXMatrixTranslation(&translation,origin.x,origin.y,origin.z); //4722AD.
 			D3DXMatrixRotationY(&rotation,radians); //4723C7.
 			D3DXMatrixMultiply(&transform,&rotation,&translation); //471950.
-			shape->SetTransform(&transform._11);
+			Gfx_Matrix4x4 value;
+			value.matrix = transform;
+			shape->SetTransform(&value.matrix._11);
 		}
 		GameCreature* QueryCreature(void* object)
 		{

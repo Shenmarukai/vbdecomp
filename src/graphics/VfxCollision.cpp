@@ -1,4 +1,5 @@
 #include "VfxCollision.hpp"
+#include "VfxFrame.hpp"
 #include <string.h>
 #include "VfxParticles.hpp"
 #include "ParticleSystem.hpp"
@@ -13,35 +14,6 @@ double GfxDistanceSquared3D(const float* first, const float* second);
 
 namespace
 {
-	//4EECF0 recovers the analytic epoch
-	//after a collision has chosen a position and instantaneous velocity.
-	void RestoreCollisionMotion(float mass, float resistance, float scale,
-		const D3DXVECTOR3& acceleration, const D3DXVECTOR3& position,
-		const D3DXVECTOR3& velocity, float elapsed,
-		D3DXVECTOR3& initialPosition, D3DXVECTOR3& initialVelocity)
-	{
-		if (mass == 0)
-		{
-			initialPosition = position;
-			initialVelocity = velocity;
-			return;
-		}
-		if (fabs(resistance) < 0.000008)
-			resistance = float((resistance >= 0 ? 1 : -1) * 0.000008);
-		double inverse = 1.0 / resistance;
-		float storedInverse = float(inverse);
-		double decay = 1.0 - exp(-double(resistance) * elapsed);
-		for (int axis = 0; axis < 3; ++axis)
-		{
-			float force = mass * scale * acceleration[axis];
-			float velocityAtEpoch = velocity[axis] - acceleration[axis] * elapsed;
-			initialVelocity[axis] = velocityAtEpoch;
-			initialPosition[axis] = float(position[axis]
-				- ((velocityAtEpoch - force * inverse) * storedInverse * decay
-					+ force * inverse * elapsed));
-		}
-	}
-
 	//4EEBC0; complete by-value stack protocol, helper ownership unresolved.
 	int __stdcall OverlapsCollisionBox(JE::VFX_Vector dimensions, D3DXMATRIX transform,
 		float x, float y, float z, float radius)
@@ -111,7 +83,7 @@ namespace
 		if (x >= y && x >= z) return 0;
 		if (!preferY && y >= x && y >= z) return 1;
 		if (z >= x && z >= y) return 2;
-		return 2 * rand() / 32767; //4B82E0(1,3), minus one; consumes real CRT RNG.
+		return JE::VfxFrame::RandomInteger(1, 3) - 1; //Native CRT RNG boundary4B82E0.
 	}
 
 	void SetCollisionNormal(JE::VFX_Collision& collision, Gfx_ParticleInfo& particle,
@@ -149,6 +121,53 @@ namespace
 
 namespace JE
 {
+	float* VFX_Collision::RestoreParticleMotion(float mass, float resistance,
+		float accelerationX, float accelerationY, float accelerationZ,
+		float positionX, float positionY, float positionZ,
+		float velocityX, float velocityY, float velocityZ, float elapsed,
+		float* initialX, float* initialY, float* initialZ,
+		float* initialVelocityX, float* initialVelocityY, float* initialVelocityZ) //4EECF0.
+	{
+		if (mass == g_GfxScalarZero)
+		{
+			*initialX = positionX;
+			*initialY = positionY;
+			*initialZ = positionZ;
+			*initialVelocityX = velocityX;
+			*initialVelocityY = velocityY;
+			*initialVelocityZ = velocityZ;
+			return initialVelocityX;
+		}
+		const float minimumResistance = 0.000008f;
+		if (fabs(resistance) < double(minimumResistance))
+			resistance = resistance < g_GfxScalarZero ? -minimumResistance : minimumResistance;
+
+		const float forceX = float(double(mass) * scale * accelerationX);
+		const float epochVelocityX = float(double(velocityX) - double(accelerationX) * elapsed);
+		*initialVelocityX = epochVelocityX;
+		const double decay = 1.0 - exp(-double(resistance) * elapsed);
+		const double inverse = double(g_GfxScalarOne) / resistance;
+		const double terminalX = forceX * inverse;
+		const float storedInverse = float(inverse);
+		*initialX = float(positionX - ((epochVelocityX - terminalX) * storedInverse * decay
+			+ terminalX * elapsed));
+
+		const double forceY = double(mass) * scale * accelerationY;
+		const double epochVelocityY = double(velocityY) - double(accelerationY) * elapsed;
+		*initialVelocityY = float(epochVelocityY);
+		const double terminalY = inverse * forceY;
+		*initialY = float(positionY - ((epochVelocityY - terminalY) * storedInverse * decay
+			+ terminalY * elapsed));
+
+		const double forceZ = double(mass) * scale * accelerationZ;
+		const float epochVelocityZ = float(double(velocityZ) - double(accelerationZ) * elapsed);
+		*initialVelocityZ = epochVelocityZ;
+		const double terminalZ = inverse * forceZ;
+		*initialZ = float(positionZ - ((epochVelocityZ - terminalZ) * storedInverse * decay
+			+ terminalZ * elapsed));
+		return initialVelocityZ;
+	}
+
 	VFX_CollisionData::VFX_CollisionData()
 	{ }
 	void VFX_CollisionData::Read(const VFX_ParameterHolder& parameters)
@@ -365,7 +384,12 @@ namespace JE
 						if (previousPosition && particle.birthTime < time)
 						{
 							float projection = -D3DXVec3Dot(&colliderVelocity, &localNormal);
-							currentVelocity += localNormal * projection;
+							const D3DXVECTOR3 correction = localNormal * projection;
+							Gfx_Vector3f currentVelocityValue, correctionValue;
+							memcpy(currentVelocityValue.value, &currentVelocity, sizeof(currentVelocityValue.value));
+							memcpy(correctionValue.value, &correction, sizeof(correctionValue.value));
+							currentVelocityValue.AddAssign(correctionValue);
+							memcpy(&currentVelocity, currentVelocityValue.value, sizeof(currentVelocityValue.value));
 						}
 						currentVelocity *= data.power * 0.0099999998f;
 						const double vx=currentVelocity.x, vy=currentVelocity.y, vz=currentVelocity.z;
@@ -380,6 +404,17 @@ namespace JE
 							NormalizeCollisionVector(currentVelocity);
 							currentVelocity *= speed;
 						}
+						D3DXVECTOR3 initialPosition, initialVelocity;
+						RestoreParticleMotion(particle.mass, particle.resistance,
+							acceleration.x, acceleration.y, acceleration.z,
+							position.x, position.y, position.z,
+							currentVelocity.x, currentVelocity.y, currentVelocity.z, elapsed,
+							&initialPosition.x, &initialPosition.y, &initialPosition.z,
+							&initialVelocity.x, &initialVelocity.y, &initialVelocity.z);
+						D3DXVec3TransformCoord(&initialPosition, &initialPosition, &transform);
+						D3DXVec3TransformCoord(&initialVelocity, &initialVelocity, &rotation);
+						particle.initialPosition = initialPosition;
+						particle.initialVelocity = initialVelocity;
 						outputPosition = position;
 						D3DXVec3TransformCoord(&outputPosition, &outputPosition, &transform);
 					}
@@ -388,20 +423,28 @@ namespace JE
 						currentVelocity = velocityAtEpoch + acceleration * elapsed;
 						D3DXVECTOR3 impulse = data.collisionType == 3 ? -position : position;
 						impulse *= data.power * 0.0099999998f;
-						currentVelocity += impulse;
+						Gfx_Vector3f currentVelocityValue, impulseValue;
+						memcpy(currentVelocityValue.value, &currentVelocity, sizeof(currentVelocityValue.value));
+						memcpy(impulseValue.value, &impulse, sizeof(impulseValue.value));
+						currentVelocityValue.AddAssign(impulseValue);
+						memcpy(&currentVelocity, currentVelocityValue.value, sizeof(currentVelocityValue.value));
+						D3DXVECTOR3 initialPosition, initialVelocity;
+						RestoreParticleMotion(particle.mass, particle.resistance,
+							acceleration.x, acceleration.y, acceleration.z,
+							position.x, position.y, position.z,
+							currentVelocity.x, currentVelocity.y, currentVelocity.z, elapsed,
+							&initialPosition.x, &initialPosition.y, &initialPosition.z,
+							&initialVelocity.x, &initialVelocity.y, &initialVelocity.z);
+						D3DXVec3TransformCoord(&initialPosition, &initialPosition, &transform);
+						D3DXMATRIX forwardRotation = transform;
+						forwardRotation._41 = forwardRotation._42 = forwardRotation._43 = 0;
+						D3DXVec3TransformCoord(&initialVelocity, &initialVelocity, &forwardRotation);
+						particle.initialPosition = initialPosition;
+						particle.initialVelocity = initialVelocity;
 						//4F0BC0 copies the inverse-local position, not the epoch or
 						//world position. Singular inverse leaves the wrapper's zero.
 						outputPosition = position;
 					}
-					D3DXVECTOR3 initialPosition, initialVelocity;
-					RestoreCollisionMotion(particle.mass, particle.resistance, scale, acceleration,
-						position, currentVelocity, elapsed, initialPosition, initialVelocity);
-					D3DXVec3TransformCoord(&initialPosition, &initialPosition, &transform);
-					D3DXMATRIX forwardRotation = transform;
-					forwardRotation._41 = forwardRotation._42 = forwardRotation._43 = 0;
-					D3DXVec3TransformCoord(&initialVelocity, &initialVelocity, &forwardRotation);
-					particle.initialPosition = initialPosition;
-					particle.initialVelocity = initialVelocity;
 				}
 				if (data.collisionType >= 3) normalTail = false;
 			}
@@ -424,28 +467,71 @@ namespace JE
 				NormalizeCollisionVector(inward);
 				D3DXVECTOR3 particleProjection = inward * D3DXVec3Dot(&inward, &currentVelocity);
 				D3DXVECTOR3 particleTangent = currentVelocity - particleProjection;
+				Gfx_Vector3f colliderProjectionValue, particleProjectionValue;
+				memcpy(colliderProjectionValue.value, &colliderProjection, sizeof(colliderProjectionValue.value));
+				memcpy(particleProjectionValue.value, &particleProjection, sizeof(particleProjectionValue.value));
 				D3DXVECTOR3 differenceA = colliderProjection - particleProjection;
-				D3DXVECTOR3 sum = colliderProjection + particleProjection;
+				const Gfx_Vector3f sumA = colliderProjectionValue.Add(particleProjectionValue);
+				D3DXVECTOR3 sum;
+				memcpy(&sum, sumA.value, sizeof(sumA.value));
 				D3DXVECTOR3 exchangedA = (sum - differenceA) * 0.5f;
 				D3DXVECTOR3 differenceB = particleProjection - colliderProjection;
+				const Gfx_Vector3f sumB = colliderProjectionValue.Add(particleProjectionValue);
+				memcpy(&sum, sumB.value, sizeof(sumB.value));
 				D3DXVECTOR3 exchangedB = (sum - differenceB) * 0.5f;
-				D3DXVECTOR3 colliderResult = exchangedA + colliderTangent;
+				Gfx_Vector3f exchangedAValue, colliderTangentValue;
+				memcpy(exchangedAValue.value, &exchangedA, sizeof(exchangedAValue.value));
+				memcpy(colliderTangentValue.value, &colliderTangent, sizeof(colliderTangentValue.value));
+				const Gfx_Vector3f colliderResult = exchangedAValue.Add(colliderTangentValue);
 				(void)colliderResult; //Original computes but does not publish collider motion.
-				currentVelocity = (exchangedB + particleTangent) * (data.power * 0.0099999998f);
+				Gfx_Vector3f exchangedBValue, particleTangentValue;
+				memcpy(exchangedBValue.value, &exchangedB, sizeof(exchangedBValue.value));
+				memcpy(particleTangentValue.value, &particleTangent, sizeof(particleTangentValue.value));
+				const Gfx_Vector3f particleResult = exchangedBValue.Add(particleTangentValue);
+				memcpy(&currentVelocity, particleResult.value, sizeof(particleResult.value));
 				float responseRadius = float(double(data.radius) * scale + diameter);
-				outputPosition = center + normal * responseRadius;
-				RestoreCollisionMotion(particle.mass, particle.resistance, scale, acceleration,
-					outputPosition, currentVelocity, elapsed, particle.initialPosition, particle.initialVelocity);
+				const D3DXVECTOR3 scaledNormal = normal * responseRadius;
+				Gfx_Vector3f centerValue, scaledNormalValue;
+				memcpy(centerValue.value, &center, sizeof(centerValue.value));
+				memcpy(scaledNormalValue.value, &scaledNormal, sizeof(scaledNormalValue.value));
+				const Gfx_Vector3f responsePosition = centerValue.Add(scaledNormalValue);
+				D3DXVECTOR3 collisionPosition;
+				memcpy(&collisionPosition, responsePosition.value, sizeof(responsePosition.value));
+				currentVelocity *= data.power * 0.0099999998f;
+				D3DXVECTOR3 initialPosition, initialVelocity;
+				RestoreParticleMotion(particle.mass, particle.resistance,
+					acceleration.x, acceleration.y, acceleration.z,
+					collisionPosition.x, collisionPosition.y, collisionPosition.z,
+					currentVelocity.x, currentVelocity.y, currentVelocity.z, elapsed,
+					&initialPosition.x, &initialPosition.y, &initialPosition.z,
+					&initialVelocity.x, &initialVelocity.y, &initialVelocity.z);
+				particle.initialPosition = initialPosition;
+				particle.initialVelocity = initialVelocity;
+				outputPosition = collisionPosition;
 			}
 			else if (data.collisionType == 1)
 			{
 				normal = particle.position - center;
 				NormalizeCollisionVector(normal);
 				float responseRadius = float(double(data.radius) * scale + diameter);
-				outputPosition = center + normal * responseRadius;
+				const D3DXVECTOR3 scaledNormal = normal * responseRadius;
+				Gfx_Vector3f centerValue, scaledNormalValue;
+				memcpy(centerValue.value, &center, sizeof(centerValue.value));
+				memcpy(scaledNormalValue.value, &scaledNormal, sizeof(scaledNormalValue.value));
+				const Gfx_Vector3f responsePosition = centerValue.Add(scaledNormalValue);
+				D3DXVECTOR3 collisionPosition;
+				memcpy(&collisionPosition, responsePosition.value, sizeof(responsePosition.value));
 				D3DXVECTOR3 acceleration = particles.Acceleration();
-				RestoreCollisionMotion(particle.mass, particle.resistance, scale, acceleration,
-					outputPosition, D3DXVECTOR3(0,0,0), elapsed, particle.initialPosition, particle.initialVelocity);
+				D3DXVECTOR3 initialPosition, initialVelocity;
+				RestoreParticleMotion(particle.mass, particle.resistance,
+					acceleration.x, acceleration.y, acceleration.z,
+					collisionPosition.x, collisionPosition.y, collisionPosition.z,
+					0.0f, 0.0f, 0.0f, elapsed,
+					&initialPosition.x, &initialPosition.y, &initialPosition.z,
+					&initialVelocity.x, &initialVelocity.y, &initialVelocity.z);
+				particle.initialPosition = initialPosition;
+				particle.initialVelocity = initialVelocity;
+				outputPosition = collisionPosition;
 			}
 			else if (data.collisionType == 2)
 			{
@@ -463,9 +549,21 @@ namespace JE
 				D3DXVECTOR3 acceleration = particles.Acceleration();
 				D3DXVECTOR3 currentVelocity = particle.initialVelocity + acceleration * elapsed;
 				if (data.collisionType == 4) difference = -difference;
-				currentVelocity += difference * (data.power * 0.0099999998f);
-				RestoreCollisionMotion(particle.mass, particle.resistance, scale, acceleration,
-					particle.position, currentVelocity, elapsed, particle.initialPosition, particle.initialVelocity);
+				const D3DXVECTOR3 impulse = difference * (data.power * 0.0099999998f);
+				Gfx_Vector3f currentVelocityValue, impulseValue;
+				memcpy(currentVelocityValue.value, &currentVelocity, sizeof(currentVelocityValue.value));
+				memcpy(impulseValue.value, &impulse, sizeof(impulseValue.value));
+				currentVelocityValue.AddAssign(impulseValue);
+				memcpy(&currentVelocity, currentVelocityValue.value, sizeof(currentVelocityValue.value));
+				D3DXVECTOR3 initialPosition, initialVelocity;
+				RestoreParticleMotion(particle.mass, particle.resistance,
+					acceleration.x, acceleration.y, acceleration.z,
+					particle.position.x, particle.position.y, particle.position.z,
+					currentVelocity.x, currentVelocity.y, currentVelocity.z, elapsed,
+					&initialPosition.x, &initialPosition.y, &initialPosition.z,
+					&initialVelocity.x, &initialVelocity.y, &initialVelocity.z);
+				particle.initialPosition = initialPosition;
+				particle.initialVelocity = initialVelocity;
 				outputPosition = particle.position;
 				normalTail = false;
 			}

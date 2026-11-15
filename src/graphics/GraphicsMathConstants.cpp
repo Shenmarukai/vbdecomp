@@ -1,8 +1,78 @@
 #include "Camera.hpp"
 #include "GfxVector3.hpp"
+#include "GfxMatrix.hpp"
 #include "G3DModel.hpp"
 #include <string.h>
 #include <math.h>
+
+double __cdecl GfxSin(float value) //48F6C0.
+{
+	return sin(value);
+}
+
+double __cdecl GfxCos(float value) //48F6D0.
+{
+	return cos(value);
+}
+
+Gfx_Matrix4x4::Gfx_Matrix4x4() //412AD0; observed identity stores, no ownership credit.
+{
+	matrix._11 = 1.0f;
+	matrix._12 = 0.0f;
+	matrix._13 = 0.0f;
+	matrix._14 = 0.0f;
+	matrix._21 = 0.0f;
+	matrix._22 = 1.0f;
+	matrix._23 = 0.0f;
+	matrix._24 = 0.0f;
+	matrix._31 = 0.0f;
+	matrix._32 = 0.0f;
+	matrix._33 = 1.0f;
+	matrix._34 = 0.0f;
+	matrix._41 = 0.0f;
+	matrix._42 = 0.0f;
+	matrix._43 = 0.0f;
+	matrix._44 = 1.0f;
+}
+
+void Gfx_Matrix3x3::SetZero() //48F6E0.
+{
+	{
+		const float row[3] = {0.0f, 0.0f, 0.0f};
+		memcpy(value, row, sizeof(row));
+	}
+	{
+		const float row[3] = {0.0f, 0.0f, 0.0f};
+		memcpy(value + 3, row, sizeof(row));
+	}
+	{
+		const float row[3] = {0.0f, 0.0f, 0.0f};
+		memcpy(value + 6, row, sizeof(row));
+	}
+}
+
+void Gfx_Matrix3x3::SetDiagonal(float diagonal) //48F780.
+{
+	float* destination = value;
+	for (DWORD count = 3; count; --count)
+	{
+		memcpy(destination, &diagonal, sizeof(diagonal));
+		destination += 4;
+	}
+}
+
+void Gfx_Matrix3x3::SetIdentity(float diagonal) //48FD30.
+{
+	SetZero();
+	SetDiagonal(diagonal);
+}
+
+void Gfx_AffineMatrix3x4::SetIdentity(float diagonal) //48FD50.
+{
+	linear.SetIdentity(diagonal);
+	const float zero[3] = {0.0f, 0.0f, 0.0f};
+	memcpy(translation, zero, sizeof(zero));
+}
 
 // The original read-only float at0x649C50 has bits3C8EFA35.
 const float g_GfxDegreesToRadians = D3DX_PI / 180.0f;
@@ -10,6 +80,7 @@ const float g_GfxDegreesToRadians = D3DX_PI / 180.0f;
 // Original OctreeCamera inputs at6ADB70/6ADB6C are loaded as separate floats.
 extern const float g_GfxCameraDegreeFraction = 0.0055555557f;
 extern const float g_GfxCameraPi = 3.1415901f;
+extern const float g_GfxCameraHalfPi = 1.570796f; //6ADB68.
 
 //48F660; actual scalar call boundary, real sqrt primitive; support0.
 double G3D_Sqrt(double value)
@@ -20,6 +91,17 @@ double G3D_Sqrt(double value)
 double G3D_InverseSqrt(double value) //48F670; actual shared math boundary.
 {
 	return value == 0.0 ? 0.0 : 1.0 / sqrt(value);
+}
+
+G3D_UnitVector3d G3D_Vector3d::Normalized() const //48FDA0.
+{
+	const double inverse = G3D_InverseSqrt(value[0] * value[0]
+		+ value[1] * value[1] + value[2] * value[2]);
+	G3D_Vector3d scaled = *this;
+	scaled.value[0] *= inverse;
+	scaled.value[1] *= inverse;
+	scaled.value[2] *= inverse;
+	return G3D_UnitVector3d(scaled);
 }
 
 // Ordinary observed boundaries; ownership is unresolved and receives no code credit.
@@ -222,10 +304,10 @@ double __cdecl GfxDistanceSquared3D(const float* first, const float* second)
 	return (z * z + y * y) + x * x;
 }
 
-float GfxDistanceSquaredXZ(const float* first, const float* second)
+float __cdecl GfxDistanceSquaredXZ(const float* first, const float* second) //521FD0.
 {
-	const double x = double(first[0]) - second[0];
-	const double z = double(first[2]) - second[2];
+	const float x = first[0] - second[0];
+	const float z = first[2] - second[2];
 	return z * z + x * x;
 }
 
@@ -266,7 +348,11 @@ float Gfx_Vector3f::Dot(const float* other) const
 	const float x = value[0] * other[0];
 	const float y = value[1] * other[1];
 	const float z = value[2] * other[2];
-	const float result = (x + y) + z;
+	union RoundedFloat { float scalar; volatile DWORD bits; } rounded;
+	rounded.scalar = (x + y) + z;
+	const DWORD bits = rounded.bits;
+	float result;
+	memcpy(&result, &bits, sizeof(result)); //52212B/52212D: retain float rounding.
 	return result;
 }
 
@@ -275,6 +361,29 @@ void Gfx_Vector3f::RotateXZ(float cosine, float sine, Gfx_Vector3f& output) cons
 	output.value[1] = value[1];
 	output.value[0] = sine * value[2] + cosine * value[0];
 	output.value[2] = cosine * value[2] - sine * value[0];
+}
+
+void Gfx_Vector3f::RotateYZ(float cosine, float sine) //522070.
+{
+	const double y = cosine * value[1] - sine * value[2];
+	value[2] = cosine * value[2] + sine * value[1];
+	value[1] = float(y);
+}
+
+void Gfx_Vector3f::RotateXZ(float cosine, float sine) //5220D0.
+{
+	const double x = cosine * value[0] + sine * value[2];
+	value[2] = cosine * value[2] - sine * value[0];
+	value[0] = float(x);
+}
+
+Gfx_Vector3f Gfx_Vector3f::Cross(const Gfx_Vector3f& other) const //522210.
+{
+	Gfx_Vector3f result;
+	result.value[0] = other.value[2] * value[1] - other.value[1] * value[2];
+	result.value[1] = other.value[0] * value[2] - other.value[2] * value[0];
+	result.value[2] = other.value[1] * value[0] - other.value[0] * value[1];
+	return result;
 }
 
 // Ordinary observed vector boundaries; ownership remains unresolved/support0.
@@ -361,6 +470,23 @@ Gfx_Vector3f Gfx_Vector3f::Subtract(const Gfx_Vector3f& other) const //5222A0, s
 	result.value[1] = value[1] - other.value[1];
 	result.value[2] = value[2] - other.value[2];
 	return result;
+}
+
+Gfx_Vector3f Gfx_Vector3f::Add(const Gfx_Vector3f& other) const //522310, support0.
+{
+	Gfx_Vector3f result;
+	result.value[0] = value[0] + other.value[0];
+	result.value[1] = value[1] + other.value[1];
+	result.value[2] = value[2] + other.value[2];
+	return result;
+}
+
+Gfx_Vector3f& Gfx_Vector3f::AddAssign(const Gfx_Vector3f& other) //522380, support0.
+{
+	value[0] += other.value[0];
+	value[1] += other.value[1];
+	value[2] += other.value[2];
+	return *this;
 }
 
 //521F50 ordinary SDK vector-scaling boundary; ownership remains unresolved/support0.

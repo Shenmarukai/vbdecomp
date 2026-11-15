@@ -7,6 +7,7 @@
 #include "network/EngineServer.hpp"
 #include "graphics/Graphics.hpp"
 #include "graphics/MapMaskManager.hpp"
+#include "gui/Interface.hpp"
 #include "startup/NetworkComponent.hpp"
 #include "startup/GameClient.hpp"
 #include "startup/EngineSettings.hpp"
@@ -51,8 +52,12 @@ namespace JE
 			virtual void BeforeWorldDestruction()
 			{
 				F3::GameClient* game = dynamic_cast<F3::GameClient*>(ClientOwner());
-				if (game && game->Interfaces()->auxiliary24)
-					throw std::logic_error("GameWorld46F21B: populated auxiliary24 texture owner430760 unresolved");
+				if (game)
+				{
+					::GUI::Interface* auxiliary = game->Interfaces()->auxiliary24;
+					if (auxiliary && !auxiliary->GetHidden())
+						throw std::logic_error("GameWorld46F226: visible auxiliary24 texture owner430760 unresolved");
+				}
 			}
 			virtual void ClearGraphicsSelectionCache()
 			{

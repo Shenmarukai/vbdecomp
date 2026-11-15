@@ -14,6 +14,19 @@ namespace GUI
 		CloseClipboard(); return result; //No original failure-free or invented ownership repair.
 	}
 
+	std::string Manager::ReadClipboardText() //4B41D0, original clipboard ownership policy.
+	{
+		std::string result;
+		if (OpenClipboard(NULL))
+		{
+			HANDLE data = GetClipboardData(CF_TEXT);
+			if (!data) { GetLastError(); return result; } //Original omits CloseClipboard here.
+			const char* text = static_cast<const char*>(GlobalLock(data));
+			result.assign(text, std::strlen(text));
+			GlobalUnlock(data); CloseClipboard();
+		}
+		return result;
+	}
 	void Manager::SetTooltip(const std::string& text) //4B4160.
 	{
 		tooltip = text;

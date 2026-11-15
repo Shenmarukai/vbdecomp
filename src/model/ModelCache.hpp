@@ -27,6 +27,7 @@ namespace JE
 		std::string GetTextureVariationName(DWORD slot, DWORD index); //584140; optional Tex%d value.
 		DWORD GetTextureVariationCount(DWORD slot); //583F70; optional inner property, required outer section.
 		DWORD GetVariationCount(DWORD slot); //583BF0, unchecked required configuration value.
+		LONG GetTextureSlot(DWORD slot); //584ED0, unchecked required TextureSlot value.
 		BYTE AppendsVariationName(DWORD slot); //584390, absent optional key is false.
 		BYTE AppendsVariationSuffix(DWORD slot); //584B10.
 		BYTE AppendsSexSuffix(DWORD slot); //584560.

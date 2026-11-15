@@ -42,7 +42,7 @@ namespace F3
 				if (selected == hovered)
 				{
 					std::string text("You talk to yourself, but recieve no answer.");
-					client->child0xAC->AddSpeech(selectedID,text,2000,128,128,128); //587A60 forwarding.
+					client->AddFloatingSpeechText(selectedID,text,2000,128,128,128);
 				}
 			}
 			break;
@@ -96,7 +96,7 @@ namespace F3
 						if (selected == hovered)
 						{
 							std::string text("You start to attack yourself, but think better of it.");
-							client->child0xAC->AddSpeech(selectedID,text,3500,128,128,128);
+							client->AddFloatingSpeechText(selectedID,text,3500,128,128,128);
 						}
 						else
 						{

@@ -3,6 +3,7 @@
 #include "TextureManager.hpp"
 #include "ModelInstance.hpp"
 #include "ModelNode.hpp"
+#include "GfxVector3.hpp"
 #include <float.h>
 #include <math.h>
 #include <stdlib.h>
@@ -32,8 +33,8 @@ namespace
 
 	double WrappedPhase(float value, float period)
 	{
-		double phase = fmod(value, period);
-		return value != 0.0f && phase == 0.0f ? period : phase;
+		float phase = float(fmod(value, period));
+		return value != g_GfxScalarZero && phase == g_GfxScalarZero ? period : phase;
 	}
 	static void ColorAt(LONG count, const float* times, LONG& red, LONG& green,
 		LONG& blue, const LONG colors[][3], float time)
@@ -164,7 +165,7 @@ double Gfx_ParticleCos(float radians)
 double Gfx_ParticleWaveform(LONG kind, float first, float last, float time)
 {
 	double result = last;
-	double phase;
+	float phase;
 	switch (kind)
 	{
 	case 1:
@@ -175,16 +176,18 @@ double Gfx_ParticleWaveform(LONG kind, float first, float last, float time)
 		break;
 	case 3:
 		phase = WrappedPhase(time, 1.0f);
-		if (phase < 0.5f)
+		if (phase < g_GfxScalarHalf)
 			result = phase * (last - double(first)) * 2.0f + first;
 		else
-			result = (1.0f - phase) * (last - double(first)) * 2.0f + first;
+			result = (g_GfxScalarOne - phase) * (last - double(first)) * 2.0f + first;
 		break;
 	case 4:
+	{
 		time = time * 6.2831855f - 1.5707964f;
-		result = (Gfx_ParticleSin(time) + 1.0f)
-			* (last - double(first)) * 0.5f + first;
+		const double wave = Gfx_ParticleSin(time) + g_GfxScalarOne;
+		result = wave * (last - double(first)) * g_GfxScalarHalf + first;
 		break;
+	}
 	}
 	return result;
 }
@@ -879,3 +882,8 @@ void Gfx_ParticleSystem::Update(float time)
 	if (geometryDirty && configuration.particleTrailType == 1)
 		RebuildTrails();
 }
+
+//Original read-only operand identities; no original symbol spelling is claimed.
+extern const float g_GfxScalarZero = 0.0f; //6CB56C.
+extern const float g_GfxScalarHalf = 0.5f; //647D38, distinct from double half647D30.
+extern const float g_GfxScalarOne = 1.0f; //647880.

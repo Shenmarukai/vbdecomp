@@ -1,6 +1,6 @@
 #include "ModelInstance.hpp"
 #include "ModelCache.hpp"
-#include "ModelServices.hpp"
+#include "resources/ResourceSystem.hpp"
 #include "graphics/ModelInstance.hpp"
 #include "graphics/ModelData.hpp"
 #include "graphics/Material.hpp"
@@ -13,15 +13,19 @@
 
 namespace
 {
-	BYTE ExcludedMaterial(const std::string& name) // 0x564AA0, original6FF650.
+	const char* excludedMaterialNames[] = //6FF650.
 	{
-		const char* excluded[] =
+		"", "Head", "Chest", "UpperArms", "Hands", "Legs", "Feet", "Waist", "ForeArms", "Shins"
+	};
+
+	BYTE ExcludedMaterial(const std::string& name) //564AA0.
+	{
+		for (LONG i = 0; i < 10; ++i)
 		{
-			"", "Head", "Chest", "UpperArms", "Hands", "Legs", "Feet", "Waist", "ForeArms", "Shins"
-		};
-		for (DWORD i = 0; i < sizeof(excluded) / sizeof(excluded[0]); ++i)
+			std::string excluded(excludedMaterialNames[i]);
 			if (!_mbsicmp(reinterpret_cast<const unsigned char*>(name.c_str()),
-				reinterpret_cast<const unsigned char*>(excluded[i]))) return 1;
+				reinterpret_cast<const unsigned char*>(excluded.c_str()))) return 1;
+		}
 		return 0;
 	}
 
@@ -36,21 +40,24 @@ namespace JE
 
 	void ModelInstance::SetSocketModel(DWORD slot, const char* texture)
 	{
-		Gfx_ModelInstance* model = instances[slot];
-		if (!model) return;
+		if (!instances[slot]) return;
 		std::string sourceName;
 		if (texture && !IsStringBlank(texture, " \n\t\r")) sourceName = texture;
 		else if (!slot) sourceName = instances[0]->GetMaterial(0)->textureNames[0];
 		else
 		{
-			DWORD count = model->data->MaterialCount();
-			for (DWORD i = 0; i < count; ++i)
+			const LONG count = LONG(instances[slot]->data->MaterialCount());
+			for (LONG i = 0; i < count; ++i)
 			{
-				Gfx_Material* material = model->GetMaterial(i);
-				if (material && !ExcludedMaterial(material->name))
+				Gfx_Material* material = instances[slot]->GetMaterial(i);
+				if (material)
 				{
-					sourceName = material->textureNames[0];
-					break;
+					std::string materialName(material->name);
+					if (!ExcludedMaterial(materialName))
+					{
+						sourceName = material->textureNames[0];
+						break;
+					}
 				}
 			}
 		}
@@ -73,8 +80,12 @@ namespace JE
 			}
 		}
 		DWORD sourceHandle;
-		HRESULT result;
-		if (!ModelServices::LoadSocketTexture(&sourceHandle, sourceName, &result)) return;
+		Resources::ResourceMemoryStream* stream = Resources::g_pResourceSystem->OpenMemoryStream(sourceName.c_str(), 0);
+		if (!stream) return;
+		const HRESULT result = g_GfxSystem->LoadTextureFromBuffer(&sourceHandle, sourceName,
+			static_cast<const BYTE*>(stream->resource->data), stream->resource->size,
+			D3DFMT_A8R8G8B8, D3DPOOL_SYSTEMMEM, UINT(-1), D3DX_FILTER_NONE, D3DX_FILTER_TRIANGLE, 0);
+		Resources::g_pResourceSystem->CloseMemoryStream(stream);
 		if (FAILED(result))
 		{
 			OutputDebugStringA("ModelInstance::SetSocketModel() - Unable to create master stitched texture.");
@@ -87,17 +98,18 @@ namespace JE
 			source->frameCount > 0 ? LONG(source->frames[0].width) : 0,
 			source->frameCount > 0 ? LONG(source->frames[0].height) : 0};
 		double minimum[2] = {0, 0}, maximum[2] = {0, 0};
-		Gfx_GetTextureRegion(g_pModelCache->Number(slot, "TextureSlot", 1), minimum, maximum);
-		UINT width = destination->frameCount > 0 ? destination->frames[0].width : 0;
-		UINT height = destination->frameCount > 0 ? destination->frames[0].height : 0;
-		RECT destinationRect = {LONG(width * minimum[0]), LONG(height * minimum[1]),
-			LONG(width * maximum[0]), LONG(height * maximum[1])};
+		Gfx_GetTextureRegion(g_pModelCache->GetTextureSlot(slot), minimum, maximum);
+		RECT destinationRect;
+		destinationRect.left = LONG((destination->frameCount > 0 ? destination->frames[0].width : 0) * minimum[0]);
+		destinationRect.right = LONG((destination->frameCount > 0 ? destination->frames[0].width : 0) * maximum[0]);
+		destinationRect.top = LONG((destination->frameCount > 0 ? destination->frames[0].height : 0) * minimum[1]);
+		destinationRect.bottom = LONG((destination->frameCount > 0 ? destination->frames[0].height : 0) * maximum[1]);
 		destination->CopyRect(0, &destinationRect, source, 0, &sourceRect, 0, 0);
 		D3DXFilterTexture(destination->frames[0].texture, NULL, 0, D3DX_DEFAULT);
 		g_GfxSystem->DeleteTexture(sourceHandle);
-		for (DWORD i = 0; i < model->data->MaterialCount(); ++i)
+		for (DWORD i = 0; i < instances[slot]->data->MaterialCount(); ++i)
 		{
-			Gfx_Material* material = model->GetMaterial(i);
+			Gfx_Material* material = instances[slot]->GetMaterial(i);
 			if (material) material->textureHandles[0] = textureHandle;
 		}
 	}

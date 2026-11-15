@@ -4,6 +4,7 @@
 #include "World.hpp"
 #include "graphics/Octree.hpp"
 #include "graphics/OctreeShape.hpp"
+#include "graphics/GfxMatrix.hpp"
 #include <cmath>
 #include <stdexcept>
 
@@ -66,12 +67,11 @@ namespace JE
 		configuration.type = 2;
 		map->GetOctree()->CreateShape(&configuration, &shape);
 		if (!shape) return 0;
-		D3DXMATRIX transform;
-		D3DXMatrixIdentity(&transform);
+		Gfx_Matrix4x4 transform;
 		//The shape uses the raw angle as radians here; Contains converts it first.
-		transform._11 = float(std::cos(double(angle)));
-		transform._31 = float(std::sin(double(angle)));
-		shape->SetTransform(reinterpret_cast<const float*>(&transform));
+		transform.matrix._11 = float(std::cos(double(angle)));
+		transform.matrix._31 = float(std::sin(double(angle)));
+		shape->SetTransform(&transform.matrix._11);
 		return 1;
 	}
 

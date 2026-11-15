@@ -9,6 +9,7 @@
 #include "entity/PathManager.hpp"
 #include "entity/World.hpp"
 #include "entity/WorldCollections.hpp"
+#include "graphics/GfxVector3.hpp"
 #include <math.h>
 #include <set>
 #include <stdexcept>
@@ -111,10 +112,13 @@ namespace F3
 						if (D3DXVec3Length(&distance) >= width) break;
 					}
 					const float angle = door->rotation.x * 0.017453292f;
-					const D3DXVECTOR3 normal(-static_cast<float>(sin(angle)),0,static_cast<float>(cos(angle)));
-					const float fromSide = D3DXVec3Dot(&normal,&initial);
-					const float toSide = D3DXVec3Dot(&normal,&candidate);
-					if (!((fromSide < 0 && toSide > 0) || (fromSide > 0 && toSide < 0))) break;
+					const float normalZ = static_cast<float>(GfxCos(angle));
+					const float normalX = static_cast<float>(-GfxSin(angle));
+					const double fromSide = double(normalZ) * initial.z + double(normalX) * initial.x
+						+ double(initial.y) * 0.0f;
+					const float toSide = float(double(candidate.z) * normalZ + double(normalX) * candidate.x
+						+ double(candidate.y) * 0.0f); //40634F rounds only the candidate side.
+					if (!((fromSide > 0 && toSide < 0) || (fromSide < 0 && toSide > 0))) break;
 					if (!JE::g_World->party->Contains(owner))
 					{
 						GameActionOperateDoor* operate = new GameActionOperateDoor;

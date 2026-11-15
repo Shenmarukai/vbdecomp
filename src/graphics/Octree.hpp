@@ -67,6 +67,8 @@ struct OctreeNode
 	~OctreeNode(); // 0x5AD8A0; does not own child nodes.
 	int ClassifyObject(const float* center, const float* extent) const; // 0x5BD1A0, ECX node / RET8.
 	const DWORD* GetChildOrder(const float* position, DWORD* count) const; //5BCF30, ECX node / RET8.
+	int IntersectRay(const OctreeRay& ray, const float* positions,
+		float* distance, float* point, DWORD mask, DWORD mode, DWORD* flags) const; //5BD260, RET1C.
 	int QueryFloorHeight(const OctreeRay& ray, const float* positions,
 		float* distance, float* height, DWORD mask, DWORD mode, DWORD* flags) const; //5BD410, RET1C.
 	DWORD ordinal;
@@ -148,6 +150,8 @@ struct OctreeRay
 	typedef int (OctreeRay::*BoundsTest)(const float*, const float*, float*, float*) const;
 	int TestBounds(const float* minimum, const float* maximum,
 		float* distance, float* point) const; //4ADC20, factored entry-face policy.
+	int IntersectTriangle(const float* a, const float* b, const float* c,
+		float* distance, float* point) const; //4AC2B0, RET14.
 	int IntersectDownwardTriangle(const float* a, const float* b, const float* c,
 		float* distance, float* height) const; //4AC5E0, RET14.
 	void SetDirection(const float* inputDirection); //4ADC90; NULL reselects current signs.

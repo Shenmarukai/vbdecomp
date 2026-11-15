@@ -28,6 +28,7 @@ namespace F3
 	class HotKeysOptionsInterface;
 	class OptionsMultiplayerInterface;
 	class OptionsVideoInterface;
+	class WorldMapInterface;
 
 	class GameInterfaces : public JE::Interfaces
 	{
@@ -51,11 +52,11 @@ namespace F3
 		InventoryInterface* inventory; //+18.
 		EscapeMenuInterface* escapeMenu; //+1C.
 		LoadingBarInterface* loading; //+20.
-		void* auxiliary24; //+24, texture-owning producer/type unresolved.
+		::GUI::Interface* auxiliary24; //+24, borrowed Interface view; concrete texture owner/producer unresolved.
 		JE::WorldContainerInterface* container; //+28.
 		DWORD value2C; //+2C, constructor zero; meaning unresolved.
 		InterfaceMessageScreen* auxiliary30; //+30; borrowed partial view, constructor NULL.
-		DWORD value34; //+34, constructor zero; meaning unresolved.
+		WorldMapInterface* worldMap; //+34, borrowed; constructor NULL, producer unresolved.
 		CharacterGenerationInterface* characterGeneration; //+38.
 		StoreCatalogueScreen* auxiliary3C; //+3C, borrowed partial view; constructor NULL.
 		StoreInventoryScreen* auxiliary40; //+40, complete borrowed pointer; constructor NULL.

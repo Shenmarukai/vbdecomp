@@ -1,4 +1,5 @@
 #include "OctreeCamera.hpp"
+#include "GfxVector3.hpp"
 #include <math.h>
 #include <new>
 #include <stdexcept>
@@ -8,22 +9,10 @@
 // their ordered products into a rounded compile-time conversion constant.
 extern const float g_GfxCameraDegreeFraction;
 extern const float g_GfxCameraPi;
+extern const float g_GfxCameraHalfPi;
 
 namespace
 {
-	// Camera-local precision adaptation: real D3DX normalization changed an
-	// observed finite result by one ULP. Retain the original wide intermediate
-	// arithmetic using the real CRT sqrt, then store the three float results.
-	// This is not another vector library or a separately reconstructed unit.
-	__declspec(noinline) void NormalizeCameraVector(D3DXVECTOR3* value)
-	{
-		double x = value->x, y = value->y, z = value->z;
-		double reciprocal = 1.0 / sqrt(x * x + y * y + z * z);
-		value->y = static_cast<float>(y * reciprocal);
-		value->z = static_cast<float>(z * reciprocal);
-		value->x = static_cast<float>(x * reciprocal);
-	}
-
 	// The observed non-axis transform disagrees with D3DX's SIMD association.
 	// This local camera boundary retains the original float output after wide
 	// z/y/x products, without providing another general matrix implementation.
@@ -133,37 +122,79 @@ noCamera:
 
 void OCTREE_Camera::SetFrustum(float degrees, float aspect, float nearPlane, float farPlane)
 {
-	// These are the game's degree/angle decisions, not a D3DX perspective matrix.
-	volatile float vertical = static_cast<float>(degrees * 0.5 * 0.0055555557f * 3.1415901f);
-	double horizontal = 1.570796f - degrees * static_cast<double>(aspect) * 0.5
-		* 0.0055555557f * 3.1415901f;
-	// Original trigonometric arguments/results cross stored-float call boundaries.
-	// Volatile stores prevent VC7 inlining from silently retaining extra precision.
-	volatile float sineHorizontal = static_cast<float>(sin(horizontal));
-	volatile float cosineHorizontal = static_cast<float>(cos(horizontal));
-	volatile float sineVertical = -static_cast<float>(sin(vertical));
-	volatile float cosineVertical = static_cast<float>(cos(vertical));
-	D3DXVECTOR3 forward(sineHorizontal, 0, cosineHorizontal);
-	D3DXVECTOR3 up(0, cosineVertical, sineVertical);
-	D3DXVec3Cross(localRays, &forward, &up);
-	NormalizeCameraVector(localRays);
-	localRays[1] = D3DXVECTOR3(-localRays[0].x, localRays[0].y, localRays[0].z);
-	localRays[2] = D3DXVECTOR3(localRays[0].x, -localRays[0].y, localRays[0].z);
-	localRays[3] = D3DXVECTOR3(-localRays[0].x, -localRays[0].y, localRays[0].z);
-	localRays[4] = D3DXVECTOR3(0, 0, nearPlane);
-	localRays[5] = D3DXVECTOR3(0, 0, farPlane);
-	D3DXVec3Cross(localPlanes, localRays + 1, localRays);
-	NormalizeCameraVector(localPlanes);
-	D3DXVec3Cross(localPlanes + 1, localRays + 2, localRays + 3);
-	NormalizeCameraVector(localPlanes + 1);
-	D3DXVec3Cross(localPlanes + 2, localRays, localRays + 2);
-	NormalizeCameraVector(localPlanes + 2);
-	D3DXVec3Cross(localPlanes + 3, localRays + 3, localRays + 1);
-	NormalizeCameraVector(localPlanes + 3);
-	localPlanes[4] = D3DXVECTOR3(0, 0, 1);
-	localPlanes[5] = D3DXVECTOR3(0, 0, -1);
-	projectionScaleX = projectionScaleY = 1;
-	projectionOffsetX = projectionOffsetY = 0;
+	const float vertical = static_cast<float>(static_cast<double>(degrees)
+		* g_GfxScalarHalf * g_GfxCameraDegreeFraction * g_GfxCameraPi);
+	Gfx_Vector3f forward = {{0.0f, 0.0f, 1.0f}};
+	Gfx_Vector3f up = {{0.0f, 1.0f, 0.0f}};
+	const double horizontal = g_GfxCameraHalfPi - static_cast<double>(degrees)
+		* aspect * g_GfxScalarHalf * g_GfxCameraDegreeFraction * g_GfxCameraPi;
+	const float sineHorizontal = static_cast<float>(sin(horizontal));
+	const float cosineHorizontal = static_cast<float>(cos(horizontal));
+	forward.RotateXZ(cosineHorizontal, sineHorizontal);
+	const float sineVertical = static_cast<float>(-sin(vertical));
+	const float cosineVertical = static_cast<float>(cos(vertical));
+	up.RotateYZ(cosineVertical, sineVertical);
+
+	Gfx_Vector3f corner = forward.Cross(up);
+	memcpy(localRays, corner.value, sizeof(corner.value));
+	corner.Normalize();
+	memcpy(localRays, corner.value, sizeof(corner.value));
+	const float negativeX = -localRays[0].x;
+	localRays[1].x = negativeX;
+	localRays[3].x = negativeX;
+	const float negativeY = -localRays[0].y;
+	localRays[1].y = localRays[0].y;
+	localRays[3].y = negativeY;
+	localRays[1].z = localRays[0].z;
+	localRays[3].z = localRays[0].z;
+	localRays[2].x = localRays[0].x;
+	localRays[2].y = negativeY;
+	localRays[2].z = localRays[0].z;
+	localRays[4].x = 0;
+	localRays[4].y = 0;
+	localRays[4].z = nearPlane;
+	localRays[5].x = 0;
+	localRays[5].y = 0;
+	localRays[5].z = farPlane;
+
+	Gfx_Vector3f right, lowerLeft, lowerRight;
+	memcpy(right.value, localRays + 1, sizeof(right.value));
+	memcpy(lowerLeft.value, localRays + 2, sizeof(lowerLeft.value));
+	memcpy(lowerRight.value, localRays + 3, sizeof(lowerRight.value));
+	{
+		Gfx_Vector3f normal = right.Cross(corner);
+		memcpy(localPlanes, normal.value, sizeof(normal.value));
+		normal.Normalize();
+		memcpy(localPlanes, normal.value, sizeof(normal.value));
+	}
+	{
+		Gfx_Vector3f normal = lowerLeft.Cross(lowerRight);
+		memcpy(localPlanes + 1, normal.value, sizeof(normal.value));
+		normal.Normalize();
+		memcpy(localPlanes + 1, normal.value, sizeof(normal.value));
+	}
+	{
+		Gfx_Vector3f normal = corner.Cross(lowerLeft);
+		memcpy(localPlanes + 2, normal.value, sizeof(normal.value));
+		normal.Normalize();
+		memcpy(localPlanes + 2, normal.value, sizeof(normal.value));
+	}
+	{
+		Gfx_Vector3f normal = lowerRight.Cross(right);
+		memcpy(localPlanes + 3, normal.value, sizeof(normal.value));
+		normal.Normalize();
+		memcpy(localPlanes + 3, normal.value, sizeof(normal.value));
+	}
+	localPlanes[4].x = 0;
+	localPlanes[4].y = 0;
+	localPlanes[5].x = 0;
+	localPlanes[5].y = 0;
+	projectionOffsetX = 0;
+	projectionOffsetY = 0;
+	localPlanes[4].z = 1;
+	localPlanes[5].z = -1;
+	projectionScaleX = 1;
+	projectionScaleY = 1;
 }
 
 void OCTREE_Camera::SetScreen(float width, float height, const D3DXMATRIX* projection)

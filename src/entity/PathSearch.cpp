@@ -2,17 +2,9 @@
 #include "Entity.hpp"
 #include "startup/MessageLoop.hpp"
 #include "World.hpp"
-#include <algorithm>
 
 namespace
 {
-	struct LowestPathCost
-	{
-		bool operator()(const JE::PathNode* left, const JE::PathNode* right) const
-		{
-			return left->totalCost > right->totalCost;
-		}
-	};
 	LONG AddPathCost(LONG left, LONG right)
 	{
 		return static_cast<LONG>(static_cast<DWORD>(left) + static_cast<DWORD>(right));
@@ -56,15 +48,11 @@ namespace JE
 			first->open = 1; first->closed = 0; first->parent = NULL; first->cost = 0;
 			first->totalCost = Estimate(request->startCell.x, request->startCell.y,
 				request->goalCell.x, request->goalCell.y);
-			request->frontier->push_back(first);
-			std::push_heap(request->frontier->begin(), request->frontier->end(), LowestPathCost());
+			PushPathNode(*request->frontier, first);
 		}
-		std::vector<PathNode*>& frontier = *request->frontier;
-		while (!frontier.empty())
+		while (!request->frontier->empty())
 		{
-			std::pop_heap(frontier.begin(), frontier.end(), LowestPathCost());
-			PathNode* current = frontier.back();
-			frontier.pop_back();
+			PathNode* current = PopPathNode(*request->frontier);
 			//Original leaves current.open set even after removing it from the heap.
 			if (PathDifference(current->point.x, request->goalCell.x) <= 3
 				&& PathDifference(current->point.y, request->goalCell.y) <= 3)
@@ -98,19 +86,11 @@ namespace JE
 				node->totalCost = total;
 				if (node->open)
 				{
-					for (std::vector<PathNode*>::iterator entry = frontier.begin(); entry != frontier.end(); ++entry)
-					{
-						if ((*entry)->point.x == node->point.x && (*entry)->point.y == node->point.y)
-						{
-							std::push_heap(frontier.begin(), entry+1, LowestPathCost());
-							break;
-						}
-					}
+					ReprioritizePathNode(*request->frontier, node->point);
 				}
 				else
 				{
-					frontier.push_back(node);
-					std::push_heap(frontier.begin(), frontier.end(), LowestPathCost());
+					PushPathNode(*request->frontier, node);
 					node->open = 1;
 				}
 			}

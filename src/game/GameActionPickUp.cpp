@@ -45,7 +45,7 @@ namespace F3
 			move->SetTarget(target);
 			move->stopDistance=3;
 			owner->QueueAction(move);
-			GameActionPickUp* retry=new(std::nothrow) GameActionPickUp; //407016 is direct construction.
+			GameActionPickUp* retry=new GameActionPickUp; //407016 is direct construction.
 			retry->SetTarget(target);
 			owner->QueueAction(retry);
 			completed=1;

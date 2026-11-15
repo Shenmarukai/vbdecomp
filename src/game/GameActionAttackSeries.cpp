@@ -9,6 +9,22 @@
 
 namespace F3
 {
+	void GameActionAttack::SetPointTarget(BYTE enabled, const D3DXVECTOR3* point) //401100.
+	{
+		pointTarget = enabled;
+		if (enabled && point)
+		{
+			targetPosition.x = point->x;
+			targetPosition.y = point->y;
+			targetPosition.z = point->z;
+		}
+	}
+
+	LONG GameActionAttack::QueueSubAttackAnimation(const AttackSubAttack& subAttack) //4012C0.
+	{
+		return attacker->QueueAnimationEvent(subAttack.animation, 0);
+	}
+
 	BYTE GameActionAttack::BuildSubAttacks() //403300.
 	{
 		FaceTarget();

@@ -5,91 +5,44 @@
 D3DXVECTOR3 GfxAddVectors(const float* first, const float* second);
 D3DXVECTOR3 GfxSubtractVectors(const float* first, const float* second);
 
-namespace
+int OctreeRay::IntersectTriangle(const float* first, const float* second,
+	const float* third, float* distance, float* point) const //4AC2B0.
 {
-
-
-	bool MatchesTriangle(DWORD flags, DWORD mask, DWORD mode)
+	D3DXVECTOR3 edgeValue = GfxSubtractVectors(second, first);
+	Gfx_Vector3f edge1 = {{edgeValue.x, edgeValue.y, edgeValue.z}};
+	edgeValue = GfxSubtractVectors(third, first);
+	Gfx_Vector3f edge2 = {{edgeValue.x, edgeValue.y, edgeValue.z}};
+	Gfx_Vector3f p = direction.Cross(edge2);
+	float determinant = edge1.Dot(p.value);
+	Gfx_Vector3f q;
+	if (determinant > 0.000099999997f)
 	{
-		switch (mode)
-		{
-		case 0: return !mask || (flags & mask) != 0;
-		case 1: return (flags & mask) != 0;
-		case 2: return (flags & mask) == mask;
-		case 3: return (flags & mask) == 0;
-		case 4: return (flags & mask) != mask;
-		default: return true;
-		}
+		D3DXVECTOR3 offsetValue = GfxSubtractVectors(origin, first);
+		Gfx_Vector3f offset = {{offsetValue.x, offsetValue.y, offsetValue.z}};
+		float u = offset.Dot(p.value);
+		if (u < 0.0 || u > determinant) return 0;
+		q = offset.Cross(edge1);
+		float v = direction.Dot(q.value);
+		if (v < 0.0 || u + v > determinant) return 0;
 	}
-
-	//Proprietary4AC2B0 two-sided barycentric policy, using the real SDK vector
-	//operations. Original x87 versus SDK rounding is not claimed equivalent.
-	bool IntersectTriangle(const OctreeRay& ray, const float* first, const float* second,
-		const float* third, float& distance, float* point)
+	else
 	{
-		D3DXVECTOR3 a(first), b(second), c(third), direction(ray.direction.value), origin(ray.origin);
-		D3DXVECTOR3 edge1 = b - a, edge2 = c - a, p, q;
-		D3DXVec3Cross(&p, &direction, &edge2);
-		float determinant = D3DXVec3Dot(&edge1, &p);
-		if (!(determinant > 0.000099999997f) && !(-0.000099999997f > determinant)) return false;
-		D3DXVECTOR3 offset = origin - a;
-		float u = D3DXVec3Dot(&offset, &p);
-		D3DXVec3Cross(&q, &offset, &edge1);
-		float v = D3DXVec3Dot(&direction, &q);
-		if (determinant > 0.000099999997f)
-		{
-			if (u < 0.0f || u > determinant || v < 0.0f || u + v > determinant) return false;
-		}
-		else if (u > 0.0f || u < determinant || v > 0.0f || u + v < determinant) return false;
-		double value = static_cast<double>(D3DXVec3Dot(&edge2, &q)) * (1.0 / determinant);
-		distance = static_cast<float>(value);
-		if (!(value >= 0.0)) return false;
-		for (int axis = 0; axis < 3; ++axis)
-		{
-			float scaled = ray.direction.value[axis] * distance;
-			point[axis] = ray.origin[axis] + scaled;
-		}
-		return true;
+		if (!(-0.000099999997f > determinant)) return 0;
+		D3DXVECTOR3 offsetValue = GfxSubtractVectors(origin, first);
+		Gfx_Vector3f offset = {{offsetValue.x, offsetValue.y, offsetValue.z}};
+		float u = offset.Dot(p.value);
+		if (u > 0.0 || u < determinant) return 0;
+		q = offset.Cross(edge1);
+		float v = direction.Dot(q.value);
+		if (v > 0.0 || u + v < determinant) return 0;
 	}
-
-	bool IntersectNode(const OctreeNode& node, const OctreeRay& ray, const float* positions,
-		float& distance, float* point, DWORD mask, DWORD mode, DWORD* flags) //5BD260.
-	{
-		if (!node.indices) return false;
-		distance = ray.maximumDistance;
-		DWORD cursor = 0, triangle = 0;
-		while (cursor < node.wordCount)
-		{
-			WORD marker = node.indices[cursor];
-			if (marker & 0xC000)
-			{
-				cursor += (marker & 0x8000) ? 4 : 2;
-				continue;
-			}
-			DWORD count = node.indices[cursor+1];
-			cursor += 2;
-			DWORD end = cursor + count;
-			while (cursor < end)
-			{
-				const float* a = positions + 3*node.indices[cursor];
-				const float* b = positions + 3*node.indices[cursor+1];
-				const float* c = positions + 3*node.indices[cursor+2];
-				DWORD triangleFlags = node.triangleFlags[triangle++];
-				cursor += 3;
-				if (!MatchesTriangle(triangleFlags, mask, mode)) continue;
-				float candidateDistance, candidatePoint[3];
-				if (IntersectTriangle(ray, a, b, c, candidateDistance, candidatePoint)
-					&& candidateDistance < distance)
-				{
-					distance = candidateDistance;
-					for (int axis = 0; axis < 3; ++axis) point[axis] = candidatePoint[axis];
-					if (flags) *flags = node.triangleFlags[triangle-1];
-				}
-			}
-			cursor += cursor & 1;
-		}
-		return distance != ray.maximumDistance;
-	}
+	float value = edge2.Dot(q.value) * (g_GfxScalarOne / determinant);
+	*distance = value;
+	if (value < g_GfxScalarZero) return 0;
+	Gfx_Vector3f scaled = direction.Scale(value);
+	D3DXVECTOR3 hit = GfxAddVectors(origin, scaled.value);
+	memcpy(point, &hit, sizeof(hit));
+	return 1;
 }
 
 int OCTREE_Camera::MakeScreenRay(LONG x, LONG y, OctreeRay* output)
@@ -173,8 +126,8 @@ int OCTREE::QueryGroundRay(const OctreeRay& ray, OctreeGroundHit* output, DWORD 
 					if (node == &root)
 						throw std::logic_error("OCTREE5AEB93: root-leaf ray+24h buffer selector unresolved");
 					float distance, point[3];
-					if (IntersectNode(*node, ray, vertexBuffers[node->vertexBuffer].positions,
-						distance, point, mask, mode, &triangleFlags) && distance < best)
+					if (node->IntersectRay(ray, vertexBuffers[node->vertexBuffer].positions,
+						&distance, point, mask, mode, &triangleFlags) && distance < best)
 					{
 						best = distance;
 						output->distance = distance;

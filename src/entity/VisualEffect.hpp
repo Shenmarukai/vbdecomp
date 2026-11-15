@@ -24,6 +24,8 @@ namespace JE
 		virtual void FinishLights(); //59F840.
 		BYTE IsFinished() const; //59F7D0.
 		virtual BOOL IsSelectionDisabled() const; //59F760, slot28; selectable BYTE equals0.
+		virtual DWORD SetStoredValues(const DWORD* input); //59F770, slot2C; raw three-word copy.
+		virtual DWORD* GetStoredValues(DWORD* output) const; //59F7A0, slot30; returns output.
 		BOOL IsEffectVisible(); //59FC70, cached fog visibility; distinct from virtual octree visibility.
 		void ResetVisibility(); //59F8D0, clears both cached result bytes.
 		void CollectLights(std::list<VFX_Light*>& output); //59FF20, actual child RTTI.

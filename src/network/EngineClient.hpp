@@ -79,6 +79,8 @@ namespace JE
 		void MapTransitionInterface(DWORD address); //Explicit addressed interface child, not an original entry.
 		void AddFloatingSpeechText(DWORD entityID, DWORD stringReference, DWORD duration,
 			DWORD red, DWORD green, DWORD blue); //58AAD0; resolve then actual text owner virtual0.
+		void AddFloatingSpeechText(DWORD entityID, const std::string& text, DWORD duration,
+			DWORD red, DWORD green, DWORD blue); //587A60; actual text owner virtual0.
 		void AddFloatingDamageText(DWORD entityID, const std::string& text,
 			DWORD red, DWORD green, DWORD blue); //587A70; actual text owner virtual4.
 		void SendDialogueReply(Net::Packet& packet); //587850; message54, original Send flag0.

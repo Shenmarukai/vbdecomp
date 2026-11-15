@@ -65,7 +65,8 @@ namespace F3
 		{
 			primaryAmmo=FindAmmunition(primaryCaliber,primaryModifier);
 			if (!primaryAmmo)
-				throw std::logic_error("GameWeapon412FBB: original fatal ammo lookup has an unwritten %d argument");
+				//412FBB supplies only the format string, leaving its %d argument unwritten.
+				JE::FatalError("GameWeapon::GetEffectiveRange on entitiy %d - Unable to look up ammo.");
 		}
 		return LONG(attack->range+primaryAmmo->value968);
 	}

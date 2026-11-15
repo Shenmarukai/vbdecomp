@@ -57,7 +57,7 @@ namespace F3
 			move->SetTarget(target);
 			move->stopDistance=5;
 			owner->QueueAction(move);
-			GameActionOperateContainer* retry=new(std::nothrow) GameActionOperateContainer;
+			GameActionOperateContainer* retry=new GameActionOperateContainer;
 			retry->SetTarget(target);
 			owner->QueueAction(retry);
 			completed=1;

@@ -23,6 +23,9 @@ namespace JE
 		LONG cost, totalCost;
 		BYTE open, closed;
 	};
+	void ReprioritizePathNode(std::vector<PathNode*>& frontier, const PathPoint& point); //560AA0.
+	PathNode* PopPathNode(std::vector<PathNode*>& frontier); //560E40, captures the root before heap adjustment.
+	void PushPathNode(std::vector<PathNode*>& frontier, PathNode* node); //562550, borrowed node.
 	struct PathPointHash
 	{
 		enum { bucket_size = 4, min_buckets = 8 };

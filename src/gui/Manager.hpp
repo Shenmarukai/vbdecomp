@@ -42,6 +42,7 @@ namespace GUI
 		void SetStringCallback(StringCallback callback); //4B2AC0; borrowed callback only.
 		void SetTooltip(const std::string& text); //4B4160; assigns the actual tooltip member.
 		BYTE WriteClipboardText(const std::string& text); //4B2CB0; borrowed text, original clipboard policy.
+		std::string ReadClipboardText(); //4B41D0; returns an owned copy, preserves failure behavior.
 
 		void GetResolution(DWORD& width, DWORD& height); // 0x4B28A0.
 		void SetResolution(LONG width, LONG height); //4B4CE0, actual viewport/scaling setup.

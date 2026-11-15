@@ -1,8 +1,103 @@
 #include "Octree.hpp"
+#include "OctreeShape.hpp"
 #include "d3dx9.h"
 #include <cstddef>
 #include <float.h>
 #include <stdexcept>
+
+int OCTREE::UpdateShape(OCTREE_Shape* shape) //5B0880.
+{
+	OctreeNode* node = &root;
+	int classification;
+	int level = 0;
+	classification = 0;
+	if (!shape) return 2;
+	if (currentShape) currentShape->selectedObjects = NULL;
+	currentShape = shape;
+	shape->selectedObjects = reinterpret_cast<OctreeSpatialObject**>(scratch);
+	currentShape->queryCursor = 0;
+	OctreeShapeNodeCache* cache = currentShape->cachedNodes;
+	if (cache && cache->Node(0)) return 0;
+	currentShape->ClearNodes();
+	for (DWORD index = 0; reinterpret_cast<OctreeSpatialObject**>(scratch)[index]; ++index)
+	{
+		--reinterpret_cast<OctreeSpatialObject**>(scratch)[index]->references;
+		OctreeSpatialObject* object = reinterpret_cast<OctreeSpatialObject**>(scratch)[index];
+		if (!object->references) delete object;
+		reinterpret_cast<OctreeSpatialObject**>(scratch)[index] = NULL;
+	}
+	DWORD written = 0;
+	while (node && level >= 0)
+	{
+		LONG child = LONG(traversal[level].nextChild);
+		if (!child)
+		{
+			OctreeNode* current = node;
+			if (classification != 2)
+			{
+				classification = currentShape->ClassifyBox(current->bounds);
+				if (!classification) child = 8;
+			}
+			traversal[level].classification = classification;
+			if (classification)
+			{
+				if (current->flags & 1) currentShape->AddNode(current);
+				OctreeSpatialObject* object = current->objects;
+				if (object)
+				{
+					if (classification == 2)
+					{
+						do
+						{
+							reinterpret_cast<OctreeSpatialObject**>(scratch)[written] = object;
+							++object->references;
+							object = object->next;
+							++written;
+						}
+						while (object);
+					}
+					else
+					{
+						do
+						{
+							if (currentShape->ClassifyObject(object->center, object->extent))
+							{
+								reinterpret_cast<OctreeSpatialObject**>(scratch)[written] = object;
+								++object->references;
+								++written;
+							}
+							object = object->next;
+						}
+						while (object);
+					}
+				}
+			}
+		}
+		OctreeNode* descendant = NULL;
+		if (!(node->flags & 1))
+			while (child < 8)
+			{
+				descendant = node->children[child++];
+				if (descendant) break;
+			}
+		if (descendant)
+		{
+			traversal[level].nextChild = child;
+			node = descendant;
+			++level;
+		}
+		else
+		{
+			traversal[level].nextChild = 0;
+			node = node->parent;
+			//The original also reads the preceding frame when leaving the root.
+			classification = static_cast<volatile OctreeTraversal*>(traversal)[level - 1].classification;
+			--level;
+		}
+	}
+	reinterpret_cast<OctreeSpatialObject**>(scratch)[written] = NULL;
+	return 0;
+}
 
 namespace
 {
