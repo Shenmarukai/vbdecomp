@@ -1,7 +1,6 @@
 #include "OctreeShape.hpp"
 #include "Octree.hpp"
 #include <d3dx8math.h>
-#include <new>
 #include <stdexcept>
 
 D3DXVECTOR3 GfxAddVectors(const float* first, const float* second);
@@ -245,33 +244,47 @@ int CreateOctreeRing2D(float outerRadius, float innerRadius, OCTREE_Shape** outp
 	return 0;
 }
 
+int CreateOctreeTriangle2D(float angle, float length, OCTREE_Shape** output) //5BBC00.
+{
+	if (angle > 180.0f) return 2;
+	OCTREE_Tri2D* triangle = new OCTREE_Tri2D;
+	if (!triangle) return 1;
+	triangle->Configure(angle, length);
+	*output = triangle;
+	return 0;
+}
+
+int CreateOctreePie2D(float angle, float radius, OCTREE_Shape** output) //5BB090.
+{
+	if (angle > 180.0f) return 2;
+	OCTREE_Pie2D* pie = new OCTREE_Pie2D;
+	if (!pie) return 1;
+	pie->Configure(angle, radius);
+	*output = pie;
+	return 0;
+}
+
 int OCTREE::CreateShape(const OctreeShapeConfiguration* configuration, OCTREE_Shape** output)
 {
 	OCTREE_Shape* shape = NULL;
 	switch (configuration->type)
 	{
+	case 0:
+		{
+			const int result = CreateOctreeTriangle2D(configuration->first, configuration->radius, &shape);
+			if (result) return result;
+		}
+		break;
 	case 1:
 		{
 			const int result = CreateOctreeCircle2D(configuration->radius, &shape);
 			if (result) return result;
 		}
 		break;
-	case 0:
-		{
-			if (configuration->first>180.0f) return 2;
-			OCTREE_Tri2D* triangle=new(std::nothrow) OCTREE_Tri2D;
-			if (!triangle) return 1;
-			triangle->Configure(configuration->first,configuration->radius); //5BBC00.
-			shape=triangle;
-		}
-		break;
 	case 2:
 		{
-			if (configuration->first>180.0f) return 2;
-			OCTREE_Pie2D* pie=new(std::nothrow) OCTREE_Pie2D;
-			if (!pie) return 1;
-			pie->Configure(configuration->first,configuration->radius);
-			shape=pie;
+			const int result = CreateOctreePie2D(configuration->first, configuration->radius, &shape);
+			if (result) return result;
 		}
 		break;
 	case 3:

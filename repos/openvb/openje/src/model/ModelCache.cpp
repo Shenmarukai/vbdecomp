@@ -23,6 +23,7 @@ namespace JE
 	static std::string modelAbbreviationKey("Abbreviation"); //6FF0F8; native6438E0 lifetime.
 	static std::string modelVariationCountKey("VariationCount"); //6FF114.
 	static std::string textureVariationCountKey("TextureVariationCount"); //6FF130; native643940.
+	static std::string textureSlotKey("TextureSlot"); //6FF14C; native643970.
 	static std::string appendVariationNameKey("AppendModelVariationName"); //6FF168.
 	static std::string appendSexSuffixKey("AppendSexSuffix"); //6FF184.
 	static std::string maleSuffixFormat("MaleSuffix%d"); //6FF1A0; native643A00.
@@ -93,6 +94,16 @@ namespace JE
 		Configuration::Values::iterator value = section->second.find(modelVariationCountKey);
 		std::string text(value->second);
 		return DWORD(atol(text.c_str()));
+	}
+
+	LONG ModelCache::GetTextureSlot(DWORD slot) //584ED0; required section/key.
+	{
+		char sectionName[12];
+		_itoa(slot, sectionName, 10);
+		Configuration::Settings::iterator section = settings.find(sectionName);
+		Configuration::Values::iterator value = section->second.find(textureSlotKey);
+		std::string text(value->second);
+		return atol(text.c_str());
 	}
 
 	BYTE ModelCache::AppendsVariationName(DWORD slot) //584390.

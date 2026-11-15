@@ -61,13 +61,91 @@ Action layouts affect consumers even where a source implementation exists.
 
 ## Work that can be separated from those blockers
 
-Several original helper boundaries are absent as standalone source functions even
-though their operations occur in consumers. Examples include inventory heading
-initialization (`43B1B0`), optional-model forwarding (`549FC0`), speech forwarding
-(`587A60`), path-search heap helpers (`560AA0`, `560E40`, `562550`) and RGBA
-read/write helpers (`4C87B0`, `4C8870`, `4C8AD0`). These are candidates for restoring
-original source boundaries when accuracy work resumes. Presence in a caller does
-not establish the original helper's ABI or emitted code.
+The RGBA helpers (`4C87B0`, `4C8870`, `4C8AD0`) now have separate source bodies.
+The text writer captures all four components before numeric formatting. Their
+original private register conventions remain unresolved: current 90/124/45-byte
+bodies differ from the original 86/121/41-byte scopes. Release compile/link and
+static capture/publication checks pass; no exact-match credit is added.
+Complete text RGBA read/write and binary-read comparisons remain nonmatching.
+The binary RGBA writer is unclosed on overlap with its defined RGB helper.
+Vertex text export also restores separate 24-byte position/normal snapshots
+before their formatter calls. Its complete 287-byte caller remains nonmatching.
+Vertex text input now calls the existing three-component reader in both
+coordinate and normal branches. Its 52-byte reader and 12-byte scaled-number
+helper match complete code; the caller remains nonmatching.
+
+The attack-series animation helper (`4012C0`) now has a separate 21-byte body
+and caller boundary. Its complete static comparison has one layout difference:
+attacker current `+10` versus original `+18`. No exact-match credit is added.
+The point-target setter (`401100`) now has a separate 39-byte body and packet
+caller. Four field operands retain the unresolved Action-layout difference.
+
+The following helper boundaries have complete function-code matches verified
+2026-11-15 with VC7 13.00.9466, LINK 7.00.9466, PSDK 5.1.3590.2 and DirectX 8.1.
+Every relocation is resolved; EH and metadata contributions are included.
+
+| Original | Source function | Code including EH | Owned metadata |
+| --- | --- | ---: | ---: |
+| `549FC0` | `JE::Entity::ProcessAnimationCues` | 18 | 0 |
+| `587A60` | `JE::Client::AddFloatingSpeechText` (text overload) | 10 | 0 |
+| `43B1B0` | `F3::InventoryInterface::InitializeHeading` | 196 | 36 |
+| `560AA0` | `JE::ReprioritizePathNode` | 99 | 0 |
+| `560E40` | `JE::PopPathNode` | 103 | 0 |
+| `562550` | `JE::PushPathNode` | 63 | 0 |
+| `4C9330` | `G3D_WriteTextVector` | 72 | 0 |
+| `5BBC00` | `CreateOctreeTriangle2D` | 197 | 36 |
+| `5BB090` | `CreateOctreePie2D` | 197 | 36 |
+| `584ED0` | `JE::ModelCache::GetTextureSlot` | 354 | 0 |
+| `4B41D0` | `GUI::Manager::ReadClipboardText` | 298 | 36 |
+| `564AA0` | `ExcludedMaterial` | 232 | 0 |
+
+The triangle/pie factories restore separate allocation/configuration boundaries
+and the original ordinary `operator new` call. The dispatcher uses all five
+factory calls; its complete equality remains unverified.
+
+Socket replacement remains nonmatching after a complete static comparison. Its
+defined removal and animation helpers are included.
+
+Material exclusion restores its pointer table and per-comparison string lifetime.
+Texture stitching restores material-name snapshots, direct resource operations,
+live socket reloads, a signed initial scan and coordinate-conversion order. The
+unit uses native Release `/GS`. Complete caller comparison is nonmatching; owned
+EH and metadata match.
+
+The texture-slot query restores its persistent `TextureSlot` key and the original
+one-argument call from texture stitching. Required lookups remain unchecked;
+the texture caller remains nonmatching.
+
+The clipboard reader restores the ordinary Manager member and Paste call.
+Its native security-cookie sequence supports the unit's Release `/GS` option.
+Original clipboard failure behavior remains. Paste restores the original range
+comparisons; its owned EH still overlaps CopySelection.
+
+Typed text editing restores virtual text snapshots, the Label append boundary
+and scoped overwrite/selection string construction. The logical body remains
+nonmatching inside catalog aggregate `4C13C0`; no catalog match is credited.
+
+Keyboard deletion, Right Arrow and End restore virtual text snapshots and
+cleanup before blink reset. End uses virtual wrapping, and modifier bits are
+reread after callbacks. The handler remains nonmatching; comparison closure
+is blocked by existing Paste/CopySelection support overlap.
+
+Edit events restore virtual wrapping for drag scrolling and mouse wheels, with
+original captures before callbacks. Paste/CopySelection support overlap still
+blocks comparison closure.
+
+Caret hit testing restores the virtual text snapshot, bounded row lookups and
+captured clipping bounds and character indices. The body remains nonmatching; all
+operands resolve and the complete unwind metadata matches.
+
+Loading-screen visibility has a complete nonmatching static comparison with all
+call operands resolved. No source change or new exact-match credit follows.
+
+The inventory constructor emits all 29 original helper/name pairs. Path update
+restores frontier-pointer reloads after callbacks. Release compile/link and
+shared-consumer checks pass. Two STL heap supports were checked separately and
+earn no proprietary credit. Complete caller equality, class ABI and runtime
+behavior remain unverified; `PathManager::Update` remains nonmatching.
 
 The 161 unresolved-origin entries were reviewed separately: 63 have registered
 source bodies, 43 have current source-annotation candidates, 54 still lack a

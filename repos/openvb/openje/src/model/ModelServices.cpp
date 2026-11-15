@@ -30,14 +30,4 @@ namespace JE { namespace ModelServices
 		_strupr(buffer);
 		return std::string(buffer);
 	}
-	BYTE LoadSocketTexture(DWORD* output, const std::string& name, HRESULT* result)
-	{
-		Resources::ResourceMemoryStream* stream = Resources::OpenResourceMemoryStream(name.c_str(), 0);
-		if (!stream) return 0;
-		*result = g_GfxSystem->LoadTextureFromBuffer(output, name, stream->begin,
-			static_cast<UINT>(stream->end - stream->begin), D3DFMT_A8R8G8B8,
-			D3DPOOL_SYSTEMMEM, UINT(-1), D3DX_FILTER_NONE, D3DX_FILTER_TRIANGLE, 0);
-		Resources::CloseResourceMemoryStream(stream);
-		return 1;
-	}
 }}

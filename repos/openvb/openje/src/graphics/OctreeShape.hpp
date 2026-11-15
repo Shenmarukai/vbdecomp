@@ -135,3 +135,7 @@ int CreateOctreeRing2D(float outerRadius, float innerRadius, OCTREE_Shape** outp
 
 //5BA030: native status/output factory; failed creation leaves output unwritten.
 int CreateOctreeRect2D(float width, float length, OCTREE_Shape** output);
+
+//5BBC00/5BB090: angle or allocation failure leaves output unwritten.
+int CreateOctreeTriangle2D(float angle, float length, OCTREE_Shape** output);
+int CreateOctreePie2D(float angle, float radius, OCTREE_Shape** output);

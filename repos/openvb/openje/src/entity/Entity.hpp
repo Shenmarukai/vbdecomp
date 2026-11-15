@@ -231,6 +231,7 @@ namespace JE
 		void QueueAnimation(DWORD group, DWORD file, DWORD loops, BYTE reverse,
 			DWORD timeOffset, BYTE clearPending); // Owning deque append54EB40, library supplied.
 		void UpdateAnimationQueue(); // Factored54C891..54CA35; not complete Entity::Update.
+		void ProcessAnimationCues(DWORD milliseconds); //549FC0, nullable model forwarding.
 		DWORD GetAnimationTime() const; // 0x549040.
 		float GetAnimationDuration() const; // 0x548FC0.
 		DWORD EndAnimationNow(); // 0x548F90, writes end time; does not clear queue.

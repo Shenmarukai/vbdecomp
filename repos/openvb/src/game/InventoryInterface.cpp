@@ -130,18 +130,35 @@ namespace F3
 		backpackScroll->SetMaximum(33);
 		backpackScroll->SetStep(1);
 		backpackScroll->SetValue(0, 1);
-		const char* inactive[28] = {"lblHead", "lblBody", "lblHand1", "lblHand2", "lblST", "lblPE",
-			"lblEN", "lblCH", "lblIN", "lblAG", "lblLK", "lblSkill01", "lblSkill02", "lblSkill03",
-			"lblSkill04", "lblSkill05", "lblSkill06", "lblSkill07", "lblSkill08", "lblSkill09",
-			"lblSkill10", "lblSkill11", "lblSkill12", "lblSkill13", "lblSkill14",
-			"lblSortName", "lblSortType", "lblSortWeight"};
-		for (int i = 0; i < 28; ++i)
-		{
-			::GUI::Window* label = FindWindow(inactive[i]);
-			if (label) label->SetValue3B(0); //43B1B0, only this flag is changed.
-		}
-		::GUI::Window* number = FindWindow("lblSortNumber");
-		if (number) number->SetValue3B(0);
+		InitializeHeading("lblHead");
+		InitializeHeading("lblBody");
+		InitializeHeading("lblHand1");
+		InitializeHeading("lblHand2");
+		InitializeHeading("lblST");
+		InitializeHeading("lblPE");
+		InitializeHeading("lblEN");
+		InitializeHeading("lblCH");
+		InitializeHeading("lblIN");
+		InitializeHeading("lblAG");
+		InitializeHeading("lblLK");
+		InitializeHeading("lblSkill01");
+		InitializeHeading("lblSkill02");
+		InitializeHeading("lblSkill03");
+		InitializeHeading("lblSkill04");
+		InitializeHeading("lblSkill05");
+		InitializeHeading("lblSkill06");
+		InitializeHeading("lblSkill07");
+		InitializeHeading("lblSkill08");
+		InitializeHeading("lblSkill09");
+		InitializeHeading("lblSkill10");
+		InitializeHeading("lblSkill11");
+		InitializeHeading("lblSkill12");
+		InitializeHeading("lblSkill13");
+		InitializeHeading("lblSkill14");
+		InitializeHeading("lblSortName");
+		InitializeHeading("lblSortType");
+		InitializeHeading("lblSortWeight");
+		InitializeHeading("lblSortNumber");
 		descriptionLabel = static_cast< ::GUI::Label*>(FindWindow("lblDescriptionText"));
 		dropPicture = static_cast< ::GUI::Picture*>(FindWindow("picDropToWorld"));
 		const char* slotNames[6] = {"picBodySlot", "picHeadSlot", "picHand1Slot", "picHand2Slot", "picHand3Slot", "picHand4Slot"};
@@ -156,6 +173,12 @@ namespace F3
 		for (int row = 0; row < 33; ++row)
 			for (int column = 0; column < 3; ++column)
 				backpackSlots[row][column] = new InventorySlot; //43E5DC, binds no GUI pictures yet.
+	}
+
+	void InventoryInterface::InitializeHeading(const char* name)
+	{
+		::GUI::Window* label = FindWindow(std::string(name));
+		if (label) label->SetValue3B(0);
 	}
 
 	InventoryInterface::~InventoryInterface() //43B000.

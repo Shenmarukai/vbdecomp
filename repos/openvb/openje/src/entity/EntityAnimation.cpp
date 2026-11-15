@@ -133,8 +133,8 @@ namespace JE
 		else
 		{
 			if (WorldTime() < animationEndTime) return;
-			if (animationStartTime && animationStartTime < animationEndTime && model)
-				model->ProcessAnimationCues(animationEndTime - animationStartTime);
+			if (animationStartTime && animationStartTime < animationEndTime)
+				ProcessAnimationCues(animationEndTime - animationStartTime);
 			if (animationQueue.empty())
 			{
 				if (!suppressIdleAnimation && !IsDead())

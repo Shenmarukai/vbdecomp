@@ -88,6 +88,7 @@ namespace F3
 		BYTE flags2AC, flags2AD;
 		std::list<DWORD> selectedItemIDs; //+2B0; owns nodes, not entities.
 	private:
+		void InitializeHeading(const char* name); //43B1B0, clear the named label's value3B flag.
 		void PickupSound(); //43A960, unused native receiver.
 		void PutDownSound(); //43A9E0, unused native receiver.
 		void DamageTypeName(DWORD type, std::string& text); //43C990.

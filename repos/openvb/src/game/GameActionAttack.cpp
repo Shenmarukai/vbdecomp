@@ -327,7 +327,7 @@ namespace F3
 			subAttacks.pop_front();
 			subAttackActive=1;
 			subAttackDeadline=currentSubAttack.playAnimation
-				? time+attacker->QueueAnimationEvent(currentSubAttack.animation,0) : time;
+				? time+QueueSubAttackAnimation(currentSubAttack) : time;
 		}
 		FaceTarget(); //Actual4012E0 is called after the subattack queue/deadline update.
 		if (subAttackActive && (receivedDamageCue || (subAttackDeadline && subAttackDeadline<=time)))

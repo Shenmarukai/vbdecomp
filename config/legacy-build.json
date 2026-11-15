@@ -1374,6 +1374,16 @@
         "/GS"
       ]
     },
+    "repos/openvb/openje/src/model/ModelTexture.cpp": {
+      "Release": [
+        "/GS"
+      ]
+    },
+    "repos/openvb/openje/src/gui/ManagerState.cpp": {
+      "Release": [
+        "/GS"
+      ]
+    },
     "repos/openvb/openje/src/gui/EditInput.cpp": {
       "Release": [
         "/GS"

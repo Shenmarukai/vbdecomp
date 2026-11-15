@@ -40,6 +40,7 @@ namespace F3
 		virtual int Update(DWORD time, DWORD budget); //404320, connected preparation/movement prefix.
 		virtual int Finish(DWORD time); //4021B0.
 		void SetTarget(JE::Entity* target); //403FA0, changed target queues a successor.
+		void SetPointTarget(BYTE enabled, const D3DXVECTOR3* point); //401100, raw flag and optional point.
 		GameActionAttack* CloneRequest(); //404270, preserves request fields only.
 		void OnReleaseCue(); //4017D0, actual attack-mode VFX attachment; cue argument unused.
 
@@ -80,6 +81,7 @@ namespace F3
 		void FaceTarget(); //4012E0.
 		BYTE PrepareAttack(); //402680.
 		BYTE BuildSubAttacks(); //403300, facing then actual child dispatch.
+		LONG QueueSubAttackAnimation(const AttackSubAttack& subAttack); //4012C0, event forwarding.
 		BYTE BuildUnarmedSubAttacks(); //402D80, ordinary thiscall/RET.
 		BYTE BuildWeaponSubAttacks(); //402B70, ordinary thiscall/RET.
 		BYTE ResolveSubAttackTargets(); //402E00, actual unarmed target list; weapon owner remains addressed.

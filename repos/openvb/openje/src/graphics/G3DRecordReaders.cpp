@@ -109,13 +109,6 @@ void G3D_Vector3d::CheckUnitMagnitude()
 
 namespace
 {
-	void ReadTextVector(double* output, DWORD count)
-	{
-		G3DText::Expect('(');
-		for (DWORD index = 0; index < count; ++index) output[index] = G3D_ReadScaledNumber();
-		G3DText::Expect(')');
-	}
-
 	//4C9380; the final CRT count is returned without changing the float wire values.
 	size_t ReadFileTextureCoordinate(FILE* stream, double* output)
 	{
@@ -136,6 +129,37 @@ namespace
 		memcpy(&value.a, &alpha, sizeof(alpha));
 		memcpy(output, &value, sizeof(value));
 		return output;
+	}
+
+	//4C87B0; the original private ESI result-pointer ABI remains unresolved.
+	D3DXCOLOR* ReadTextColorWithAlpha(D3DXCOLOR* output)
+	{
+		float value[4];
+		G3DText::Expect('(');
+		value[0] = static_cast<float>(G3D_ReadScaledNumber());
+		value[1] = static_cast<float>(G3D_ReadScaledNumber());
+		value[2] = static_cast<float>(G3D_ReadScaledNumber());
+		value[3] = static_cast<float>(G3D_ReadScaledNumber());
+		G3DText::Expect(')');
+		memcpy(output, value, sizeof(value));
+		return output;
+	}
+
+	//4C8870; ordinary arguments adapt the original EAX color-pointer ABI.
+	int WriteTextColorWithAlpha(const float* color, FILE* stream)
+	{
+		float red = color[0], green = color[1], blue = color[2], alpha = color[3];
+		return fprintf(stream, "(%g %g %g %g) ", G3D_TextNumber(red), G3D_TextNumber(green),
+			G3D_TextNumber(blue), G3D_TextNumber(alpha));
+	}
+
+	//4C8AD0; original EAX/ECX ABI unresolved. Alpha follows RGB; final CRT count returned.
+	size_t WriteFileColorWithAlpha(const float* color, FILE* stream)
+	{
+		G3D_WriteFileColor(stream, color);
+		float alpha;
+		memcpy(&alpha, color + 3, sizeof(alpha));
+		return fwrite(&alpha, sizeof(alpha), 1, stream);
 	}
 
 }
@@ -244,7 +268,7 @@ void G3D_Vertex::ReadText()
 		if (key == "Coordinate")
 		{
 			double value[3] = {0.0, 0.0, 0.0};
-			ReadTextVector(value, 3);
+			G3D_ReadTextVector(value);
 			value[0] *= G3D_GlobalScale;
 			value[1] *= G3D_GlobalScale;
 			value[2] *= G3D_GlobalScale;
@@ -253,20 +277,15 @@ void G3D_Vertex::ReadText()
 		else if (key == "Normal")
 		{
 			G3D_Vector3d value = {{0.0, 0.0, 0.0}};
-			ReadTextVector(value.value, 3);
+			G3D_ReadTextVector(value.value);
 			G3D_UnitVector3d unit = value.Normalized();
 			memcpy(normal, unit.vector.value, sizeof(normal));
 		}
 		else if (key == "Color")
 		{
-			float value[4];
-			G3DText::Expect('(');
-			value[0] = static_cast<float>(G3D_ReadScaledNumber());
-			value[1] = static_cast<float>(G3D_ReadScaledNumber());
-			value[2] = static_cast<float>(G3D_ReadScaledNumber());
-			value[3] = static_cast<float>(G3D_ReadScaledNumber());
-			G3DText::Expect(')');
-			memcpy(color, value, sizeof(color));
+			D3DXCOLOR value;
+			D3DXCOLOR* result = ReadTextColorWithAlpha(&value);
+			memcpy(color, result, sizeof(color));
 		}
 		else if (key == "TexCoord" || key == "LMCoord")
 		{
@@ -450,12 +469,7 @@ void G3D_Vertex::Write(FILE* stream) //4CA150.
 	G3D_WriteFileVector(stream, vector);
 	memcpy(vector, normal, sizeof(vector));
 	G3D_WriteFileVector(stream, vector);
-	for (DWORD component = 0; component < 4; ++component)
-	{
-		float value;
-		memcpy(&value, &color[component], sizeof(value));
-		fwrite(&value, 4, 1, stream);
-	}
+	WriteFileColorWithAlpha(color, stream);
 	LONG count = textureCount;
 	fwrite(&count, 4, 1, stream);
 	for (LONG texture = 0; texture < textureCount; ++texture)
@@ -475,11 +489,14 @@ void G3D_Vertex::WriteText(FILE* stream) //4C9CE0.
 	G3D_WriteIndent(stream);
 	fprintf(stream, "%s{ ", "Vertex");
 	fprintf(stream, "Coordinate");
-	fprintf(stream, "(%.0f %.0f %.0f) ", G3D_TextNumber(position[0]), G3D_TextNumber(position[1]), G3D_TextNumber(position[2]));
+	double vector[3];
+	memcpy(vector, position, sizeof(vector));
+	G3D_WriteTextVector(stream, vector);
 	fprintf(stream, "Normal");
-	fprintf(stream, "(%.0f %.0f %.0f) ", G3D_TextNumber(normal[0]), G3D_TextNumber(normal[1]), G3D_TextNumber(normal[2]));
+	memcpy(vector, normal, sizeof(vector));
+	G3D_WriteTextVector(stream, vector);
 	fprintf(stream, "Color");
-	fprintf(stream, "(%g %g %g %g) ", G3D_TextNumber(color[0]), G3D_TextNumber(color[1]), G3D_TextNumber(color[2]), G3D_TextNumber(color[3]));
+	WriteTextColorWithAlpha(color, stream);
 	for (LONG texture = 0; texture < textureCount; ++texture)
 	{
 		if (texture) fprintf(stream, "LMCoord");

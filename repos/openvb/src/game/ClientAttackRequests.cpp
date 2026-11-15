@@ -70,10 +70,7 @@ namespace F3
 			GameActionAttack* action=new GameActionAttack;
 			action->SetTarget(target);
 			action->calledShotPart=calledShotPart;
-			//401100 writes the raw request BYTE, then copies the point only for
-			//a nonzero request. It does not reset targetID or prior actions.
-			action->pointTarget=pointTarget;
-			if (pointTarget) action->targetPosition=point;
+			action->SetPointTarget(pointTarget,&point);
 			attacker->QueueAction(action);
 		}
 		else JE::LogDebugString("GameServer::recv_packet() - Entities for attack action not found.\n");
