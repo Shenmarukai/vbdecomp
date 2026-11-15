@@ -189,8 +189,8 @@ const char* Graphics::GetAdapterDescription()
 BOOL Graphics::ToggleFullscreen()
 {
 	BYTE wasFullscreen = fullscreen;
-	DWORD selectedWidth = width;
-	DWORD selectedHeight = height;
+	LONG selectedWidth = width;
+	LONG selectedHeight = height;
 	BOOL result;
 	if (wasFullscreen)
 	{

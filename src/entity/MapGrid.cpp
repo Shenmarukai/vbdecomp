@@ -4,6 +4,8 @@
 
 namespace JE
 {
+	template<> void RLEGrid<BYTE>::Read(Resources::ResourceFileHandle* stream);
+
 	template<class T> RLEGrid<T>::RLEGrid(LONG widthValue, LONG heightValue)
 	{
 		std::list<RLECell<T>*> emptyRow;
