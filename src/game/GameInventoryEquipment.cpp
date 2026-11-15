@@ -160,10 +160,13 @@ namespace F3
 		while (i != pendingRecords.end())
 		{
 			if (i->values[2] == entity->entityID)
-				//46959F discards the returned successor and retains the invalid iterator.
-				pendingRecords.erase(i);
+			{
+				i = pendingRecords.erase(i);
+			}
 			else
+			{
 				++i;
+			}
 		}
 		GameItem* item = dynamic_cast<GameItem*>(entity);
 		if (item && item->value160 == 5)

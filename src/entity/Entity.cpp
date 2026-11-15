@@ -137,13 +137,14 @@ namespace JE
 
 	void UpdateEntities(World& world)
 	{
-		for (std::list<Entity*>::iterator i = updateEntities.begin(); i != updateEntities.end(); ++i)
+		std::list<Entity*>::iterator i = updateEntities.begin();
+		while (i != updateEntities.end())
 		{
 			Entity* entity = *i;
+			++i; // ServerUpdate can remove this entity from updateEntities.
 			if (entity->state == 5) continue;
 			entity->UpdateClient(world.GetServerTime());
 			entity->ServerUpdate(world.GetServerTime());
-			//545EC7 still advances the held iterator after either callback erases it.
 		}
 	}
 
@@ -173,9 +174,11 @@ namespace JE
 			Map* current = map->second;
 			current->Update(GetServerTime());
 		}
-		for (std::list<Entity*>::iterator current = updateEntities.begin(); current != updateEntities.end(); ++current)
+		std::list<Entity*>::iterator current = updateEntities.begin();
+		while (current != updateEntities.end())
 		{
 			Entity* entity = *current;
+			++current; // ServerUpdate can remove this entity from updateEntities.
 			if (entity->state == 5) continue;
 			entity->UpdateClient(GetServerTime());
 			entity->ServerUpdate(GetServerTime());

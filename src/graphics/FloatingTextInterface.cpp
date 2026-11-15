@@ -65,9 +65,10 @@ namespace JE
 				label->background.SetHidden(1);
 				label->duration = 0;
 			}
-			//58FF5A follows the next link even after erase. Preserve the
-			//original sentinel wrap and skipped next nonempty entry.
-			++entry;
+			else
+			{
+				++entry;
+			}
 		}
 	}
 	::GUI::FloatingLabel* FloatingTextInterface::FindFree()

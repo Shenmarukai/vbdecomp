@@ -150,8 +150,9 @@ namespace JE
 		ClearHistory();
 		sourceMode = 1;
 		sourceLines = lines;
+		if (rows.empty()) return;
 		std::list< ::GUI::Label*>::iterator row = rows.end();
-		--row; //Original starts at the tail, including its unwritten empty-list domain.
+		--row;
 		LONG index = 0;
 		while (index < historyOffset && index < LONG(lines.size())) ++index;
 		for (; row != rows.begin() && index < LONG(lines.size()); ++index, --row)

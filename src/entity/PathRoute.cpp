@@ -37,6 +37,7 @@ namespace JE
 {
 	void PathManager::SmoothRoute(PathRequest* request)
 	{
+		if (request->route->size() < 2) return;
 		typedef std::list<D3DXVECTOR3>::iterator RouteIterator;
 		RouteIterator anchor = request->route->begin();
 		RouteIterator current = anchor; ++current;
