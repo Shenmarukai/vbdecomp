@@ -6,12 +6,10 @@ namespace JE
 {
 	namespace Configuration
 	{
-		unsigned char __cdecl ReadResourceConfigurationFile(std::string sFilename,
-			Settings& settings)
+		unsigned char __cdecl ReadResourceConfigurationFile(std::string sFilename, Settings& settings)
 		{
 			settings.clear();
-			Resources::ResourceFileHandle* const pFile =
-				Resources::g_pResourceSystem->OpenStream(sFilename.c_str(), 1);
+			Resources::ResourceFileHandle* const pFile = Resources::g_pResourceSystem->OpenStream(sFilename.c_str(), 1);
 			if (!pFile)
 				return 0;
 			if (!Resources::g_pResourceSystem->Seek(pFile, 0, 2))

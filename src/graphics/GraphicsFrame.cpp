@@ -12,7 +12,6 @@
 #include "gui/Manager.hpp"
 #include "gui/Win32Input.hpp"
 #include "network/EngineClient.hpp"
-#include <set>
 
 OCTREE_Camera* Graphics::GetPickingCamera() //581190.
 {
@@ -25,7 +24,10 @@ void Graphics::PrepareScene(BYTE* mapChanged)
 {
 	*mapChanged = 0;
 	JE::SetSceneOctree(NULL);
-	if (!JE::EngineClientServices::CurrentClient()->field0x10A) ::GUI::g_Manager.Update();
+	if (!JE::EngineClientServices::CurrentClient()->field0x10A)
+	{
+		::GUI::g_Manager.Update();
+	}
 	//58291A reloads the published World only after GUI Update has returned.
 	JE::World* world = JE::g_World;
 	JE::Map* map = world->GetMap(world->valueE0);
@@ -39,8 +41,7 @@ void Graphics::PrepareScene(BYTE* mapChanged)
 			{
 				*mapChanged = 1;
 				renderer->Cleanup();
-				DWORD color = (DWORD(map->color[0]) << 16)
-					| (DWORD(map->color[1]) << 8) | DWORD(map->color[2]);
+				DWORD color = (DWORD(map->color[0]) << 16) | (DWORD(map->color[1]) << 8) | DWORD(map->color[2]);
 				renderer->Initialize(tree, 500, color, bounds, 1);
 				renderer->UpdateCamera(NULL);
 				map->ApplyHeightFog(renderer);
@@ -61,14 +62,22 @@ void Graphics::PrepareScene(BYTE* mapChanged)
 				JE::g_World->PrepareLightIndices(renderer);
 				currentOctree = tree;
 			}
-			if (cameraControl->Update()) renderer->UpdateCamera(NULL);
-			else renderer->RestoreVisibility();
+			if (cameraControl->Update())
+			{
+				renderer->UpdateCamera(NULL);
+			}
+			else
+			{
+				renderer->RestoreVisibility();
+			}
 			renderer->ClearHiddenMaterials();
 			std::set<int> hiddenMaterials;
 			map->CopyHiddenMaterials(hiddenMaterials);
 			renderer->SetHiddenMaterials(hiddenMaterials);
 			if (sceneEnabled && !JE::EngineClientServices::CurrentClient()->field0x108)
+			{
 				renderer->SubmitVisible(debugBounds, NULL);
+			}
 		}
 	}
 	maskManager->Update();
@@ -123,4 +132,20 @@ BYTE Graphics::ProcessInput(const JE::Input::InputEvent& event)
 		break;
 	}
 	return result;
+}
+
+void Graphics::DetachOctree(OCTREE* tree)
+{
+	if (!tree)
+	{
+		return;
+	}
+	if (renderer && renderer->octree == tree)
+	{
+		renderer->Cleanup();
+	}
+	if (currentOctree == tree)
+	{
+		currentOctree = NULL;
+	}
 }

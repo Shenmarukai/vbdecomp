@@ -12,14 +12,15 @@
 // Original 0x56B810 startup policy. Reconstruction remains incomplete.
 static int RunOriginalStartup(HINSTANCE hInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-	_mbsstr(reinterpret_cast<const unsigned char*>(lpCmdLine),
-		reinterpret_cast<const unsigned char*>("-leakcheck"));
+	_mbsstr(reinterpret_cast<const unsigned char*>(lpCmdLine), reinterpret_cast<const unsigned char*>("-leakcheck"));
 	char szModulePath[MAX_PATH];
 	int nMainResult;
 
 	F3::g_instance = hInstance;
 	if (!GetModuleFileNameA(NULL, szModulePath, MAX_PATH))
+	{
 		JE::FatalError("Unable to get module file name.");
+	}
 
 	F3::SetupSaveDirectory(szModulePath);
 	F3::SetupConfigFile();

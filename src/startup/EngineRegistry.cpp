@@ -33,10 +33,25 @@ namespace F3
 		}
 	}
 
+#ifdef _DEBUG
+#define CHECK_HEAP()                      \
+    do                                    \
+    {                                     \
+        if (!_CrtCheckMemory())           \
+        {                                 \
+            __debugbreak();               \
+        }                                 \
+    } while (false)
+#else
+#define CHECK_HEAP() ((void)0)
+#endif
+
 	// 0x5ACDE0. Every live slot is called in order, without a null shortcut.
 	void UpdateComponents()
 	{
 		for (std::size_t nIndex = 0; nIndex < COMPONENT_COUNT; ++nIndex)
+		{
 			g_Components[nIndex].pObject->Update();
+		}
 	}
 }

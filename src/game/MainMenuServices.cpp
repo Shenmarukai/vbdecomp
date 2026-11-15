@@ -20,6 +20,9 @@
 #include "startup/EngineSettings.hpp"
 #include <stdexcept>
 
+#include "graphics/Graphics.hpp"
+#include "graphics/OctreeRender.hpp"
+
 namespace F3 { namespace MainMenuServices
 {
 	OptionsInterface* GetOptionsInterface()
@@ -40,10 +43,13 @@ namespace F3 { namespace MainMenuServices
 		}
 		GameClient* client = static_cast<GameClient*>(g_pNetworkInstance->client);
 		client->child0xAC->Clear();
+
 		if (JE::Resources::g_pResourceSystem->Contains(map.c_str()))
 		{
 			JE::IWorldClient* world = JE::g_World;
+
 			world->Reset();
+
 			world = JE::g_World;
 			world->LoadMap(map.c_str()); //Original does not inspect the return.
 			{

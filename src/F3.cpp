@@ -14,7 +14,9 @@ namespace F3
 		Startup();
 		RegisterConsoleCommand("quit", &QuitCommand);
 		while (ProcessMessagesAndUpdateTime())
+		{
 			UpdateComponents();
+		}
 		Shutdown();
 		return 1;
 	}

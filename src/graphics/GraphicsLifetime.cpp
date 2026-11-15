@@ -3,6 +3,7 @@
 #include "EngineFactory.hpp"
 #include "MapMaskManager.hpp"
 #include "OctreeRender.hpp"
+#include "GraphicsScene.hpp"
 #include "OctreeResourceCallbacks.hpp"
 #include "SystemInterface.hpp"
 #include "gui/Manager.hpp"
@@ -99,6 +100,14 @@ Graphics::~Graphics()
 	delete maskManager;
 	//58386F calls Cleanup unconditionally, then reloads renderer for deletion.
 	//Its actual destructor calls Cleanup again; neither member is reset here.
+	if (renderer && renderer->octree)
+	{
+		DetachOctree(renderer->octree);
+	}
+	if (JE::GetSceneOctree() == currentOctree && currentOctree)
+	{
+		JE::SetSceneOctree(NULL);
+	}
 	renderer->Cleanup();
 	delete renderer;
 	Cleanup();

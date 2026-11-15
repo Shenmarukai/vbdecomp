@@ -7,9 +7,6 @@
 #include "diagnostics/DebugOutput.hpp"
 #include "entity/World.hpp"
 
-#include <new>
-#include <stdexcept>
-
 namespace F3
 {
 	JE::Net::UInt32 NetworkComponent::GetMode() const //5B4F30.

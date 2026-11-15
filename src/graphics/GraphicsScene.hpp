@@ -35,4 +35,6 @@ namespace JE
 	};
 	void SetSceneOctree(OCTREE* tree); //4B81A0, actual global707F08.
 	OCTREE* GetSceneOctree(); //4B81B0.
+
+	void DetachOctreeConsumers(OCTREE* tree);
 }

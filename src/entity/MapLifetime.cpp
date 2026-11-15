@@ -2,6 +2,7 @@
 #include "MapEffect.hpp"
 #include "MapFog.hpp"
 #include "graphics/Octree.hpp"
+#include "graphics/GraphicsScene.hpp"
 #include "scripting/ScriptSmall.hpp"
 #include "Water.hpp"
 #include "graphics/Water.hpp"
@@ -16,6 +17,11 @@ namespace JE
 
 	Map::~Map()
 	{
+		// (Adam)
+		if (octree)
+		{
+			DetachOctreeConsumers(octree);
+		}
 		//57AC70..57ACCD holds the next list node, unlinking the current one
 		//before SetMap and virtual Entity destruction. The Map remains registered
 		//in World throughout this destructor; World reset erases it afterwards.

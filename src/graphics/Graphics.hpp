@@ -29,6 +29,7 @@ public:
 
 	void Initialize(DWORD unused); //581810; RET4, argument unread by original.
 	void Cleanup(); //581490; GUI cleanup then live global backend shutdown.
+	void DetachOctree(OCTREE* tree); // (Adam)
 	void SetShadowMode(DWORD mode); //580F80.
 	DWORD CycleShadowMode(); //580FF0.
 	void SetLinearFiltering(BYTE value); //581620, raw55 then global backend.

@@ -55,17 +55,26 @@ int OCTREE_Camera::Release()
 {
 	if (buckets)
 	{
-		for (DWORD index = 0; buckets[index]; ++index) delete[] buckets[index];
+		for (DWORD index = 0; buckets[index]; ++index)
+		{
+			delete[] buckets[index];
+		}
 		delete[] buckets;
 	}
-	if (nodes) delete[] nodes;
+	if (nodes)
+	{
+		delete[] nodes;
+	}
 	if (objects)
 	{
 		for (DWORD index = 0; objects[index]; ++index)
 		{
 			--objects[index]->references;
 			OctreeSpatialObject* object = objects[index];
-			if (!object->references) ::operator delete(object);
+			if (!object->references)
+			{
+				::operator delete(object);
+			}
 			else object->flags &= ~2u;
 		}
 		delete[] objects;
