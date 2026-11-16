@@ -1,10 +1,2 @@
-add_library(adecode STATIC IMPORTED GLOBAL)
-
-set_target_properties(adecode PROPERTIES
-    IMPORTED_LOCATION
-        "${CMAKE_CURRENT_SOURCE_DIR}/lib/Adecode.lib"
-)
-
-target_link_options(adecode INTERFACE
-    "/NODEFAULTLIB:LIBC"
-)
+add_library(adecode STATIC "include/adecode/adecode.h" "src/adecode.c")
+target_include_directories(adecode PUBLIC "include/")
